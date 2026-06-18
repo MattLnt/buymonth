@@ -20,7 +20,7 @@ const faqs = [
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>,
     desc: "Déposer et gérer vos dossiers",
     questions: [
-      { q: "Est-ce vraiment gratuit pour les vendeurs ?", r: "Oui, déposer un dossier est entièrement gratuit. Vous ne payez rien, même si votre dossier est débloqué par un acheteur. La commission est à charge exclusive de l'acheteur." },
+      { q: "eEst-ce vraiment gratuit pour les vendeurs ?", r: "Oui, déposer un dossier est entièrement gratuit. Vous ne payez rien, même si votre dossier est débloqué par un acheteur. La commission est à charge exclusive de l'acheteur." },
       { q: "Mon identité est-elle protégée ?", r: "Absolument. Aucune information identifiable (nom, adresse, logo, email, téléphone) n'est visible par les acheteurs avant déblocage payant. Seules les données anonymisées (province, chiffre d'affaires annuel, activités, type de transaction) sont visibles." },
       { q: "Combien de dossiers puis-je déposer ?", r: "Il n'y a aucune limite. Vous pouvez déposer autant de dossiers que vous le souhaitez." },
       { q: "Puis-je modifier ou supprimer mon dossier ?", r: "Oui, vous pouvez modifier, masquer ou supprimer vos dossiers à tout moment depuis votre tableau de bord." },
