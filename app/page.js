@@ -1,210 +1,219 @@
+"use client";
 import Link from "next/link";
-import Image from "next/image";
-import PublicNav from "@/app/components/PublicNav";
-import PublicBottomNav from "@/app/components/PublicBottomNav";
-import PublicFooter from "@/app/components/PublicFooter";
+import { useState } from "react";
 
 export default function HomePage() {
-  return (
-    <div style={{ minHeight: "100vh", background: "#fff", fontFamily: "var(--font-sans)" }}>
+  const [yearly, setYearly] = useState(false);
+  const [openFaq, setOpenFaq] = useState(0);
 
-      <PublicNav />
+  const faqs = [
+    { q: "Comment fonctionne l'affichage en mensualités ?", a: "En tant qu'intermédiaire en crédit agréé FSMA, nous convertissons le prix de vos biens en mensualité indicative. Vous communiquez un budget mensuel clair à vos prospects, tout en restant parfaitement conforme à la réglementation." },
+    { q: "Quel est le coût de la plateforme ?", a: "Une redevance fixe de 499€/mois, couplée à une redevance variable de maximum 19€ par bien. Plus votre portefeuille est large, plus le coût unitaire par bien diminue. Une seule facture, tout compris." },
+    { q: "Qui gère le dossier de financement ?", a: "BuyMonth pilote l'intégralité du dossier de crédit, de la simulation jusqu'à la signature de l'acte. Nous présentons le dossier à plusieurs banques partenaires pour maximiser les chances d'acceptation." },
+    { q: "Le pré-scoring, comment ça marche ?", a: "Le pré-scoring analyse la faisabilité financière du crédit sur demande. Vos commerciaux savent immédiatement s'ils parlent à un acheteur solvable, ce qui filtre les leads et vous fait gagner un temps précieux." },
+    { q: "Y a-t-il un engagement de durée ?", a: "Pas d'engagement obligatoire. Pour les clients qui s'engagent sur 2 ans, une réduction de fidélité de 5% est appliquée. La tarification est réévaluée tous les 6 mois selon l'évolution de votre portefeuille." },
+  ];
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#fff", fontFamily: "var(--font-sans)", color: "#1A1E2E", overflow: "hidden" }}>
 
       <style>{`
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        @media (max-width: 768px) {
-          .hero-section { padding: 80px 24px 60px !important; }
-          .hero-title { font-size: 32px !important; }
-          .hero-subtitle { font-size: 15px !important; }
-          .hero-stats { max-width: 100% !important; grid-template-columns: repeat(2, 1fr) !important; }
-          .section-pad { padding: 60px 24px !important; }
-          .grid-2 { grid-template-columns: 1fr !important; gap: 32px !important; }
-          .grid-3 { grid-template-columns: 1fr !important; }
-          .sticky-col { position: static !important; }
-          .timeline-path { display: none !important; }
-          .cta-section { padding: 60px 24px !important; }
-          .cta-title { font-size: 28px !important; }
-          .pricing-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
-          .market-cols { grid-template-columns: 1fr !important; gap: 16px !important; }
-          .expert-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
-          .split-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+        .serif-it { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 500; }
+        @media (max-width: 900px) {
+          .ps-hero-title { font-size: 44px !important; }
+          .ps-pad { padding: 64px 24px !important; }
+          .ps-grid-3 { grid-template-columns: 1fr !important; }
+          .ps-grid-2 { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .ps-dash { transform: none !important; }
+          .ps-dash-aside { display: none !important; }
+          .ps-logos { gap: 28px !important; }
         }
       `}</style>
 
-      <main>
+      {/* ============ HERO ============ */}
+      <section style={{ position: "relative", padding: "150px 24px 0", textAlign: "center", background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,184,168,0.18) 0%, transparent 60%), linear-gradient(180deg, #EEF3FA 0%, #fff 70%)" }}>
+        <div style={{ maxWidth: 820, margin: "0 auto", position: "relative", zIndex: 1 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+            <span style={{ background: "#193B5E", color: "#fff", fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20 }}>Nouveau</span>
+            <span style={{ fontSize: 14, color: "#5A6275" }}>Approuvé par 400+ professionnels de l'immobilier</span>
+          </div>
 
-        {/* ============ HERO ============ */}
-        <div id="home" className="hero-section" style={{ background: "#193B5E", padding: "130px 48px 90px", position: "relative", overflow: "hidden" }}>
-          <Image src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1600&q=80" alt="" fill priority sizes="100vw"
-            style={{ objectFit: "cover", objectPosition: "center 30%" }} />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(95deg, rgba(25,59,94,0.97) 0%, rgba(25,59,94,0.88) 45%, rgba(25,59,94,0.55) 100%)" }} />
-
-          <div style={{ maxWidth: 1060, margin: "0 auto", position: "relative", zIndex: 1 }}>
-            <div style={{ maxWidth: 660 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(124,184,168,0.12)", border: "1px solid rgba(124,184,168,0.25)", borderRadius: 24, padding: "6px 16px", marginBottom: 28 }}>
-                <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#7CB8A8", animation: "pulse 2s infinite" }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.08em" }}>INTERMÉDIAIRE EN CRÉDIT AGRÉÉ FSMA</span>
-              </div>
-              <h1 className="hero-title" style={{ fontSize: 52, fontWeight: 700, color: "#fff", lineHeight: 1.1, margin: "0 0 22px", letterSpacing: "-0.03em" }}>
-                Vendez votre bien en{" "}
-                <span style={{ color: "#7CB8A8" }}>mensualités</span>, pas en m².
-              </h1>
-              <p className="hero-subtitle" style={{ fontSize: 17, color: "rgba(255,255,255,0.8)", lineHeight: 1.8, maxWidth: 520, margin: "0 0 36px" }}>
-                Facilitez la vente de vos biens immobiliers en proposant à vos clients une approche claire et rassurante : communiquer en mensualités.
-              </p>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 56 }}>
-                <Link href="#contact" style={{ background: "#7CB8A8", color: "#193B5E", padding: "12px 26px", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
-                  Commencer maintenant →
-                </Link>
-                <Link href="#solution" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", padding: "12px 26px", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none", backdropFilter: "blur(4px)" }}>
-                  En savoir plus
-                </Link>
-              </div>
-            </div>
-
-            <div className="hero-stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 1, borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)", maxWidth: 620, backdropFilter: "blur(6px)" }}>
-              {[
-                { value: "499 €", label: "Redevance fixe / mois" },
-                { value: "19 €", label: "Max par bien" },
-                { value: "7", label: "Étapes clés en main" },
-                { value: "FSMA", label: "Agrément officiel" },
-              ].map((s, i) => (
-                <div key={i} style={{ padding: "16px 12px", background: "rgba(20,20,20,0.55)", textAlign: "center" }}>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: "#7CB8A8", marginBottom: 3 }}>{s.value}</div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", fontWeight: 500 }}>{s.label}</div>
-                </div>
-              ))}
-            </div>
+          <h1 className="ps-hero-title" style={{ fontSize: 68, fontWeight: 700, lineHeight: 1.05, letterSpacing: "-0.03em", margin: "0 0 24px", color: "#193B5E" }}>
+            Vendez vos biens<br /><span className="serif-it" style={{ color: "#7CB8A8" }}>en mensualités</span>
+          </h1>
+          <p style={{ fontSize: 18, lineHeight: 1.7, color: "#5A6275", maxWidth: 560, margin: "0 auto 36px" }}>
+            Transformez votre approche commerciale avec une plateforme pensée pour les promoteurs : affichage en budget mensuel, qualification des leads et financement intégré.
+          </p>
+          <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 70 }}>
+            <Link href="#contact" style={{ background: "#193B5E", color: "#fff", padding: "15px 32px", borderRadius: 12, fontSize: 15, fontWeight: 600, textDecoration: "none", boxShadow: "0 12px 30px rgba(25,59,94,0.25)" }}>
+              Commencer
+            </Link>
+            <Link href="#contact" style={{ background: "#fff", color: "#193B5E", padding: "15px 32px", borderRadius: 12, fontSize: 15, fontWeight: 600, textDecoration: "none", boxShadow: "0 6px 20px rgba(25,59,94,0.1)" }}>
+              Réserver une démo
+            </Link>
           </div>
         </div>
 
-        {/* ============ SIGNATURE DÈS LA 1ÈRE VISITE (split) ============ */}
-        <div id="solution" className="section-pad" style={{ padding: "90px 48px", background: "#fff" }}>
-          <div style={{ maxWidth: 1060, margin: "0 auto" }}>
-            <div className="split-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.1em", margin: "0 0 14px" }}>LE CONSTAT</p>
-                <h2 style={{ fontSize: 34, fontWeight: 700, color: "#193B5E", margin: "0 0 20px", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
-                  Et si vos prospects signaient dès la première visite ?
-                </h2>
-                <p style={{ fontSize: 15, color: "#6B7280", lineHeight: 1.8, margin: "0 0 18px" }}>
-                  Aujourd'hui, les acquéreurs raisonnent d'abord en <strong style={{ color: "#193B5E" }}>budget mensuel</strong>, comme pour une voiture en leasing ou un smartphone avec abonnement, et non plus en prix global.
-                </p>
-                <p style={{ fontSize: 15, color: "#6B7280", lineHeight: 1.8, margin: "0 0 18px" }}>
-                  Cette évolution est dictée par l'incertitude économique et la nécessité de maîtriser leurs dépenses. Afficher un bien en mensualités n'est plus une option, c'est devenu la norme.
-                </p>
-                <p style={{ fontSize: 15, color: "#6B7280", lineHeight: 1.8, margin: 0 }}>
-                  En tant qu'intermédiaire en crédit <strong style={{ color: "#193B5E" }}>agréé FSMA</strong>, nous conseillons vos clients en matière de financement, transformant l'incertitude en opportunité commerciale concrète et rapide.
-                </p>
-              </div>
-              <div style={{ position: "relative", borderRadius: 20, overflow: "hidden", minHeight: 380, boxShadow: "0 20px 60px rgba(25,59,94,0.15)" }}>
-                <Image src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=900&q=80" alt="Maison" fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: "cover" }} />
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 50%, rgba(25,59,94,0.6) 100%)" }} />
-                <div style={{ position: "absolute", bottom: 24, left: 24, right: 24, background: "rgba(255,255,255,0.95)", backdropFilter: "blur(8px)", borderRadius: 14, padding: "18px 22px" }}>
-                  <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 600, marginBottom: 4 }}>Achetez ce bien dès</div>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: "#193B5E" }}>1 260 € <span style={{ fontSize: 15, color: "#7CB8A8" }}>/mois</span></div>
+        {/* ===== FAUX DASHBOARD ===== */}
+        <div style={{ maxWidth: 1080, margin: "0 auto", position: "relative", zIndex: 1 }}>
+          <div className="ps-dash" style={{ background: "#fff", borderRadius: "20px 20px 0 0", boxShadow: "0 -10px 60px rgba(25,59,94,0.15)", border: "1px solid #EBEFF5", borderBottom: "none", overflow: "hidden", textAlign: "left" }}>
+            {/* Topbar */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid #EFF2F7" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: "#193B5E", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 </div>
+                <span style={{ fontSize: 15, fontWeight: 700, color: "#193B5E" }}>BuyMonth</span>
+              </div>
+              <div style={{ flex: 1, maxWidth: 300, margin: "0 20px", background: "#F4F6FB", borderRadius: 8, padding: "8px 14px", fontSize: 13, color: "#9AA2B4" }}>Rechercher un bien…</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 30, height: 30, borderRadius: "50%", background: "rgba(124,184,168,0.2)" }} />
+                <div style={{ width: 30, height: 30, borderRadius: "50%", background: "#193B5E" }} />
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* ============ LE FREIN N°1 (3 problèmes, fond foncé) ============ */}
-        <div className="section-pad" style={{ padding: "90px 48px", background: "#193B5E", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 800, height: 500, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(124,184,168,0.06) 0%, transparent 70%)", pointerEvents: "none" }} />
-          <div style={{ maxWidth: 960, margin: "0 auto", position: "relative", zIndex: 1 }}>
-            <div style={{ textAlign: "center", marginBottom: 56 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.1em", margin: "0 0 14px" }}>LE FREIN N°1</p>
-              <h2 style={{ fontSize: 36, fontWeight: 700, color: "#fff", margin: "0 0 14px", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
-                L'incertitude liée au financement.
-              </h2>
-              <p style={{ fontSize: 15, color: "rgba(255,255,255,0.75)", maxWidth: 540, margin: "0 auto", lineHeight: 1.8 }}>
-                Le marché immobilier belge fait face à des défis majeurs qui paralysent les décisions d'achat et compromettent vos ventes.
-              </p>
-            </div>
-
-            <div className="market-cols" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-              {[
-                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>, title: "Pouvoir d'achat sous pression", desc: "Vos acheteurs potentiels reportent leurs décisions face à l'incertitude économique et aux taux d'intérêt fluctuants." },
-                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="1.5"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg>, title: "Exigences bancaires accrues", desc: "Des critères d'octroi plus stricts vous font perdre des ventes, même pour des profils solides." },
-                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>, title: "Financement trop tardif", desc: "L'incertitude sur le financement génère des coûts marketing exponentiels et des cycles de vente interminables." },
-              ].map((item, i) => (
-                <div key={i} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "28px 24px" }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(124,184,168,0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                    {item.icon}
-                  </div>
-                  <h3 style={{ fontSize: 15, fontWeight: 700, color: "#fff", margin: "0 0 8px", lineHeight: 1.4 }}>{item.title}</h3>
-                  <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, margin: 0 }}>{item.desc}</p>
-                </div>
-              ))}
-            </div>
-            <p style={{ textAlign: "center", fontSize: 14, color: "rgba(255,255,255,0.6)", marginTop: 32, fontStyle: "italic" }}>
-              Cette réalité du terrain vous coûte cher en temps, en argent et en opportunités perdues.
-            </p>
-          </div>
-        </div>
-
-        {/* ============ APPROCHE COMMERCIALE INÉDITE (3 piliers) ============ */}
-        <div className="section-pad" style={{ padding: "90px 48px", background: "#fff" }}>
-          <div style={{ maxWidth: 960, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: 16 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.1em", margin: "0 0 12px" }}>LA SOLUTION</p>
-              <h2 style={{ fontSize: 34, fontWeight: 700, color: "#193B5E", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Une approche commerciale inédite.</h2>
-              <p style={{ fontSize: 15, color: "#6B7280", maxWidth: 600, margin: "0 auto 48px", lineHeight: 1.8 }}>
-                Notre solution clé en main vous permet de présenter vos biens plus concrètement, d'optimiser la qualification de vos leads et de raccourcir vos cycles de vente.
-              </p>
-            </div>
-
-            <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
-              {[
-                { num: "1", title: "Affichage en €/mois", desc: "Une communication claire et conforme qui parle directement au budget de vos prospects. Finis les prix au m² abstraits, vous parlez à leurs priorités financières." },
-                { num: "2", title: "Simulation + pré-scoring", desc: "Une qualification dès le premier contact. Vos commerciaux savent immédiatement s'ils parlent à un acheteur solvable, vous faisant gagner un temps précieux." },
-                { num: "3", title: "Gestion complète jusqu'à l'acte", desc: "BuyMonth pilote l'intégralité du dossier de financement. Plus de stress, plus de ventes perdues pour des raisons financières ou administratives." },
-              ].map((p, i) => (
-                <div key={i} style={{ background: "#F7F9FB", border: "1px solid #E5E7EB", borderRadius: 16, padding: "32px 28px" }}>
-                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#193B5E", color: "#7CB8A8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 700, marginBottom: 20 }}>{p.num}</div>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, color: "#193B5E", margin: "0 0 10px" }}>{p.title}</h3>
-                  <p style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.7, margin: 0 }}>{p.desc}</p>
-                </div>
-              ))}
-            </div>
-            <p style={{ textAlign: "center", fontSize: 18, fontWeight: 700, color: "#193B5E", marginTop: 40 }}>
-              Parler mensualités, c'est parler décision.
-            </p>
-          </div>
-        </div>
-
-        {/* ============ PROCESS 7 ÉTAPES (timeline) ============ */}
-        <div id="process" className="section-pad" style={{ padding: "90px 48px", background: "#F7F9FB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
-          <div style={{ maxWidth: 960, margin: "0 auto" }}>
-            <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 80, alignItems: "start" }}>
-              <div className="sticky-col" style={{ position: "sticky", top: 100 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.1em", margin: "0 0 12px" }}>NOTRE PROCESS</p>
-                <h2 style={{ fontSize: 32, fontWeight: 700, color: "#193B5E", margin: "0 0 16px", letterSpacing: "-0.02em", lineHeight: 1.2 }}>En 7 étapes, clé en main.</h2>
-                <p style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.7, margin: "0 0 28px" }}>De la mensualisation de vos biens jusqu'à la signature de l'acte, nous pilotons tout le processus.</p>
-                <Link href="#contact" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, color: "#193B5E", textDecoration: "none", borderBottom: "2px solid #7CB8A8", paddingBottom: 2 }}>
-                  Démarrer le test →
-                </Link>
-              </div>
-
-              <div style={{ position: "relative" }}>
-                <div style={{ position: "absolute", left: 21, top: 30, bottom: 30, width: 2, background: "linear-gradient(to bottom, rgba(124,184,168,0.5), rgba(124,184,168,0.12))", borderRadius: 2 }} />
+            <div style={{ display: "flex" }}>
+              {/* Sidebar */}
+              <div className="ps-dash-aside" style={{ width: 180, borderRight: "1px solid #EFF2F7", padding: "18px 14px", flexShrink: 0 }}>
                 {[
-                  { num: "01", title: "Mensualisation des biens", desc: "Nous convertissons tous vos biens en affichage €/mois à utiliser sur vos supports marketing et commerciaux." },
-                  { num: "02", title: "Capture des leads", desc: "QR codes sur vos supports, landing pages dédiées, et bornes interactives en showroom." },
-                  { num: "03", title: "Simulation personnalisée", desc: "Calcul de la mensualité adapté au profil du prospect, suivi de la mise en place du processus de financement." },
-                  { num: "04", title: "Constitution du dossier", desc: "Accompagnement de vos prospects étape par étape pour garantir la complétude du dossier de financement." },
-                  { num: "05", title: "Analyse crédit", desc: "Présentation du dossier simultanément auprès de plusieurs banques partenaires pour identifier la meilleure offre et maximiser les chances d'acceptation." },
-                  { num: "06", title: "Offre ferme", desc: "Une fois l'accord obtenu, le prospect devient acheteur avec conditions suspensives levées, sécurisant ainsi la vente pour vous." },
-                  { num: "07", title: "Acte & reporting", desc: "Accompagnement jusqu'à la signature finale et reporting détaillé pour votre suivi commercial et votre comptabilité." },
-                ].map((step, i) => (
-                  <div key={i} style={{ display: "flex", gap: 24, padding: "22px 0", position: "relative" }}>
-                    <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#fff", border: "2px solid #7CB8A8", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#193B5E", fontSize: 14, fontWeight: 700, position: "relative", zIndex: 1, boxShadow: "0 0 0 5px #F7F9FB" }}>
-                      {step.num}
+                  { label: "Tableau de bord", active: true },
+                  { label: "Mes biens" },
+                  { label: "Leads" },
+                  { label: "Simulations" },
+                  { label: "Dossiers crédit" },
+                  { label: "Reporting" },
+                  { label: "Paramètres" },
+                ].map((m, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, marginBottom: 2, background: m.active ? "rgba(25,59,94,0.07)" : "transparent" }}>
+                    <div style={{ width: 16, height: 16, borderRadius: 4, background: m.active ? "#193B5E" : "#D5DAE3" }} />
+                    <span style={{ fontSize: 13, fontWeight: m.active ? 700 : 500, color: m.active ? "#193B5E" : "#7A8298" }}>{m.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Contenu */}
+              <div style={{ flex: 1, padding: "22px 24px", background: "#FBFCFE" }}>
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: "#193B5E", margin: "0 0 2px" }}>Bonjour, Julien</h3>
+                <p style={{ fontSize: 13, color: "#9AA2B4", margin: "0 0 20px" }}>Voici l'activité de votre portefeuille en temps réel.</p>
+
+                {/* KPI cards */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
+                  {[
+                    { label: "Biens actifs", value: "24", trend: "+3 ce mois", color: "#193B5E" },
+                    { label: "Leads qualifiés", value: "58", trend: "+12% ce mois", color: "#7CB8A8" },
+                    { label: "Simulations", value: "142", trend: "+24% ce mois", color: "#193B5E" },
+                    { label: "Dossiers actés", value: "9", trend: "+2 ce mois", color: "#7CB8A8" },
+                  ].map((k, i) => (
+                    <div key={i} style={{ background: "#fff", border: "1px solid #EFF2F7", borderRadius: 12, padding: "14px" }}>
+                      <div style={{ fontSize: 11, color: "#9AA2B4", marginBottom: 6 }}>{k.label}</div>
+                      <div style={{ fontSize: 24, fontWeight: 700, color: k.color, lineHeight: 1 }}>{k.value}</div>
+                      <div style={{ fontSize: 10, color: "#7CB8A8", marginTop: 5, fontWeight: 600 }}>{k.trend}</div>
                     </div>
-                    <div style={{ flex: 1, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, padding: "18px 20px" }}>
-                      <h3 style={{ fontSize: 15, fontWeight: 700, color: "#193B5E", margin: "0 0 6px" }}>{step.title}</h3>
-                      <p style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.7, margin: 0 }}>{step.desc}</p>
+                  ))}
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 12 }}>
+                  {/* Graph */}
+                  <div style={{ background: "#fff", border: "1px solid #EFF2F7", borderRadius: 12, padding: "18px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "#193B5E" }}>Leads par mois</span>
+                      <span style={{ fontSize: 11, color: "#9AA2B4", background: "#F4F6FB", padding: "4px 10px", borderRadius: 6 }}>2024</span>
+                    </div>
+                    <svg width="100%" height="130" viewBox="0 0 320 130" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="rgba(124,184,168,0.35)" />
+                          <stop offset="100%" stopColor="rgba(124,184,168,0)" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M0,100 C40,90 60,60 100,65 C140,70 160,30 200,40 C240,50 260,20 320,15 L320,130 L0,130 Z" fill="url(#g1)" />
+                      <path d="M0,100 C40,90 60,60 100,65 C140,70 160,30 200,40 C240,50 260,20 320,15" fill="none" stroke="#7CB8A8" strokeWidth="2.5" />
+                      <path d="M0,115 C50,108 70,95 110,98 C150,101 180,80 220,85 C260,90 280,75 320,70" fill="none" stroke="#193B5E" strokeWidth="2.5" strokeDasharray="4 4" opacity="0.6" />
+                    </svg>
+                    <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
+                      <span style={{ fontSize: 11, color: "#7A8298", display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#7CB8A8" }} />Leads reçus</span>
+                      <span style={{ fontSize: 11, color: "#7A8298", display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#193B5E" }} />Qualifiés</span>
+                    </div>
+                  </div>
+
+                  {/* Donut */}
+                  <div style={{ background: "#fff", border: "1px solid #EFF2F7", borderRadius: 12, padding: "18px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#193B5E", alignSelf: "flex-start", marginBottom: 12 }}>Taux de conversion</span>
+                    <svg width="110" height="110" viewBox="0 0 42 42">
+                      <circle cx="21" cy="21" r="15.9" fill="none" stroke="#EFF2F7" strokeWidth="5" />
+                      <circle cx="21" cy="21" r="15.9" fill="none" stroke="#7CB8A8" strokeWidth="5" strokeDasharray="68 100" strokeDashoffset="25" strokeLinecap="round" />
+                      <text x="21" y="20" textAnchor="middle" fontSize="8" fontWeight="700" fill="#193B5E">68%</text>
+                      <text x="21" y="27" textAnchor="middle" fontSize="3.5" fill="#9AA2B4">acheteurs</text>
+                    </svg>
+                    <div style={{ marginTop: 12, width: "100%" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#7A8298", marginBottom: 4 }}><span>Signés</span><span style={{ fontWeight: 700, color: "#193B5E" }}>39</span></div>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#7A8298" }}><span>En cours</span><span style={{ fontWeight: 700, color: "#193B5E" }}>19</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ LOGOS ============ */}
+      <section className="ps-pad" style={{ padding: "60px 24px", background: "#fff", borderTop: "1px solid #F1F4F9" }}>
+        <p style={{ textAlign: "center", fontSize: 14, color: "#9AA2B4", margin: "0 0 32px" }}>La solution de référence pour les promoteurs et agences en Belgique</p>
+        <div className="ps-logos" style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: 56, opacity: 0.55 }}>
+          {["Promoteurs", "Constructeurs", "Agences", "Notaires", "Courtiers", "FSMA"].map((l, i) => (
+            <span key={i} style={{ fontSize: 22, fontWeight: 700, color: "#193B5E", letterSpacing: "-0.02em" }}>{l}</span>
+          ))}
+        </div>
+      </section>
+
+      {/* ============ INTRO FEATURES ============ */}
+      <section id="solution" className="ps-pad" style={{ padding: "90px 24px 40px", textAlign: "center" }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: "#7CB8A8", margin: "0 0 14px" }}>● Fonctionnalités clés</p>
+        <h2 style={{ fontSize: 46, fontWeight: 700, color: "#193B5E", margin: 0, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+          Simplifiez la vente<br /><span className="serif-it" style={{ color: "#7CB8A8" }}>immobilière.</span>
+        </h2>
+      </section>
+
+      {/* ============ SECTION CAPTURE LEADS (split features) ============ */}
+      <section className="ps-pad" style={{ padding: "60px 24px 90px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div className="ps-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
+            <div style={{ background: "linear-gradient(135deg, #193B5E, #24507A)", borderRadius: 24, padding: "40px", minHeight: 380, display: "flex", flexDirection: "column", justifyContent: "center", gap: 14, position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: -60, right: -60, width: 240, height: 240, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,184,168,0.25) 0%, transparent 70%)" }} />
+              {[
+                { label: "Prix du bien", val: "315 000 €" },
+                { label: "Mensualité estimée", val: "1 260 € /mois", hl: true },
+                { label: "Durée", val: "25 ans" },
+                { label: "Profil acheteur", val: "Solvable ✓", hl: true },
+              ].map((r, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "16px 20px", position: "relative", zIndex: 1 }}>
+                  <span style={{ fontSize: 14, color: "rgba(255,255,255,0.7)" }}>{r.label}</span>
+                  <span style={{ fontSize: 17, fontWeight: 700, color: r.hl ? "#7CB8A8" : "#fff" }}>{r.val}</span>
+                </div>
+              ))}
+            </div>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 600, color: "#7CB8A8", margin: "0 0 14px" }}>● Qualification intelligente</p>
+              <h3 style={{ fontSize: 34, fontWeight: 700, color: "#193B5E", margin: "0 0 20px", letterSpacing: "-0.02em", lineHeight: 1.15 }}>
+                Analysez vos leads pour <span className="serif-it" style={{ color: "#7CB8A8" }}>accélérer la vente.</span>
+              </h3>
+              <p style={{ fontSize: 16, color: "#5A6275", lineHeight: 1.7, margin: "0 0 28px" }}>
+                Découvrez comment rester organisé, gagner du temps et développer vos ventes immobilières.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+                {[
+                  { title: "Capture des leads", desc: "Collectez les prospects depuis vos sites, QR codes et campagnes." },
+                  { title: "Qualification automatique", desc: "Score et segmentation des leads selon leur solvabilité et leur intérêt." },
+                  { title: "Conversion & financement", desc: "Outils de communication intelligents pour transformer vos prospects en acheteurs." },
+                ].map((f, i) => (
+                  <div key={i} style={{ display: "flex", gap: 16, alignItems: "flex-start", paddingLeft: 16, borderLeft: i === 0 ? "2px solid #7CB8A8" : "2px solid #EFF2F7" }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(124,184,168,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#193B5E" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div>
+                      <h4 style={{ fontSize: 16, fontWeight: 700, color: "#193B5E", margin: "0 0 4px" }}>{f.title}</h4>
+                      <p style={{ fontSize: 14, color: "#5A6275", margin: 0, lineHeight: 1.6 }}>{f.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -212,145 +221,139 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+      </section>
 
-        {/* ============ MODÈLE TARIFAIRE ============ */}
-        <div id="tarifs" className="section-pad" style={{ padding: "90px 48px", background: "#fff" }}>
-          <div style={{ maxWidth: 960, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: 48 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.1em", margin: "0 0 12px" }}>TARIFS</p>
-              <h2 style={{ fontSize: 34, fontWeight: 700, color: "#193B5E", margin: "0 0 12px", letterSpacing: "-0.02em" }}>Une redevance fixe, claire et évolutive.</h2>
-              <p style={{ fontSize: 15, color: "#6B7280", maxWidth: 580, margin: "0 auto", lineHeight: 1.8 }}>
-                BuyMonth fonctionne sur base d'une redevance mensuelle fixe, couplée à une redevance variable ajustée selon votre portefeuille.
-              </p>
-            </div>
-
-            <div style={{ background: "#193B5E", borderRadius: 20, padding: "48px", textAlign: "center", marginBottom: 20, position: "relative", overflow: "hidden", boxShadow: "0 20px 60px rgba(25,59,94,0.2)" }}>
-              <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 600, height: 400, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(124,184,168,0.1) 0%, transparent 70%)", pointerEvents: "none" }} />
-              <div style={{ position: "relative", zIndex: 1 }}>
-                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 8, marginBottom: 8 }}>
-                  <span style={{ fontSize: 56, fontWeight: 700, color: "#fff", letterSpacing: "-0.03em" }}>499 €</span>
-                  <span style={{ fontSize: 18, color: "rgba(255,255,255,0.7)" }}>/mois fixe</span>
-                </div>
-                <p style={{ fontSize: 15, color: "rgba(255,255,255,0.8)", margin: "0 0 8px" }}>
-                  + redevance variable de <strong style={{ color: "#7CB8A8" }}>maximum 19€ par bien</strong>
-                </p>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", maxWidth: 480, margin: "0 auto" }}>
-                  Le tarif est progressif et cumulatif : plus le portefeuille est large, plus le coût unitaire par bien diminue. Une seule facture, tout compris.
-                </p>
+      {/* ============ PROCESS 7 ÉTAPES ============ */}
+      <section id="process" className="ps-pad" style={{ padding: "90px 24px", background: "#FBFCFE", borderTop: "1px solid #F1F4F9", borderBottom: "1px solid #F1F4F9" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "#7CB8A8", margin: "0 0 14px" }}>● Notre process</p>
+            <h2 style={{ fontSize: 42, fontWeight: 700, color: "#193B5E", margin: 0, letterSpacing: "-0.02em" }}>En 7 étapes, <span className="serif-it" style={{ color: "#7CB8A8" }}>clé en main.</span></h2>
+          </div>
+          <div className="ps-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+            {[
+              { num: "01", title: "Mensualisation des biens", desc: "Conversion de vos biens en affichage €/mois pour vos supports marketing." },
+              { num: "02", title: "Capture des leads", desc: "QR codes, landing pages dédiées et bornes interactives en showroom." },
+              { num: "03", title: "Simulation personnalisée", desc: "Calcul de la mensualité adaptée au profil du prospect." },
+              { num: "04", title: "Constitution du dossier", desc: "Accompagnement étape par étape pour un dossier de financement complet." },
+              { num: "05", title: "Analyse crédit", desc: "Présentation simultanée à plusieurs banques pour la meilleure offre." },
+              { num: "06", title: "Offre ferme", desc: "Le prospect devient acheteur, conditions suspensives levées." },
+              { num: "07", title: "Acte & reporting", desc: "Signature finale et reporting détaillé pour votre suivi commercial." },
+            ].map((s, i) => (
+              <div key={i} style={{ background: "#fff", border: "1px solid #EFF2F7", borderRadius: 18, padding: "26px" }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#7CB8A8", marginBottom: 14, display: "inline-flex", width: 42, height: 42, borderRadius: 12, background: "rgba(124,184,168,0.12)", alignItems: "center", justifyContent: "center" }}>{s.num}</div>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: "#193B5E", margin: "0 0 8px" }}>{s.title}</h3>
+                <p style={{ fontSize: 14, lineHeight: 1.6, color: "#5A6275", margin: 0 }}>{s.desc}</p>
               </div>
-            </div>
-
-            <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-              {[
-                { title: "Tarification dégressive", desc: "Un modèle flexible avec des tarifs réduits pour chaque bien supplémentaire." },
-                { title: "Réduction de fidélité", desc: "Pour les clients s'engageant sur 2 ans, une réduction de 5% est appliquée." },
-                { title: "Réévaluation semestrielle", desc: "Tarification ajustée tous les 6 mois selon l'évolution de votre portefeuille." },
-              ].map((c, i) => (
-                <div key={i} style={{ background: "#F7F9FB", border: "1px solid #E5E7EB", borderRadius: 14, padding: "24px" }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 9, background: "rgba(124,184,168,0.12)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  </div>
-                  <h3 style={{ fontSize: 15, fontWeight: 700, color: "#193B5E", margin: "0 0 6px" }}>{c.title}</h3>
-                  <p style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.6, margin: 0 }}>{c.desc}</p>
-                </div>
-              ))}
+            ))}
+            <div style={{ background: "linear-gradient(135deg, #193B5E, #2A5278)", borderRadius: 18, padding: "26px", display: "flex", flexDirection: "column", justifyContent: "center", color: "#fff" }}>
+              <h3 style={{ fontSize: 19, fontWeight: 700, margin: "0 0 8px" }}>Prêt à tester ?</h3>
+              <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,0.8)", margin: "0 0 16px" }}>Et si on faisait le test sur vos prochains biens ?</p>
+              <Link href="#contact" style={{ display: "inline-flex", alignSelf: "flex-start", background: "#7CB8A8", color: "#193B5E", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>Commencer →</Link>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* ============ SERVICES INCLUS (6 cards) ============ */}
-        <div className="section-pad" style={{ padding: "90px 48px", background: "#F7F9FB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
-          <div style={{ maxWidth: 960, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: 48 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.1em", margin: "0 0 12px" }}>INCLUS DANS L'ABONNEMENT</p>
-              <h2 style={{ fontSize: 32, fontWeight: 700, color: "#193B5E", margin: 0, letterSpacing: "-0.02em" }}>Tout ce dont vous avez besoin.</h2>
-            </div>
-            <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-              {[
-                { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M7 7h10v10H7z"/><path d="M21 7v10M3 7v10"/></svg>, title: "Badge mensualité", desc: "Un badge personnalisé conforme FSMA « Achetez ce bien dès x €/mois », prêt à intégrer dans vos annonces." },
-                { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, title: "Pré-scoring", desc: "Analyse de la faisabilité financière du crédit sur demande, pour évaluer et filtrer vos prospects." },
-                { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>, title: "Calculatrice de mensualisation", desc: "Outil personnalisé pour simuler les mensualités et les communiquer au client à titre indicatif." },
-                { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>, title: "Reporting régulier", desc: "Suivi des dossiers et reporting général régulier : décompte des leads reçus, etc." },
-                { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg>, title: "Support & formation", desc: "Formation des commerciaux et fourniture des visuels, goodies et supports marketing." },
-                { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>, title: "Maintenance", desc: "Mises à jour et conformité réglementaire assurées par BuyMonth pour votre tranquillité d'esprit." },
-              ].map((f, i) => (
-                <div key={i} style={{ background: "#fff", borderRadius: 14, border: "1px solid #E5E7EB", padding: "22px" }}>
-                  <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(124,184,168,0.08)", display: "flex", alignItems: "center", justifyContent: "center", color: "#7CB8A8", marginBottom: 14 }}>
-                    {f.icon}
-                  </div>
-                  <h3 style={{ fontSize: 14, fontWeight: 700, color: "#193B5E", margin: "0 0 6px" }}>{f.title}</h3>
-                  <p style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
-                </div>
-              ))}
+      {/* ============ PRICING (fond navy) ============ */}
+      <section id="tarifs" className="ps-pad" style={{ padding: "90px 24px", background: "#193B5E", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: -100, left: "50%", transform: "translateX(-50%)", width: 700, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,184,168,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
+        <div style={{ maxWidth: 1000, margin: "0 auto", position: "relative", zIndex: 1 }}>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "#7CB8A8", margin: "0 0 14px" }}>● Tarifs</p>
+            <h2 style={{ fontSize: 44, fontWeight: 700, color: "#fff", margin: "0 0 28px", letterSpacing: "-0.02em" }}>Choisissez <span className="serif-it" style={{ color: "#7CB8A8" }}>votre plan.</span></h2>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 14 }}>
+              <span style={{ fontSize: 14, color: !yearly ? "#fff" : "rgba(255,255,255,0.5)", fontWeight: 600 }}>Mensuel</span>
+              <button onClick={() => setYearly(!yearly)} style={{ width: 52, height: 28, borderRadius: 20, border: "none", cursor: "pointer", background: yearly ? "#7CB8A8" : "rgba(255,255,255,0.2)", position: "relative", transition: "background 0.2s" }}>
+                <span style={{ position: "absolute", top: 3, left: yearly ? 27 : 3, width: 22, height: 22, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
+              </button>
+              <span style={{ fontSize: 14, color: yearly ? "#fff" : "rgba(255,255,255,0.5)", fontWeight: 600 }}>Annuel <span style={{ color: "#7CB8A8", fontSize: 12 }}>-5%</span></span>
             </div>
           </div>
-        </div>
 
-        {/* ============ BUYMONTH CONCRÈTEMENT (3 points + citation) ============ */}
-        <div className="section-pad" style={{ padding: "90px 48px", background: "#fff" }}>
-          <div style={{ maxWidth: 960, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: 48 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.1em", margin: "0 0 12px" }}>BUYMONTH, CONCRÈTEMENT</p>
-              <h2 style={{ fontSize: 32, fontWeight: 700, color: "#193B5E", margin: 0, letterSpacing: "-0.02em" }}>Trois bénéfices immédiats.</h2>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 48 }}>
-              {[
-                { tag: "COMMUNICATION OPTIMALE", title: "La mensualité accélère la décision", desc: "Les clients pensent aujourd'hui principalement en termes de budget mensuel. Afficher une mensualité accélère leur décision d'achat et améliore significativement le processus de vente." },
-                { tag: "GAIN DE TEMPS", title: "Le filtre qui qualifie vos leads", desc: "Grâce au pré-scoring, à la qualification des leads, à un reporting clair et à la formation, BuyMonth permet un gain de temps précieux pour les équipes de vente." },
-                { tag: "EXPERTISE UNIQUE", title: "Notre agrément FSMA facilite la vente", desc: "Nos connaissances techniques et notre agrément FSMA nous permettent de fournir des solutions financières innovantes, même en cas de refus classique, apportant une réelle valeur ajoutée." },
-              ].map((item, i) => (
-                <div key={i} style={{ display: "flex", gap: 20, alignItems: "flex-start", padding: "28px", background: "#F7F9FB", border: "1px solid #E5E7EB", borderRadius: 16 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#193B5E", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  </div>
-                  <div>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.1em" }}>{item.tag}</span>
-                    <h3 style={{ fontSize: 18, fontWeight: 700, color: "#193B5E", margin: "4px 0 8px" }}>{item.title}</h3>
-                    <p style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.7, margin: 0 }}>{item.desc}</p>
+          <div className="ps-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+            {[
+              { name: "Essentiel", price: yearly ? "474" : "499", suffix: "/mois", note: "Portefeuille réduit", features: ["Badge mensualité FSMA", "Calculatrice de mensualisation", "Pré-scoring sur demande", "Support email"], accent: false },
+              { name: "Professionnel", price: "Sur mesure", suffix: "", note: "Le plus populaire", features: ["Tout l'Essentiel", "Redevance dégressive", "Reporting des leads", "Formation commerciaux", "Support prioritaire"], accent: true },
+              { name: "Portefeuille", price: "Sur devis", suffix: "", note: "Grands volumes", features: ["Tout le Professionnel", "Tarif unitaire optimisé", "Accompagnement dédié", "Maintenance & conformité"], accent: false },
+            ].map((p, i) => (
+              <div key={i} style={{
+                background: p.accent ? "#fff" : "rgba(255,255,255,0.05)",
+                border: p.accent ? "none" : "1px solid rgba(255,255,255,0.12)",
+                borderRadius: 20, padding: "32px 28px", position: "relative",
+                boxShadow: p.accent ? "0 26px 60px rgba(0,0,0,0.3)" : "none",
+              }}>
+                {p.accent && <div style={{ position: "absolute", top: 24, right: 24, background: "#193B5E", color: "#fff", fontSize: 11, fontWeight: 700, padding: "5px 12px", borderRadius: 20 }}>Populaire</div>}
+                <p style={{ fontSize: 14, fontWeight: 600, color: p.accent ? "#7CB8A8" : "rgba(255,255,255,0.7)", margin: "0 0 12px" }}>{p.name}</p>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
+                  <span style={{ fontSize: p.price.match(/^\d+$/) ? 44 : 28, fontWeight: 700, color: p.accent ? "#193B5E" : "#fff", letterSpacing: "-0.02em" }}>{p.price.match(/^\d+$/) ? `${p.price} €` : p.price}</span>
+                  {p.suffix && <span style={{ fontSize: 14, color: p.accent ? "#9AA2B4" : "rgba(255,255,255,0.5)" }}>{p.suffix}</span>}
+                </div>
+                <p style={{ fontSize: 13, color: p.accent ? "#9AA2B4" : "rgba(255,255,255,0.5)", margin: "0 0 24px" }}>{p.note}</p>
+                <Link href="#contact" style={{ display: "block", textAlign: "center", background: p.accent ? "#193B5E" : "#7CB8A8", color: p.accent ? "#fff" : "#193B5E", padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 24 }}>Commencer</Link>
+                <div style={{ borderTop: p.accent ? "1px solid #EFF2F7" : "1px solid rgba(255,255,255,0.1)", paddingTop: 18 }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: p.accent ? "#9AA2B4" : "rgba(255,255,255,0.5)", letterSpacing: "0.08em", margin: "0 0 14px" }}>INCLUS</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+                    {p.features.map((f, j) => (
+                      <div key={j} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span style={{ fontSize: 13, color: p.accent ? "#3A4256" : "rgba(255,255,255,0.85)" }}>{f}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <div style={{ textAlign: "center", padding: "40px", background: "#193B5E", borderRadius: 20 }}>
-              <p style={{ fontSize: 24, fontWeight: 700, color: "#fff", margin: 0, lineHeight: 1.4 }}>
-                « Moins d'incertitude, <span style={{ color: "#7CB8A8" }}>plus de ventes</span>, plus vite. »
+      {/* ============ FAQ ============ */}
+      <section id="faq" className="ps-pad" style={{ padding: "90px 24px" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "#7CB8A8", margin: "0 0 14px" }}>● FAQ</p>
+            <h2 style={{ fontSize: 42, fontWeight: 700, color: "#193B5E", margin: 0, letterSpacing: "-0.02em" }}>Questions <span className="serif-it" style={{ color: "#7CB8A8" }}>fréquentes.</span></h2>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {faqs.map((f, i) => (
+              <div key={i} style={{ background: "#fff", border: "1px solid #EFF2F7", borderRadius: 14, overflow: "hidden" }}>
+                <button onClick={() => setOpenFaq(openFaq === i ? -1 : i)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 24px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: "#193B5E" }}>{f.q}</span>
+                  <span style={{ fontSize: 24, color: "#7CB8A8", lineHeight: 1, transform: openFaq === i ? "rotate(45deg)" : "none", transition: "transform 0.2s" }}>+</span>
+                </button>
+                {openFaq === i && (
+                  <div style={{ padding: "0 24px 22px", fontSize: 15, color: "#5A6275", lineHeight: 1.7 }}>{f.a}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ CTA FINAL ============ */}
+      <section id="contact" className="ps-pad" style={{ padding: "40px 24px 90px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ position: "relative", borderRadius: 32, padding: "80px 48px", textAlign: "center", overflow: "hidden", background: "linear-gradient(135deg, #193B5E 0%, #245179 55%, #2E6388 100%)" }}>
+            <div style={{ position: "absolute", top: -80, left: "30%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,184,168,0.3) 0%, transparent 65%)", pointerEvents: "none" }} />
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <h2 style={{ fontSize: 44, fontWeight: 700, color: "#fff", margin: "0 0 16px", letterSpacing: "-0.02em", lineHeight: 1.15 }}>
+                Boostez vos ventes <span className="serif-it" style={{ color: "#7CB8A8" }}>dès maintenant.</span>
+              </h2>
+              <p style={{ fontSize: 17, color: "rgba(255,255,255,0.8)", margin: "0 0 36px", maxWidth: 520, marginLeft: "auto", marginRight: "auto", lineHeight: 1.7 }}>
+                Rejoignez les promoteurs qui choisissent l'innovation concrète. Moins d'incertitude, plus de ventes, plus vite.
+              </p>
+              <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 40 }}>
+                <a href="tel:+32497709494" style={{ background: "#7CB8A8", color: "#193B5E", padding: "15px 32px", borderRadius: 12, fontSize: 15, fontWeight: 600, textDecoration: "none" }}>+32 497 70 94 94</a>
+                <a href="mailto:info@buymonth.be" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.25)", color: "#fff", padding: "15px 32px", borderRadius: 12, fontSize: 15, fontWeight: 600, textDecoration: "none" }}>info@buymonth.be</a>
+              </div>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", margin: 0 }}>
+                BuyMonth est une marque de JG Management SRL, intermédiaire en crédit immobilier agréé par la FSMA n°1021.366.349.
               </p>
             </div>
           </div>
         </div>
-
-        {/* ============ CTA CONTACT ============ */}
-        <div id="contact" className="cta-section" style={{ background: "#193B5E", padding: "90px 48px", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 800, height: 500, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(124,184,168,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
-          <div style={{ maxWidth: 640, margin: "0 auto", textAlign: "center", position: "relative", zIndex: 1 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.1em", margin: "0 0 16px" }}>PRÊT À BOOSTER VOS VENTES ?</p>
-            <h2 className="cta-title" style={{ fontSize: 36, fontWeight: 700, color: "#fff", margin: "0 0 14px", letterSpacing: "-0.02em", lineHeight: 1.2 }}>Et si on faisait le test<br />sur vos prochains biens ?</h2>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.75)", margin: "0 0 36px", lineHeight: 1.7 }}>Rejoignez les promoteurs qui choisissent l'innovation concrète.</p>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 8 }} className="market-cols">
-              {[
-                { label: "Ligne directe", value: "+32 497 70 94 94", href: "tel:+32497709494" },
-                { label: "E-mail général", value: "info@buymonth.be", href: "mailto:info@buymonth.be" },
-                { label: "Partenariats", value: "promoteurs@buymonth.be", href: "mailto:promoteurs@buymonth.be" },
-              ].map((c, i) => (
-                <a key={i} href={c.href} style={{ display: "block", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "20px 16px", textDecoration: "none" }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.08em", marginBottom: 6 }}>{c.label.toUpperCase()}</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "#fff", wordBreak: "break-word" }}>{c.value}</div>
-                </a>
-              ))}
-            </div>
-            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 28, lineHeight: 1.6 }}>
-              BuyMonth est une marque de JG Management SRL, intermédiaire en crédit immobilier agréé par la FSMA sous le numéro 1021.366.349.
-            </p>
-          </div>
-        </div>
-
-      </main>
-
-      <PublicFooter />
-      <PublicBottomNav />
+      </section>
 
     </div>
   );
