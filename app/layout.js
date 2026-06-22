@@ -4,8 +4,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Fiderio — Plateforme privée',
-  description: 'Plateforme privée de cession de cabinets comptables',
+  title: 'BuyMonth — Plateforme privée',
+  description: 'P???',
 }
 
 export default function RootLayout({ children }) {
