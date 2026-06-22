@@ -1,0 +1,80 @@
+'use client'
+
+import { useState, useRef, useEffect } from 'react'
+
+export function FormSelect({ label, value, onChange, options = [], placeholder = 'Sélectionner', required }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    function onClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [])
+
+  const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
+
+  // Normalise les options en {value, label}
+  const norm = options.map((o) => (typeof o === 'string' ? { value: o, label: o } : o))
+  const selected = norm.find((o) => o.value === value)
+  const displayLabel = selected ? selected.label : ''
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      {label && <label style={labelStyle}>{label}{required && <span style={{ color: '#7CB8A8' }}> *</span>}</label>}
+
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        style={{
+          width: '100%', padding: '11px 14px', borderRadius: 10,
+          border: `1.5px solid ${open ? '#7CB8A8' : '#E8EDF2'}`,
+          background: '#FAFDFD', fontSize: 14, color: displayLabel ? '#193B5E' : '#9AA2B4',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+          cursor: 'pointer', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s',
+          fontWeight: displayLabel ? 600 : 400, textAlign: 'left',
+        }}
+      >
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayLabel || placeholder}</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A92A6" strokeWidth="2" style={{ flexShrink: 0, transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none' }}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 60,
+          background: '#fff', border: '1px solid #EEF2F7', borderRadius: 12,
+          boxShadow: '0 16px 40px rgba(25,59,94,0.14)', overflow: 'hidden', padding: 6,
+          maxHeight: 280, overflowY: 'auto',
+        }}>
+          {norm.map((opt) => {
+            const active = opt.value === value
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => { onChange(opt.value); setOpen(false) }}
+                style={{
+                  width: '100%', textAlign: 'left', padding: '10px 12px', borderRadius: 8,
+                  border: 'none', cursor: 'pointer', fontSize: 14,
+                  background: active ? 'rgba(124,184,168,0.14)' : 'transparent',
+                  color: active ? '#193B5E' : '#3D4759', fontWeight: active ? 600 : 500,
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+                  transition: 'background 0.12s',
+                }}
+                onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = '#F5F8FB' }}
+                onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent' }}
+              >
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
+                {active && <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="3" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12" /></svg>}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}

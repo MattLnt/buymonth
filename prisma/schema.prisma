@@ -8,195 +8,108 @@ datasource db {
 }
 
 enum Role {
-  VENDEUR
-  ACHETEUR
+  CLIENT
   ADMIN
 }
 
-enum OpportuniteStatus {
-  PENDING
-  ACTIVE
-  HIDDEN
-  CLOSED
-}
-
-enum TypeDeal {
-  VENTE
-  FUSION
-  OUVERTURE_CAPITAL
-  COLLABORATION
-}
-
-enum PresenceDirigeant {
-  OUI
-  OUI_PROVISOIRE
-  NON
-}
-
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      Role
-  createdAt DateTime @default(now())
-  messages  Message[]
-  vendeur  Vendeur?
-  acheteur Acheteur?
-  resetTokens  PasswordResetToken[]
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  role        Role     @default(CLIENT)
+  createdAt   DateTime @default(now())
+  client      Client?
+  resetTokens PasswordResetToken[]
 }
 
-model Vendeur {
-  id           String @id @default(cuid())
-  userId       String @unique
-  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  nomBureau    String
-  nomCEO       String
-  logoUrl      String?
-  adresse      String?
-  telephone    String?
-  emailContact String?
-  numeroBce    String?
-  opportunites Opportunite[]
-
-}
-
-model Acheteur {
-  id               String  @id @default(cuid())
-  userId           String  @unique
-  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+model Client {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  societe          String
+  contactNom       String?
+  telephone        String?
+  adresse          String?
+  numeroTva        String?
+  logoUrl          String?
+  plan             String   @default("CLASSIC")
   stripeCustomerId String?
   stripeSubId      String?
   subStatus        String?
-  alertesEmail     Boolean @default(true)
-
-  // Filtres alertes
-  alerteProvinces  String[]
-  alerteTypeDeals  String[]
-  alerteCaMin      Float?
-  alerteCaMax      Float?
-
-  // Profil étendu
-  nomBureau        String?
-  nomCEO           String?
-  telephone        String?
-  adresse          String?
-  siteInternet     String?
-  chiffreAffaires  Float?
-  nombreClients    Int?
-  nombreCollaborateurs Int?
-  activites        String[]
-
-  deblocages       Deblocage[]
+  subEndsAt        DateTime?
+  trialEndsAt      DateTime?
+  biens            Bien[]
+  widgetPayments   WidgetPayment[]
+  createdAt        DateTime @default(now())
 }
 
-model Opportunite {
-  id                   String            @id @default(cuid())
-  vendeurId            String
-  vendeur              Vendeur           @relation(fields: [vendeurId], references: [id], onDelete: Cascade)
-
-  province             String
-  chiffreAffaires      Float
-  nombreClients        Int
-  nombreCollaborateurs Int
-  activites            String[]
-  typeDeal             TypeDeal[]
-  presenceDirigeant    PresenceDirigeant
-  description          String?
-  logiciels            String?
-
-  utiliseBrio              Boolean?
-  exclusiviteCompagnie     Boolean?
-  nomCompagnie             String?
-  venteImmeuble            Boolean?
-  dossierDigitalise        Boolean?
-
-  caIard               Float?
-  caVie                Float?
-  caCreditImmo         Float?
-  caCreditTempo        Float?
-  caPlacement          Float?
-  caBanque             Float?
-
-  adressesComplementaires String[]
-
-  // Compteurs de vues
-  vuesPubliques        Int @default(0)
-  vuesAbonnes          Int @default(0)
-
-  status               OpportuniteStatus @default(ACTIVE)
-  createdAt            DateTime          @default(now())
-
-  deblocages           Deblocage[]
-  valeurImmeuble        Int?
-
-  vues VueOpportunite[]
-}
-
-model Deblocage {
-  id              String      @id @default(cuid())
-  acheteurId      String
-  acheteur        Acheteur    @relation(fields: [acheteurId], references: [id], onDelete: Cascade)
-  opportuniteId   String
-  opportunite     Opportunite @relation(fields: [opportuniteId], references: [id], onDelete: Cascade)
-
-  stripePaymentId String?
-  paidAt          DateTime?
-
-  packCommission  Int?
-  packAccepte     Boolean  @default(false)
-  packAccepteAt   DateTime?
-
-  contactDemande  Boolean  @default(false)
-  contactAt       DateTime?
-  conversation    Conversation?
-  createdAt       DateTime @default(now())
-
-  @@unique([acheteurId, opportuniteId])
-}
-
-model Conversation {
-  id          String    @id @default(cuid())
-  deblocageId String    @unique
-  deblocage   Deblocage @relation(fields: [deblocageId], references: [id], onDelete: Cascade)
-  messages    Message[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-}
-
-model Message {
-  id             String       @id @default(cuid())
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  senderId       String
-  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  content        String
-  isRead         Boolean      @default(false)
-  createdAt      DateTime     @default(now())
-  attachmentUrl   String?
-  attachmentName  String?
-}
-
-model VueOpportunite {
-  id            String   @id @default(cuid())
-  opportuniteId String
-  opportunite   Opportunite @relation(fields: [opportuniteId], references: [id], onDelete: Cascade)
-  type          String   // "publique" ou "abonne"
-  date          DateTime @default(now())
-}
-
-model Article {
-  id          String    @id @default(cuid())
+model Bien {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   titre       String
-  slug        String    @unique
-  contenu     String    // HTML généré par Tiptap
-  extrait     String?   // résumé pour les cards
-  coverImage  String?   // URL Cloudinary
-  published   Boolean   @default(false)
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  description String?
+  prixTotal   Int
+  mensualite  Int
+  type        String?
+  chambres    Int?
+  surface     Int?
+  ville       String?
+  province    String?
+  adresse     String?
+  images      String[]
+  urlClient   String?
+  published   Boolean  @default(true)
+  vues        Int      @default(0)
+  leads       Lead[]
+  widgets     Widget[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Widget {
+  id        String   @id @default(cuid())
+  bienId    String
+  bien      Bien     @relation(fields: [bienId], references: [id], onDelete: Cascade)
+  type      String
+  premium   Boolean  @default(false)
+  vues      Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model WidgetPayment {
+  id              String   @id @default(cuid())
+  clientId        String
+  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  bienId          String?
+  montant         Int
+  devise          String   @default("eur")
+  statut          String   @default("paid")
+  stripeSessionId String?
+  createdAt       DateTime @default(now())
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  bienId    String?
+  bien      Bien?    @relation(fields: [bienId], references: [id], onDelete: SetNull)
+  nom       String?
+  email     String?
+  telephone String?
+  revenu    Int?
+  apport    Int?
+  source    String
+  createdAt DateTime @default(now())
+}
+
+model Settings {
+  id          String   @id @default("default")
+  apportPct   Float    @default(0.10)
+  tauxAnnuel  Float    @default(0.0345)
+  dureeMois   Int      @default(300)
+  leadEmails  String[]
+  essaiActif  Boolean  @default(false)
+  essaiJours  Int      @default(14)
 }
 
 model PasswordResetToken {

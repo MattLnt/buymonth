@@ -1,129 +1,85 @@
-import { NextResponse } from "next/server";
-import Stripe from "stripe";
-import { prisma } from "@/lib/prisma";
-import { sendDeblocageConfirme, sendDossierDebloqueVendeur } from "@/lib/emails";
+import { NextResponse } from 'next/server'
+import { stripe } from '@/lib/stripe'
+import { prisma } from '@/lib/prisma'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// Le webhook a besoin du corps brut (raw body) pour vérifier la signature
+export const config = { api: { bodyParser: false } }
 
 export async function POST(req) {
-  const body = await req.text();
-  const sig = req.headers.get("stripe-signature");
+  if (!stripe) return NextResponse.json({ error: 'Stripe non configuré.' }, { status: 500 })
 
-  let event;
+  const sig = req.headers.get('stripe-signature')
+  const secret = process.env.STRIPE_WEBHOOK_SECRET
+  const body = await req.text()
+
+  let event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(body, sig, secret)
   } catch (e) {
-    console.error("Webhook error:", e.message);
-    return NextResponse.json({ error: "Webhook error" }, { status: 400 });
+    console.error('[STRIPE] Signature invalide :', e?.message)
+    return NextResponse.json({ error: 'Signature invalide.' }, { status: 400 })
   }
 
   try {
     switch (event.type) {
+      // Abonnement créé / mis à jour : on synchronise statut + date de fin
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        const sub = event.data.object
+        const client = await prisma.client.findFirst({ where: { stripeCustomerId: sub.customer } })
+        if (client) {
+          await prisma.client.update({
+            where: { id: client.id },
+            data: {
+              stripeSubId: sub.id,
+              subStatus: sub.status, // active, trialing, past_due, canceled...
+              subEndsAt: sub.current_period_end ? new Date(sub.current_period_end * 1000) : null,
+              trialEndsAt: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
+              plan: (sub.status === 'active' || sub.status === 'trialing') ? 'PREMIUM' : 'CLASSIC',
+            },
+          })
+        }
+        break
+      }
 
-      case "checkout.session.completed": {
-        const session = event.data.object;
+      // Abonnement supprimé / annulé définitivement
+      case 'customer.subscription.deleted': {
+        const sub = event.data.object
+        const client = await prisma.client.findFirst({ where: { stripeCustomerId: sub.customer } })
+        if (client) {
+          await prisma.client.update({
+            where: { id: client.id },
+            data: { subStatus: 'canceled', plan: 'CLASSIC' },
+          })
+        }
+        break
+      }
 
-        if (session.mode === "subscription") {
-          const customerId = session.customer;
-          const acheteur = await prisma.acheteur.findFirst({
-            where: { stripeCustomerId: customerId },
-          });
-          if (acheteur) {
-            await prisma.acheteur.update({
-              where: { id: acheteur.id },
+      // Paiement d'un widget (mode payment one-time)
+      case 'checkout.session.completed': {
+        const cs = event.data.object
+        if (cs.mode === 'payment' && cs.metadata?.type === 'widget') {
+          const clientId = cs.metadata.clientId
+          if (clientId) {
+            await prisma.widgetPayment.create({
               data: {
-                stripeSubId: session.subscription,
-                subStatus: "active",
+                clientId,
+                bienId: cs.metadata.bienId || null,
+                montant: cs.amount_total ? Math.round(cs.amount_total / 100) : 90,
+                devise: cs.currency || 'eur',
+                statut: 'paid',
+                stripeSessionId: cs.id,
               },
-            });
+            })
           }
         }
-
-        if (session.mode === "payment") {
-          const acheteurId = session.metadata?.acheteurId;
-          const opportuniteId = session.metadata?.opportuniteId;
-          const packCommission = session.metadata?.packCommission ? parseInt(session.metadata.packCommission) : null;
-
-          if (acheteurId && opportuniteId) {
-            const deblocage = await prisma.deblocage.upsert({
-              where: { acheteurId_opportuniteId: { acheteurId, opportuniteId } },
-              create: {
-                acheteurId,
-                opportuniteId,
-                stripePaymentId: session.payment_intent,
-                paidAt: new Date(),
-                packCommission,
-              },
-              update: {
-                stripePaymentId: session.payment_intent,
-                paidAt: new Date(),
-                packCommission,
-              },
-            });
-
-            // Créer conversation automatiquement
-            await prisma.conversation.upsert({
-              where: { deblocageId: deblocage.id },
-              create: { deblocageId: deblocage.id },
-              update: {},
-            });
-
-            // Emails : confirmation acheteur + notification vendeur
-            try {
-              const acheteur = await prisma.acheteur.findUnique({
-                where: { id: acheteurId },
-                include: { user: { select: { email: true } } },
-              });
-              const opportunite = await prisma.opportunite.findUnique({
-                where: { id: opportuniteId },
-                include: { vendeur: { include: { user: { select: { email: true } } } } },
-              });
-              if (acheteur && opportunite) {
-                await sendDeblocageConfirme(acheteur.user.email, opportunite, packCommission);
-              }
-              if (opportunite?.vendeur?.user?.email) {
-                await sendDossierDebloqueVendeur(opportunite.vendeur.user.email, opportunite, packCommission);
-              }
-            } catch (emailError) {
-              console.error("Erreur email déblocage:", emailError);
-            }
-          }
-        }
-        break;
-      }
-
-      case "customer.subscription.deleted": {
-        const subscription = event.data.object;
-        const acheteur = await prisma.acheteur.findFirst({
-          where: { stripeSubId: subscription.id },
-        });
-        if (acheteur) {
-          await prisma.acheteur.update({
-            where: { id: acheteur.id },
-            data: { subStatus: "canceled" },
-          });
-        }
-        break;
-      }
-
-      case "invoice.payment_failed": {
-        const invoice = event.data.object;
-        const acheteur = await prisma.acheteur.findFirst({
-          where: { stripeCustomerId: invoice.customer },
-        });
-        if (acheteur) {
-          await prisma.acheteur.update({
-            where: { id: acheteur.id },
-            data: { subStatus: "past_due" },
-          });
-        }
-        break;
+        break
       }
     }
 
-    return NextResponse.json({ received: true });
+    return NextResponse.json({ received: true })
   } catch (e) {
-    console.error("Webhook processing error:", e);
-    return NextResponse.json({ error: "Processing error" }, { status: 500 });
+    console.error('[STRIPE] Erreur traitement webhook :', e?.message)
+    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
   }
 }

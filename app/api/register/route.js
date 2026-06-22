@@ -1,62 +1,47 @@
-import { NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
-import { sendWelcomeVendeur, sendWelcomeAcheteur } from '@/lib/emails'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export async function POST(req) {
   try {
-    const { email, password, role, nomBureau, nomCEO, telephone, adresse } = await req.json()
+    const body = await req.json();
+    const email = (body.email || "").toLowerCase().trim();
+    const { password, societe, contactNom, telephone } = body;
 
-    if (!email || !password || !role) {
-      return NextResponse.json({ message: 'Tous les champs sont requis' }, { status: 400 })
+    if (!email || !password || !societe) {
+      return NextResponse.json({ error: "Champs requis manquants." }, { status: 400 });
     }
 
-    if (password.length < 8) {
-      return NextResponse.json({ message: 'Le mot de passe doit faire au moins 8 caractères' }, { status: 400 })
+    const strong =
+      password.length >= 10 &&
+      /[A-Z]/.test(password) &&
+      /[a-z]/.test(password) &&
+      /\d/.test(password) &&
+      /[^A-Za-z0-9]/.test(password);
+    if (!strong) {
+      return NextResponse.json({ error: "Mot de passe trop faible." }, { status: 400 });
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } })
+    const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return NextResponse.json({ message: 'Cet email est déjà utilisé' }, { status: 400 })
+      return NextResponse.json({ error: "Cet email est déjà utilisé." }, { status: 409 });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hash = await bcrypt.hash(password, 12);
 
-    if (role === 'VENDEUR') {
-      await prisma.user.create({
-        data: {
-          email,
-          password: hashedPassword,
-          role: 'VENDEUR',
-          vendeur: {
-            create: {
-              nomBureau: nomBureau || '',
-              nomCEO: nomCEO || '',
-              telephone: telephone || '',
-              adresse: adresse || '',
-              emailContact: email,
-            },
-          },
+    await prisma.user.create({
+      data: {
+        email,
+        password: hash,
+        role: "CLIENT",
+        client: {
+          create: { societe, contactNom: contactNom || null, telephone: telephone || null },
         },
-      })
-      try { await sendWelcomeVendeur(email) } catch (e) { console.error('Email vendeur:', e) }
-    }
+      },
+    });
 
-    if (role === 'ACHETEUR') {
-      await prisma.user.create({
-        data: {
-          email,
-          password: hashedPassword,
-          role: 'ACHETEUR',
-          acheteur: { create: {} },
-        },
-      })
-      try { await sendWelcomeAcheteur(email) } catch (e) { console.error('Email acheteur:', e) }
-    }
-
-    return NextResponse.json({ message: 'Compte créé avec succès' }, { status: 201 })
-  } catch (error) {
-    console.error('Register error:', error)
-    return NextResponse.json({ message: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
   }
 }
