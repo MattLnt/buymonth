@@ -1,16 +1,20 @@
 import { getCurrentClient } from '@/lib/session'
-import { Sidebar } from '@/app/components/dashboard/Sidebar'
+import { DashboardShell } from '@/app/components/dashboard/DashboardShell'
 import { CLIENT_NAV } from '@/app/components/dashboard/navConfig'
 
 export default async function ClientLayout({ children }) {
   const client = await getCurrentClient()
 
+  let statut = 'none'
+  if (client?.subStatus === 'active' || client?.subStatus === 'trialing') {
+    statut = client.subStatus
+  } else if (client?.trialEndsAt && new Date(client.trialEndsAt) > new Date()) {
+    statut = 'trialing'
+  }
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F4F6FB' }}>
-      <Sidebar items={CLIENT_NAV} societe={client?.societe} email={client?.user?.email} />
-      <main style={{ flex: 1, padding: '32px 36px 96px', minWidth: 0 }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>{children}</div>
-      </main>
-    </div>
+    <DashboardShell navItems={CLIENT_NAV} societe={client?.societe} email={client?.user?.email} statut={statut}>
+      {children}
+    </DashboardShell>
   )
 }

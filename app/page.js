@@ -18,7 +18,7 @@ export default function HomePage() {
   return (
     <div style={{ minHeight: "100vh", background: "#fff", fontFamily: "var(--font-sans)", color: "#1A1E2E", overflow: "hidden" }}>
 
-      <PublicNav />
+      <PublicNav variant="light" />
 
       <style>{`
         .serif-it { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 500; }

@@ -1,8 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 
-export default function PublicNav() {
+export default function PublicNav({ variant = "dark" }) {
+  const { status } = useSession();
+  const isLoggedIn = status === "authenticated";
+
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -17,13 +21,21 @@ export default function PublicNav() {
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
-  // Liens vers des pages réelles + ancres de la home
   const navLinks = [
-    { href: "/biens", label: "Les biens", desc: "Découvrir les biens disponibles", page: true },
+    { href: "/biens", label: "Les biens", desc: "Découvrir les biens disponibles" },
     { href: "/#process", label: "Process", desc: "En 7 étapes clé en main" },
     { href: "/#tarifs", label: "Tarifs", desc: "Simple et transparent" },
-    { href: "/#contact", label: "Contact", desc: "Notre équipe vous répond" },
+    { href: "/contact", label: "Contact", desc: "Notre équipe vous répond" },
   ];
+
+  // La nav est "claire" (texte foncé) uniquement quand variant=light ET pas scrollée ET menu fermé.
+  // Dès qu'on scrolle (fond navy) ou que le menu mobile est ouvert, on repasse en texte clair.
+  const lightMode = variant === "light" && !scrolled && !menuOpen;
+
+  const logoColor = lightMode ? "#193B5E" : "#fff";
+  const linkColor = lightMode ? "rgba(25,59,94,0.72)" : "rgba(255,255,255,0.75)";
+  const loginColor = lightMode ? "#193B5E" : "#fff";
+  const logoutColor = lightMode ? "rgba(25,59,94,0.7)" : "rgba(255,255,255,0.7)";
 
   return (
     <>
@@ -45,19 +57,35 @@ export default function PublicNav() {
         transition: "background 0.4s ease, border-color 0.3s ease",
       }}>
         <Link href="/" onClick={() => setMenuOpen(false)}
-          style={{ display: "flex", alignItems: "center", textDecoration: "none", zIndex: 201, fontSize: 20, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em" }}>
+          style={{ display: "flex", alignItems: "center", textDecoration: "none", zIndex: 201, fontSize: 20, fontWeight: 700, color: logoColor, letterSpacing: "-0.02em", transition: "color 0.3s ease" }}>
           Buy<span style={{ color: "#7CB8A8" }}>Month</span>
         </Link>
 
         <div className="desktop-links" style={{ display: "flex", gap: 28, alignItems: "center" }}>
           {navLinks.map(l => (
-            <Link key={l.href} href={l.href} style={{ color: "rgba(255,255,255,0.75)", fontSize: 14, textDecoration: "none", fontWeight: 500 }}>{l.label}</Link>
+            <Link key={l.href} href={l.href} style={{ color: linkColor, fontSize: 14, textDecoration: "none", fontWeight: 500, transition: "color 0.3s ease" }}>{l.label}</Link>
           ))}
-          <Link href="/login" style={{ color: "#fff", fontSize: 14, textDecoration: "none", fontWeight: 600 }}>Connexion</Link>
-          <Link href="/register"
-            style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#7CB8A8", color: "#193B5E", padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
-            S'inscrire →
-          </Link>
+
+          {isLoggedIn ? (
+            <>
+              <Link href="/dashboard"
+                style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#7CB8A8", color: "#193B5E", padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
+                Mon espace →
+              </Link>
+              <button onClick={() => signOut({ callbackUrl: "/" })}
+                style={{ background: "none", border: "none", cursor: "pointer", color: logoutColor, fontSize: 14, fontWeight: 600, padding: 0, transition: "color 0.3s ease" }}>
+                Déconnexion
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" style={{ color: loginColor, fontSize: 14, textDecoration: "none", fontWeight: 600, transition: "color 0.3s ease" }}>Connexion</Link>
+              <Link href="/register"
+                style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#7CB8A8", color: "#193B5E", padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
+                S'inscrire →
+              </Link>
+            </>
+          )}
         </div>
 
         <button className="burger-btn" aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
@@ -103,16 +131,29 @@ export default function PublicNav() {
               ))}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <Link href="/login" onClick={() => setMenuOpen(false)}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "15px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#fff", textDecoration: "none", animation: "itemIn 0.4s ease 0.34s both" }}>
-                Connexion
-              </Link>
-              <Link href="/register" onClick={() => setMenuOpen(false)}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "16px", background: "#7CB8A8", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#193B5E", textDecoration: "none", animation: "itemIn 0.4s ease 0.4s both" }}>
-                S'inscrire →
-              </Link>
-            </div>
+            {isLoggedIn ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <Link href="/dashboard" onClick={() => setMenuOpen(false)}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "16px", background: "#7CB8A8", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#193B5E", textDecoration: "none", animation: "itemIn 0.4s ease 0.34s both" }}>
+                  Mon espace →
+                </Link>
+                <button onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }); }}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "15px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#fff", cursor: "pointer", animation: "itemIn 0.4s ease 0.4s both" }}>
+                  Déconnexion
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <Link href="/login" onClick={() => setMenuOpen(false)}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "15px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#fff", textDecoration: "none", animation: "itemIn 0.4s ease 0.34s both" }}>
+                  Connexion
+                </Link>
+                <Link href="/register" onClick={() => setMenuOpen(false)}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "16px", background: "#7CB8A8", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#193B5E", textDecoration: "none", animation: "itemIn 0.4s ease 0.4s both" }}>
+                  S'inscrire →
+                </Link>
+              </div>
+            )}
           </div>
 
           <div style={{ padding: "20px 28px 40px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", zIndex: 1 }}>

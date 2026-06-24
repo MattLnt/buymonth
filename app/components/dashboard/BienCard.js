@@ -29,6 +29,11 @@ export function BienCard({ bien }) {
         <span style={{ position: 'absolute', top: 12, left: 12, background: bien.published ? 'rgba(36,158,124,0.92)' : 'rgba(138,146,166,0.92)', color: '#fff', fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 20 }}>
           {bien.published ? 'Publié' : 'Brouillon'}
         </span>
+        {/* Pastille leads en haut à droite */}
+        <span style={{ position: 'absolute', top: 12, right: 12, display: 'inline-flex', alignItems: 'center', gap: 5, background: (bien.nbLeads || 0) > 0 ? 'rgba(25,59,94,0.92)' : 'rgba(255,255,255,0.92)', color: (bien.nbLeads || 0) > 0 ? '#fff' : '#8A92A6', fontSize: 11.5, fontWeight: 700, padding: '4px 9px', borderRadius: 20, backdropFilter: 'blur(4px)' }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
+          {bien.nbLeads || 0}
+        </span>
       </div>
 
       {/* contenu */}

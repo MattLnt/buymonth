@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google'
 import './globals.css'
+import SessionProviderWrapper from '@/app/components/SessionProviderWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -15,7 +16,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="fr">
       <body className={inter.className} suppressHydrationWarning>
-        {children}
+        <SessionProviderWrapper>
+          {children}
+        </SessionProviderWrapper>
       </body>
     </html>
   )

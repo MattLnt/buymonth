@@ -1,23 +1,19 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { Icon } from './Icon'
 
-export function Sidebar({ items, societe, email }) {
-  const [collapsed, setCollapsed] = useState(false)
+export function Sidebar({ items, societe, email, collapsed = false }) {
   const pathname = usePathname()
 
   const isActive = (href) =>
     href === pathname ||
     (href !== '/dashboard/client' && href !== '/dashboard/admin' && pathname.startsWith(href))
 
-  // Aplatit les sections en liste simple (pour le mobile)
   const flatItems = items.flatMap((it) => (it.section ? it.items : [it]))
 
-  // Rendu d'un lien (desktop)
   const renderLink = (item) => {
     const active = isActive(item.href)
     return (
@@ -46,15 +42,14 @@ export function Sidebar({ items, societe, email }) {
 
       {/* SIDEBAR DESKTOP */}
       <aside className="bm-desktop" style={{ width: collapsed ? 68 : 248, flexShrink: 0, background: '#16324F', minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', overflowX: 'hidden', transition: 'width 0.25s ease', zIndex: 50 }}>
-        <div style={{ padding: collapsed ? '20px 0' : '20px 20px', display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between', borderBottom: '1px solid rgba(255,255,255,0.07)', minHeight: 64 }}>
-          {!collapsed && (
-            <Link href="/" style={{ fontSize: 21, fontWeight: 700, color: '#fff', textDecoration: 'none', letterSpacing: '-0.02em' }}>
-              Buy<span style={{ color: '#7CB8A8' }}>Month</span>
-            </Link>
-          )}
-          <button onClick={() => setCollapsed(!collapsed)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7C8AA0', padding: 6, borderRadius: 6, display: 'flex', flexShrink: 0 }}>
-            <Icon name="menu" size={18} />
-          </button>
+        <div style={{ padding: collapsed ? '20px 0' : '20px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(255,255,255,0.07)', minHeight: 68 }}>
+          <Link href="/" style={{ fontSize: collapsed ? 0 : 21, fontWeight: 700, color: '#fff', textDecoration: 'none', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center' }}>
+            {collapsed ? (
+              <span style={{ fontSize: 21, color: '#7CB8A8' }}>B</span>
+            ) : (
+              <>Buy<span style={{ color: '#7CB8A8' }}>Month</span></>
+            )}
+          </Link>
         </div>
 
         {!collapsed && societe && (
@@ -71,7 +66,6 @@ export function Sidebar({ items, societe, email }) {
 
         <nav style={{ flex: 1, padding: collapsed ? '12px 8px' : '14px 12px', overflowY: 'auto' }}>
           {items.map((item, i) => {
-            // Section avec titre + sous-liens
             if (item.section) {
               return (
                 <div key={`sec-${i}`} style={{ marginTop: i > 0 ? 14 : 0, marginBottom: 4 }}>
@@ -85,7 +79,6 @@ export function Sidebar({ items, societe, email }) {
                 </div>
               )
             }
-            // Lien simple
             return renderLink(item)
           })}
         </nav>
@@ -99,7 +92,7 @@ export function Sidebar({ items, societe, email }) {
         </div>
       </aside>
 
-      {/* BOTTOM NAV MOBILE (liste aplatie) */}
+      {/* BOTTOM NAV MOBILE */}
       <div className="bm-mobile" style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: '#16324F', borderTop: '1px solid rgba(255,255,255,0.08)', zIndex: 50, paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="bm-bottomnav" style={{ display: 'flex', overflowX: 'auto', height: 64, alignItems: 'center', padding: '0 4px' }}>
           {flatItems.map((item) => {

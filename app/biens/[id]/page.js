@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { BienGallery } from '@/app/components/public/BienGallery'
 import { SimulateurModal } from '@/app/components/public/SimulateurModal'
+import PublicNav from '@/app/components/PublicNav'
+import PublicFooter from '@/app/components/PublicFooter'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,13 +44,22 @@ export default async function BienDetailPage({ params }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#EEF1F6' }}>
-      <div style={{ ...WRAP, padding: '24px 24px 64px' }}>
-        {/* Breadcrumb */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18, fontSize: 13, color: '#8A92A6' }}>
-          <Link href="/biens" style={{ color: '#8A92A6', textDecoration: 'none' }}>Catalogue</Link>
-          <span>→</span>
-          <span style={{ color: '#193B5E', fontWeight: 600 }}>{bien.titre}</span>
+      <PublicNav />
+
+      <PublicNav />
+
+      {/* Bandeau navy pour lisibilité de la nav + breadcrumb */}
+      <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', padding: '96px 0 28px' }}>
+        <div style={{ ...WRAP }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>
+            <Link href="/biens" style={{ color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }}>Catalogue</Link>
+            <span>→</span>
+            <span style={{ color: '#7CB8A8', fontWeight: 600 }}>{bien.titre}</span>
+          </div>
         </div>
+      </div>
+
+      <div style={{ ...WRAP, padding: '28px 24px 64px' }}>
 
         {/* Galerie pleine largeur */}
         <BienGallery images={bien.images} titre={bien.titre} />
@@ -89,7 +100,7 @@ export default async function BienDetailPage({ params }) {
           </div>
 
           {/* SIDEBAR DROITE */}
-          <div style={{ position: 'sticky', top: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ position: 'sticky', top: 88, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 16, padding: 26, position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: -40, right: -30, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.2) 0%, transparent 65%)' }} />
               <div style={{ position: 'relative' }}>
@@ -137,6 +148,8 @@ export default async function BienDetailPage({ params }) {
           </div>
         </div>
       </div>
+
+      <PublicFooter />
     </div>
   )
 }
