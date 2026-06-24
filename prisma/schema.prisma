@@ -38,6 +38,7 @@ model Client {
   subStatus        String?
   subEndsAt        DateTime?
   trialEndsAt      DateTime?
+  widgetsGratuits  Int      @default(0)
   biens            Bien[]
   widgetPayments   WidgetPayment[]
   createdAt        DateTime @default(now())
@@ -103,13 +104,14 @@ model Lead {
 }
 
 model Settings {
-  id          String   @id @default("default")
-  apportPct   Float    @default(0.10)
-  tauxAnnuel  Float    @default(0.0345)
-  dureeMois   Int      @default(300)
-  leadEmails  String[]
-  essaiActif  Boolean  @default(false)
-  essaiJours  Int      @default(14)
+  id           String   @id @default("default")
+  apportPct    Float    @default(0.10)
+  tauxAnnuel   Float    @default(0.0345)
+  dureeMois    Int      @default(300)
+  leadEmails   String[]
+  essaiActif   Boolean  @default(false)
+  essaiJours   Int      @default(14)
+  blocageActif Boolean  @default(false)
 }
 
 model PasswordResetToken {

@@ -5,11 +5,13 @@ import { WidgetGenerator } from '@/app/components/widget/WidgetGenerator'
 import { Icon } from '@/app/components/dashboard/Icon'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function WidgetsPage() {
-  const { client } = await getCurrentClient()
+  const client = await getCurrentClient()
 
   const biens = await prisma.bien.findMany({
-    where: { clientId: client?.id },
+    where: { clientId: client.id },
     orderBy: { createdAt: 'desc' },
     select: { id: true, titre: true, mensualite: true, prixTotal: true, ville: true, urlClient: true },
   })
@@ -30,7 +32,7 @@ export default async function WidgetsPage() {
           }
         />
       ) : (
-        <WidgetGenerator biens={biens} plan={client?.plan || 'CLASSIC'} />
+        <WidgetGenerator biens={biens} plan={client.plan || 'CLASSIC'} />
       )}
     </>
   )

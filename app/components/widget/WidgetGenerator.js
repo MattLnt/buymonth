@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { FormSection } from '@/app/components/dashboard/FormSection'
 import { FormSelect } from '@/app/components/dashboard/FormSelect'
 import { Badge } from './Badge'
+import { WidgetPaymentModal } from './WidgetPaymentModal'
 
 const BASE_URL = typeof window !== 'undefined' ? window.location.origin : ''
 
@@ -41,7 +42,7 @@ export function WidgetGenerator({ biens, plan }) {
   const [bienId, setBienId] = useState(biens[0]?.id || '')
   const [theme, setTheme] = useState('light')
   const [premium, setPremium] = useState(false)
-  const [couleurMode, setCouleurMode] = useState('buymonth') // 'buymonth' | 'perso'
+  const [couleurMode, setCouleurMode] = useState('buymonth')
   const [primaire, setPrimaire] = useState('#16324F')
   const [accent, setAccent] = useState('#7CB8A8')
   const [logoUrl, setLogoUrl] = useState('')
@@ -49,10 +50,28 @@ export function WidgetGenerator({ biens, plan }) {
   const [copied, setCopied] = useState('')
   const logoInput = useRef(null)
 
+  const [biensPayes, setBiensPayes] = useState([])
+  const [credits, setCredits] = useState(0)
+  const [loaded, setLoaded] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
+  const [genLoading, setGenLoading] = useState(false)
+  const [genError, setGenError] = useState('')
+
   const bien = biens.find((b) => b.id === bienId)
   const mensualite = bien?.mensualite || null
+  const paye = biensPayes.includes(bienId)
 
-  // couleurs effectives
+  // Charge biens payés + crédits gratuits au montage
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/widget/payes').then((r) => r.json()).catch(() => ({})),
+      fetch('/api/widget/credits').then((r) => r.json()).catch(() => ({})),
+    ]).then(([payes, cr]) => {
+      if (Array.isArray(payes.bienIds)) setBiensPayes(payes.bienIds)
+      if (typeof cr.creditsRestants === 'number') setCredits(cr.creditsRestants)
+    }).finally(() => setLoaded(true))
+  }, [])
+
   const effPrimaire = premium && couleurMode === 'perso' ? primaire : '#16324F'
   const effAccent = premium && couleurMode === 'perso' ? accent : '#7CB8A8'
 
@@ -91,6 +110,30 @@ export function WidgetGenerator({ biens, plan }) {
       setUploadingLogo(false)
       if (logoInput.current) logoInput.current.value = ''
     }
+  }
+
+  // Génération via crédit gratuit (pas de Stripe)
+  async function genererGratuit() {
+    setGenLoading(true); setGenError('')
+    try {
+      const res = await fetch('/api/widget/payer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bienId }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setGenError(data.error || 'Erreur.'); setGenLoading(false); return }
+      if (data.gratuit || data.dejaPaye) {
+        setBiensPayes((prev) => prev.includes(bienId) ? prev : [...prev, bienId])
+        setCredits((c) => Math.max(0, c - 1))
+      } else if (data.clientSecret) {
+        // plus de crédit → bascule sur la modale payante
+        setShowPayment(true)
+      }
+    } catch {
+      setGenError('Erreur réseau.')
+    }
+    setGenLoading(false)
   }
 
   function downloadSVG() {
@@ -141,12 +184,25 @@ export function WidgetGenerator({ biens, plan }) {
   const preBox = { margin: 0, padding: '14px', paddingRight: 78, background: '#0F2438', color: '#A8C5D6', borderRadius: 10, fontSize: 11.5, overflowX: 'auto', fontFamily: 'monospace', lineHeight: 1.5, whiteSpace: 'pre', maxWidth: '100%', boxSizing: 'border-box' }
   const copyBtn = { position: 'absolute', top: 10, right: 10, padding: '6px 12px', borderRadius: 8, background: '#7CB8A8', color: '#16324F', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }
 
-  // damier pour la preview (visible quel que soit le thème du badge)
   const checker = `repeating-conic-gradient(#EAEFF5 0% 25%, #F7F9FC 0% 50%) 50% / 20px 20px`
+
+  const bienOptions = biens.map((b) => ({
+    value: b.id,
+    label: `${b.titre} — ${b.mensualite} €/mois`,
+    badge: biensPayes.includes(b.id) ? { label: 'Généré', color: '#249E7C', bg: 'rgba(36,158,124,0.12)', dot: true } : null,
+  }))
 
   return (
     <div className="wg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16, alignItems: 'start' }}>
       <style>{`@media (max-width: 1024px){ .wg-grid { grid-template-columns: 1fr !important; } }`}</style>
+
+      {showPayment && bien && (
+        <WidgetPaymentModal
+          bien={bien}
+          onClose={() => setShowPayment(false)}
+          onSuccess={() => { setBiensPayes((prev) => prev.includes(bienId) ? prev : [...prev, bienId]); setShowPayment(false) }}
+        />
+      )}
 
       {/* COLONNE CONFIG */}
       <div style={{ minWidth: 0 }}>
@@ -154,7 +210,7 @@ export function WidgetGenerator({ biens, plan }) {
           <FormSelect
             value={bienId}
             onChange={setBienId}
-            options={biens.map((b) => ({ value: b.id, label: `${b.titre} — ${b.mensualite} €/mois` }))}
+            options={bienOptions}
             placeholder="Sélectionner un bien"
           />
         </FormSection>
@@ -180,10 +236,8 @@ export function WidgetGenerator({ biens, plan }) {
             </p>
           )}
 
-          {/* Options premium */}
           {premium && isPremiumPlan && (
             <div style={{ marginTop: 22, paddingTop: 22, borderTop: '1px solid #F2F5FA' }}>
-              {/* Logo */}
               <label style={labelStyle}>Votre logo</label>
               <input ref={logoInput} type="file" accept="image/*" onChange={handleLogo} style={{ display: 'none' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
@@ -201,7 +255,6 @@ export function WidgetGenerator({ biens, plan }) {
                 )}
               </div>
 
-              {/* Couleurs : BuyMonth ou perso */}
               <label style={labelStyle}>Couleurs</label>
               <div style={{ display: 'flex', gap: 10, marginBottom: couleurMode === 'perso' ? 16 : 0 }}>
                 <button type="button" onClick={() => setCouleurMode('buymonth')} style={toggleBtn(couleurMode === 'buymonth')}>Couleurs BuyMonth</button>
@@ -230,35 +283,87 @@ export function WidgetGenerator({ biens, plan }) {
           )}
         </FormSection>
 
-        <FormSection icon={ic.code} title="Code d'intégration" subtitle="Copiez le code sur le site du bien">
-          <label style={labelStyle}>Option A — iframe (recommandée)</label>
-          <div style={{ position: 'relative', marginBottom: 18 }}>
-            <pre style={preBox}>{iframeCode}</pre>
-            <button type="button" onClick={() => copy(iframeCode, 'iframe')} style={copyBtn}>{copied === 'iframe' ? 'Copié ✓' : 'Copier'}</button>
-          </div>
+        {/* Code d'intégration — verrouillé si non payé/généré */}
+        <FormSection icon={ic.code} title="Code d'intégration" subtitle={paye ? 'Copiez le code sur le site du bien' : 'Générez votre widget pour obtenir le code'}>
+          {!loaded ? (
+            <div style={{ padding: '20px 0', textAlign: 'center', color: '#8A92A6', fontSize: 13.5 }}>Vérification...</div>
+          ) : paye ? (
+            <>
+              <label style={labelStyle}>Option A — iframe (recommandée)</label>
+              <div style={{ position: 'relative', marginBottom: 18 }}>
+                <pre style={preBox}>{iframeCode}</pre>
+                <button type="button" onClick={() => copy(iframeCode, 'iframe')} style={copyBtn}>{copied === 'iframe' ? 'Copié ✓' : 'Copier'}</button>
+              </div>
+              <label style={labelStyle}>Option B — image (HTML)</label>
+              <div style={{ position: 'relative' }}>
+                <pre style={preBox}>{htmlCode}</pre>
+                <button type="button" onClick={() => copy(htmlCode, 'html')} style={copyBtn}>{copied === 'html' ? 'Copié ✓' : 'Copier'}</button>
+              </div>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '12px 0' }}>
+              <div style={{ display: 'inline-flex', width: 48, height: 48, borderRadius: 14, background: 'rgba(124,184,168,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
+              </div>
+              <p style={{ fontSize: 14, color: '#193B5E', fontWeight: 600, margin: '0 0 4px' }}>Widget non généré pour ce bien</p>
 
-          <label style={labelStyle}>Option B — image (HTML)</label>
-          <div style={{ position: 'relative' }}>
-            <pre style={preBox}>{htmlCode}</pre>
-            <button type="button" onClick={() => copy(htmlCode, 'html')} style={copyBtn}>{copied === 'html' ? 'Copié ✓' : 'Copier'}</button>
-          </div>
+              {credits > 0 ? (
+                <>
+                  <p style={{ fontSize: 13, color: '#8A92A6', margin: '0 0 6px', lineHeight: 1.5 }}>
+                    Vous disposez de widgets gratuits offerts.
+                  </p>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(36,158,124,0.1)', color: '#1B7A5E', fontSize: 12.5, fontWeight: 700, padding: '5px 12px', borderRadius: 20, marginBottom: 18 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#249E7C' }} />
+                    {credits} widget{credits > 1 ? 's' : ''} gratuit{credits > 1 ? 's' : ''} restant{credits > 1 ? 's' : ''}
+                  </div>
+                  {genError && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#ef4444', fontSize: 13, borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>{genError}</div>}
+                  <div>
+                    <button type="button" onClick={genererGratuit} disabled={genLoading} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '13px 26px', borderRadius: 11, background: '#7CB8A8', color: '#0F2A22', border: 'none', fontSize: 14.5, fontWeight: 700, cursor: genLoading ? 'wait' : 'pointer' }}>
+                      {genLoading ? 'Génération...' : 'Générer gratuitement'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p style={{ fontSize: 13, color: '#8A92A6', margin: '0 0 18px', lineHeight: 1.5 }}>
+                    Générez votre widget pour ce bien (90 € une fois) et obtenez le code à intégrer sur votre site.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowPayment(true)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '13px 26px', borderRadius: 11, background: 'linear-gradient(135deg, #1D4267 0%, #16324F 100%)', color: '#fff', border: 'none', fontSize: 14.5, fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    <span style={{ display: 'flex', width: 26, height: 26, borderRadius: 8, background: 'rgba(124,184,168,0.18)', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#7CB8A8" stroke="#7CB8A8" strokeWidth="1.5" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
+                    </span>
+                    Générer mon widget — 90 €
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </FormSection>
       </div>
 
       {/* COLONNE PREVIEW */}
       <div style={{ position: 'sticky', top: 24, minWidth: 0 }}>
-        <div style={{ background: checker, border: '1px solid #EEF2F7', borderRadius: 16, padding: 28, display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+        <div style={{ background: checker, border: '1px solid #EEF2F7', borderRadius: 16, padding: 28, display: 'flex', justifyContent: 'center', marginBottom: 16, position: 'relative' }}>
           <Badge mensualite={mensualite} premium={premium} theme={theme} couleurPrimaire={effPrimaire} couleurAccent={effAccent} logoUrl={premium ? logoUrl : null} width={280} />
+          {loaded && !paye && (
+            <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', background: 'rgba(22,50,79,0.85)', color: '#fff', fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 20 }}>Aperçu</div>
+          )}
         </div>
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button type="button" onClick={downloadSVG} style={{ flex: 1, padding: '11px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            Télécharger SVG
-          </button>
-          <button type="button" onClick={downloadPNG} style={{ flex: 1, padding: '11px', borderRadius: 10, background: '#fff', color: '#193B5E', border: '1.5px solid #E8EDF2', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            Télécharger PNG
-          </button>
-        </div>
+        {paye && (
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button type="button" onClick={downloadSVG} style={{ flex: 1, padding: '11px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+              Télécharger SVG
+            </button>
+            <button type="button" onClick={downloadPNG} style={{ flex: 1, padding: '11px', borderRadius: 10, background: '#fff', color: '#193B5E', border: '1.5px solid #E8EDF2', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+              Télécharger PNG
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

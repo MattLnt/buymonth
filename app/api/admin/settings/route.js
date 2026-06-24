@@ -27,6 +27,10 @@ export async function PUT(req) {
     const tauxAnnuel = b.tauxAnnuel != null ? Math.max(0, Number(b.tauxAnnuel)) : undefined
     const dureeMois = b.dureeMois != null ? Math.max(1, parseInt(b.dureeMois, 10)) : undefined
 
+    // essai gratuit
+    const essaiActif = typeof b.essaiActif === 'boolean' ? b.essaiActif : undefined
+    const essaiJours = b.essaiJours != null ? Math.max(1, Math.min(365, parseInt(b.essaiJours, 10))) : undefined
+
     // emails : tableau nettoyé
     let leadEmails
     if (Array.isArray(b.leadEmails)) {
@@ -43,6 +47,8 @@ export async function PUT(req) {
         ...(apportPct !== undefined && { apportPct }),
         ...(tauxAnnuel !== undefined && { tauxAnnuel }),
         ...(dureeMois !== undefined && { dureeMois }),
+        ...(essaiActif !== undefined && { essaiActif }),
+        ...(essaiJours !== undefined && { essaiJours }),
         ...(leadEmails !== undefined && { leadEmails }),
       },
     })

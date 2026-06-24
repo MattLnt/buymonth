@@ -1,21 +1,24 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import PublicNav from "@/app/components/PublicNav";
+import PublicFooter from "@/app/components/PublicFooter";
 
 export default function HomePage() {
-  const [yearly, setYearly] = useState(false);
   const [openFaq, setOpenFaq] = useState(0);
 
   const faqs = [
     { q: "Comment fonctionne l'affichage en mensualités ?", a: "En tant qu'intermédiaire en crédit agréé FSMA, nous convertissons le prix de vos biens en mensualité indicative. Vous communiquez un budget mensuel clair à vos prospects, tout en restant parfaitement conforme à la réglementation." },
-    { q: "Quel est le coût de la plateforme ?", a: "Une redevance fixe de 499€/mois, couplée à une redevance variable de maximum 19€ par bien. Plus votre portefeuille est large, plus le coût unitaire par bien diminue. Une seule facture, tout compris." },
+    { q: "Quel est le coût de la plateforme ?", a: "Une redevance fixe de 500€/mois donne accès à la plateforme. Chaque génération de widget pour un bien est facturée 90€, une seule fois par bien. Une facturation simple et transparente." },
     { q: "Qui gère le dossier de financement ?", a: "BuyMonth pilote l'intégralité du dossier de crédit, de la simulation jusqu'à la signature de l'acte. Nous présentons le dossier à plusieurs banques partenaires pour maximiser les chances d'acceptation." },
     { q: "Le pré-scoring, comment ça marche ?", a: "Le pré-scoring analyse la faisabilité financière du crédit sur demande. Vos commerciaux savent immédiatement s'ils parlent à un acheteur solvable, ce qui filtre les leads et vous fait gagner un temps précieux." },
-    { q: "Y a-t-il un engagement de durée ?", a: "Pas d'engagement obligatoire. Pour les clients qui s'engagent sur 2 ans, une réduction de fidélité de 5% est appliquée. La tarification est réévaluée tous les 6 mois selon l'évolution de votre portefeuille." },
+    { q: "Y a-t-il un engagement de durée ?", a: "L'abonnement est sans engagement et résiliable à tout moment depuis votre tableau de bord. La résiliation prend effet à la fin de la période de facturation en cours." },
   ];
 
   return (
     <div style={{ minHeight: "100vh", background: "#fff", fontFamily: "var(--font-sans)", color: "#1A1E2E", overflow: "hidden" }}>
+
+      <PublicNav />
 
       <style>{`
         .serif-it { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 500; }
@@ -45,7 +48,7 @@ export default function HomePage() {
             Transformez votre approche commerciale avec une plateforme pensée pour les promoteurs : affichage en budget mensuel, qualification des leads et financement intégré.
           </p>
           <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 70 }}>
-            <Link href="#contact" style={{ background: "#193B5E", color: "#fff", padding: "15px 32px", borderRadius: 12, fontSize: 15, fontWeight: 600, textDecoration: "none", boxShadow: "0 12px 30px rgba(25,59,94,0.25)" }}>
+            <Link href="/register" style={{ background: "#193B5E", color: "#fff", padding: "15px 32px", borderRadius: 12, fontSize: 15, fontWeight: 600, textDecoration: "none", boxShadow: "0 12px 30px rgba(25,59,94,0.25)" }}>
               Commencer
             </Link>
             <Link href="#contact" style={{ background: "#fff", color: "#193B5E", padding: "15px 32px", borderRadius: 12, fontSize: 15, fontWeight: 600, textDecoration: "none", boxShadow: "0 6px 20px rgba(25,59,94,0.1)" }}>
@@ -117,7 +120,7 @@ export default function HomePage() {
                   <div style={{ background: "#fff", border: "1px solid #EFF2F7", borderRadius: 12, padding: "18px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: "#193B5E" }}>Leads par mois</span>
-                      <span style={{ fontSize: 11, color: "#9AA2B4", background: "#F4F6FB", padding: "4px 10px", borderRadius: 6 }}>2024</span>
+                      <span style={{ fontSize: 11, color: "#9AA2B4", background: "#F4F6FB", padding: "4px 10px", borderRadius: 6 }}>2026</span>
                     </div>
                     <svg width="100%" height="130" viewBox="0 0 320 130" preserveAspectRatio="none">
                       <defs>
@@ -249,7 +252,7 @@ export default function HomePage() {
             <div style={{ background: "linear-gradient(135deg, #193B5E, #2A5278)", borderRadius: 18, padding: "26px", display: "flex", flexDirection: "column", justifyContent: "center", color: "#fff" }}>
               <h3 style={{ fontSize: 19, fontWeight: 700, margin: "0 0 8px" }}>Prêt à tester ?</h3>
               <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,0.8)", margin: "0 0 16px" }}>Et si on faisait le test sur vos prochains biens ?</p>
-              <Link href="#contact" style={{ display: "inline-flex", alignSelf: "flex-start", background: "#7CB8A8", color: "#193B5E", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>Commencer →</Link>
+              <Link href="/register" style={{ display: "inline-flex", alignSelf: "flex-start", background: "#7CB8A8", color: "#193B5E", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>Commencer →</Link>
             </div>
           </div>
         </div>
@@ -258,52 +261,58 @@ export default function HomePage() {
       {/* ============ PRICING (fond navy) ============ */}
       <section id="tarifs" className="ps-pad" style={{ padding: "90px 24px", background: "#193B5E", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -100, left: "50%", transform: "translateX(-50%)", width: 700, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,184,168,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ maxWidth: 1000, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", position: "relative", zIndex: 1 }}>
           <div style={{ textAlign: "center", marginBottom: 40 }}>
             <p style={{ fontSize: 14, fontWeight: 600, color: "#7CB8A8", margin: "0 0 14px" }}>● Tarifs</p>
-            <h2 style={{ fontSize: 44, fontWeight: 700, color: "#fff", margin: "0 0 28px", letterSpacing: "-0.02em" }}>Choisissez <span className="serif-it" style={{ color: "#7CB8A8" }}>votre plan.</span></h2>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 14 }}>
-              <span style={{ fontSize: 14, color: !yearly ? "#fff" : "rgba(255,255,255,0.5)", fontWeight: 600 }}>Mensuel</span>
-              <button onClick={() => setYearly(!yearly)} style={{ width: 52, height: 28, borderRadius: 20, border: "none", cursor: "pointer", background: yearly ? "#7CB8A8" : "rgba(255,255,255,0.2)", position: "relative", transition: "background 0.2s" }}>
-                <span style={{ position: "absolute", top: 3, left: yearly ? 27 : 3, width: 22, height: 22, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
-              </button>
-              <span style={{ fontSize: 14, color: yearly ? "#fff" : "rgba(255,255,255,0.5)", fontWeight: 600 }}>Annuel <span style={{ color: "#7CB8A8", fontSize: 12 }}>-5%</span></span>
-            </div>
+            <h2 style={{ fontSize: 44, fontWeight: 700, color: "#fff", margin: "0 0 12px", letterSpacing: "-0.02em" }}>Une tarification <span className="serif-it" style={{ color: "#7CB8A8" }}>simple.</span></h2>
+            <p style={{ fontSize: 16, color: "rgba(255,255,255,0.7)", margin: 0 }}>Pas d'engagement. Résiliable à tout moment.</p>
           </div>
 
-          <div className="ps-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
-            {[
-              { name: "Essentiel", price: yearly ? "474" : "499", suffix: "/mois", note: "Portefeuille réduit", features: ["Badge mensualité FSMA", "Calculatrice de mensualisation", "Pré-scoring sur demande", "Support email"], accent: false },
-              { name: "Professionnel", price: "Sur mesure", suffix: "", note: "Le plus populaire", features: ["Tout l'Essentiel", "Redevance dégressive", "Reporting des leads", "Formation commerciaux", "Support prioritaire"], accent: true },
-              { name: "Portefeuille", price: "Sur devis", suffix: "", note: "Grands volumes", features: ["Tout le Professionnel", "Tarif unitaire optimisé", "Accompagnement dédié", "Maintenance & conformité"], accent: false },
-            ].map((p, i) => (
-              <div key={i} style={{
-                background: p.accent ? "#fff" : "rgba(255,255,255,0.05)",
-                border: p.accent ? "none" : "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 20, padding: "32px 28px", position: "relative",
-                boxShadow: p.accent ? "0 26px 60px rgba(0,0,0,0.3)" : "none",
-              }}>
-                {p.accent && <div style={{ position: "absolute", top: 24, right: 24, background: "#193B5E", color: "#fff", fontSize: 11, fontWeight: 700, padding: "5px 12px", borderRadius: 20 }}>Populaire</div>}
-                <p style={{ fontSize: 14, fontWeight: 600, color: p.accent ? "#7CB8A8" : "rgba(255,255,255,0.7)", margin: "0 0 12px" }}>{p.name}</p>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
-                  <span style={{ fontSize: p.price.match(/^\d+$/) ? 44 : 28, fontWeight: 700, color: p.accent ? "#193B5E" : "#fff", letterSpacing: "-0.02em" }}>{p.price.match(/^\d+$/) ? `${p.price} €` : p.price}</span>
-                  {p.suffix && <span style={{ fontSize: 14, color: p.accent ? "#9AA2B4" : "rgba(255,255,255,0.5)" }}>{p.suffix}</span>}
-                </div>
-                <p style={{ fontSize: 13, color: p.accent ? "#9AA2B4" : "rgba(255,255,255,0.5)", margin: "0 0 24px" }}>{p.note}</p>
-                <Link href="#contact" style={{ display: "block", textAlign: "center", background: p.accent ? "#193B5E" : "#7CB8A8", color: p.accent ? "#fff" : "#193B5E", padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 24 }}>Commencer</Link>
-                <div style={{ borderTop: p.accent ? "1px solid #EFF2F7" : "1px solid rgba(255,255,255,0.1)", paddingTop: 18 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: p.accent ? "#9AA2B4" : "rgba(255,255,255,0.5)", letterSpacing: "0.08em", margin: "0 0 14px" }}>INCLUS</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-                    {p.features.map((f, j) => (
-                      <div key={j} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        <span style={{ fontSize: 13, color: p.accent ? "#3A4256" : "rgba(255,255,255,0.85)" }}>{f}</span>
-                      </div>
-                    ))}
-                  </div>
+          <div className="ps-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+            {/* Abonnement */}
+            <div style={{ background: "#fff", borderRadius: 20, padding: "36px 32px", position: "relative", boxShadow: "0 26px 60px rgba(0,0,0,0.3)" }}>
+              <div style={{ position: "absolute", top: 24, right: 24, background: "#193B5E", color: "#fff", fontSize: 11, fontWeight: 700, padding: "5px 12px", borderRadius: 20 }}>Accès plateforme</div>
+              <p style={{ fontSize: 14, fontWeight: 600, color: "#7CB8A8", margin: "0 0 12px" }}>Abonnement</p>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 6 }}>
+                <span style={{ fontSize: 46, fontWeight: 700, color: "#193B5E", letterSpacing: "-0.02em" }}>500 €</span>
+                <span style={{ fontSize: 14, color: "#9AA2B4" }}>/mois</span>
+              </div>
+              <p style={{ fontSize: 13, color: "#9AA2B4", margin: "0 0 24px" }}>Tout ce qu'il faut pour gérer votre portefeuille.</p>
+              <Link href="/register" style={{ display: "block", textAlign: "center", background: "#193B5E", color: "#fff", padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 24 }}>Commencer</Link>
+              <div style={{ borderTop: "1px solid #EFF2F7", paddingTop: 18 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#9AA2B4", letterSpacing: "0.08em", margin: "0 0 14px" }}>INCLUS</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+                  {["Accès complet à la plateforme", "Biens illimités en mensualités", "Réception de leads qualifiés", "Calcul de mensualité agréé FSMA", "Support par email"].map((f, j) => (
+                    <div key={j} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span style={{ fontSize: 13, color: "#3A4256" }}>{f}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Widget */}
+            <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 20, padding: "36px 32px" }}>
+              <p style={{ fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.7)", margin: "0 0 12px" }}>Widget par bien</p>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 6 }}>
+                <span style={{ fontSize: 46, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em" }}>90 €</span>
+                <span style={{ fontSize: 14, color: "rgba(255,255,255,0.5)" }}>/ bien</span>
+              </div>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", margin: "0 0 24px" }}>Paiement unique, à la génération du widget.</p>
+              <Link href="/register" style={{ display: "block", textAlign: "center", background: "#7CB8A8", color: "#193B5E", padding: "13px", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 24 }}>Commencer</Link>
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 18 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.5)", letterSpacing: "0.08em", margin: "0 0 14px" }}>INCLUS</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+                  {["Badge mensualité personnalisable", "Code d'intégration iframe & HTML", "Téléchargement SVG et PNG", "Valable à vie pour le bien"].map((f, j) => (
+                    <div key={j} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span style={{ fontSize: 13, color: "rgba(255,255,255,0.85)" }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -354,6 +363,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <PublicFooter />
 
     </div>
   );

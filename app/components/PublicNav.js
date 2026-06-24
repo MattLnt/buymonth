@@ -17,11 +17,12 @@ export default function PublicNav() {
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
+  // Liens vers des pages réelles + ancres de la home
   const navLinks = [
-    { href: "#solution", label: "Solution", desc: "Notre approche commerciale" },
-    { href: "#process", label: "Process", desc: "En 7 étapes clé en main" },
-    { href: "#tarifs", label: "Tarifs", desc: "Simple et transparent" },
-    { href: "#contact", label: "Contact", desc: "Notre équipe vous répond" },
+    { href: "/biens", label: "Les biens", desc: "Découvrir les biens disponibles", page: true },
+    { href: "/#process", label: "Process", desc: "En 7 étapes clé en main" },
+    { href: "/#tarifs", label: "Tarifs", desc: "Simple et transparent" },
+    { href: "/#contact", label: "Contact", desc: "Notre équipe vous répond" },
   ];
 
   return (
@@ -52,9 +53,10 @@ export default function PublicNav() {
           {navLinks.map(l => (
             <Link key={l.href} href={l.href} style={{ color: "rgba(255,255,255,0.75)", fontSize: 14, textDecoration: "none", fontWeight: 500 }}>{l.label}</Link>
           ))}
-          <Link href="#contact"
+          <Link href="/login" style={{ color: "#fff", fontSize: 14, textDecoration: "none", fontWeight: 600 }}>Connexion</Link>
+          <Link href="/register"
             style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#7CB8A8", color: "#193B5E", padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
-            Commencer →
+            S'inscrire →
           </Link>
         </div>
 
@@ -80,13 +82,13 @@ export default function PublicNav() {
         }}>
           <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(124,184,168,0.1) 0%, transparent 70%)", pointerEvents: "none" }} />
 
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "88px 28px 32px", position: "relative", zIndex: 1 }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "88px 28px 32px", position: "relative", zIndex: 1, overflowY: "auto" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(124,184,168,0.1)", border: "1px solid rgba(124,184,168,0.2)", borderRadius: 20, padding: "5px 12px", marginBottom: 36, alignSelf: "flex-start", animation: "itemIn 0.4s ease 0.05s both" }}>
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#7CB8A8" }} />
               <span style={{ fontSize: 10, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.08em" }}>INTERMÉDIAIRE EN CRÉDIT AGRÉÉ FSMA</span>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 40 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 28 }}>
               {navLinks.map((l, i) => (
                 <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)}
                   style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 0", borderBottom: "1px solid rgba(255,255,255,0.06)", textDecoration: "none", animation: `itemIn 0.4s ease ${0.1 + i * 0.07}s both` }}>
@@ -101,14 +103,20 @@ export default function PublicNav() {
               ))}
             </div>
 
-            <Link href="#contact" onClick={() => setMenuOpen(false)}
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "16px", background: "#7CB8A8", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#193B5E", textDecoration: "none", animation: "itemIn 0.4s ease 0.38s both" }}>
-              Commencer maintenant →
-            </Link>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <Link href="/login" onClick={() => setMenuOpen(false)}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "15px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#fff", textDecoration: "none", animation: "itemIn 0.4s ease 0.34s both" }}>
+                Connexion
+              </Link>
+              <Link href="/register" onClick={() => setMenuOpen(false)}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "16px", background: "#7CB8A8", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#193B5E", textDecoration: "none", animation: "itemIn 0.4s ease 0.4s both" }}>
+                S'inscrire →
+              </Link>
+            </div>
           </div>
 
           <div style={{ padding: "20px 28px 40px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", zIndex: 1 }}>
-            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", margin: 0 }}>© 2024 BuyMonth</p>
+            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", margin: 0 }}>© 2026 BuyMonth</p>
             <a href="mailto:info@buymonth.be" style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>info@buymonth.be</a>
           </div>
         </div>

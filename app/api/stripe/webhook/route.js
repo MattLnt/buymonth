@@ -2,9 +2,6 @@ import { NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 
-// Le webhook a besoin du corps brut (raw body) pour vérifier la signature
-export const config = { api: { bodyParser: false } }
-
 export async function POST(req) {
   if (!stripe) return NextResponse.json({ error: 'Stripe non configuré.' }, { status: 500 })
 
@@ -22,18 +19,19 @@ export async function POST(req) {
 
   try {
     switch (event.type) {
-      // Abonnement créé / mis à jour : on synchronise statut + date de fin
+      // Abonnement créé / mis à jour
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const sub = event.data.object
         const client = await prisma.client.findFirst({ where: { stripeCustomerId: sub.customer } })
         if (client) {
+          const periodEnd = sub.current_period_end || sub.items?.data?.[0]?.current_period_end || null
           await prisma.client.update({
             where: { id: client.id },
             data: {
               stripeSubId: sub.id,
-              subStatus: sub.status, // active, trialing, past_due, canceled...
-              subEndsAt: sub.current_period_end ? new Date(sub.current_period_end * 1000) : null,
+              subStatus: sub.status,
+              subEndsAt: periodEnd ? new Date(periodEnd * 1000) : null,
               trialEndsAt: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
               plan: (sub.status === 'active' || sub.status === 'trialing') ? 'PREMIUM' : 'CLASSIC',
             },
@@ -42,7 +40,7 @@ export async function POST(req) {
         break
       }
 
-      // Abonnement supprimé / annulé définitivement
+      // Abonnement annulé
       case 'customer.subscription.deleted': {
         const sub = event.data.object
         const client = await prisma.client.findFirst({ where: { stripeCustomerId: sub.customer } })
@@ -55,20 +53,23 @@ export async function POST(req) {
         break
       }
 
-      // Paiement d'un widget (mode payment one-time)
-      case 'checkout.session.completed': {
-        const cs = event.data.object
-        if (cs.mode === 'payment' && cs.metadata?.type === 'widget') {
-          const clientId = cs.metadata.clientId
-          if (clientId) {
+      // Paiement widget réussi (PaymentIntent direct, one-time 90€)
+      case 'payment_intent.succeeded': {
+        const pi = event.data.object
+        if (pi.metadata?.type === 'widget' && pi.metadata?.clientId && pi.metadata?.bienId) {
+          // Évite les doublons si l'event est reçu plusieurs fois
+          const existant = await prisma.widgetPayment.findFirst({
+            where: { stripeSessionId: pi.id },
+          })
+          if (!existant) {
             await prisma.widgetPayment.create({
               data: {
-                clientId,
-                bienId: cs.metadata.bienId || null,
-                montant: cs.amount_total ? Math.round(cs.amount_total / 100) : 90,
-                devise: cs.currency || 'eur',
+                clientId: pi.metadata.clientId,
+                bienId: pi.metadata.bienId,
+                montant: pi.amount ? Math.round(pi.amount / 100) : 90,
+                devise: pi.currency || 'eur',
                 statut: 'paid',
-                stripeSessionId: cs.id,
+                stripeSessionId: pi.id,
               },
             })
           }

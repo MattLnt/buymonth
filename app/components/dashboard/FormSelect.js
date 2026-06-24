@@ -16,10 +16,20 @@ export function FormSelect({ label, value, onChange, options = [], placeholder =
 
   const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
 
-  // Normalise les options en {value, label}
   const norm = options.map((o) => (typeof o === 'string' ? { value: o, label: o } : o))
   const selected = norm.find((o) => o.value === value)
   const displayLabel = selected ? selected.label : ''
+
+  // Rendu d'une pastille
+  const renderBadge = (badge) => {
+    if (!badge) return null
+    return (
+      <span style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 20, fontSize: 10.5, fontWeight: 700, color: badge.color || '#249E7C', background: badge.bg || 'rgba(36,158,124,0.12)' }}>
+        {badge.dot && <span style={{ width: 5, height: 5, borderRadius: '50%', background: badge.color || '#249E7C' }} />}
+        {badge.label}
+      </span>
+    )
+  }
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -37,7 +47,10 @@ export function FormSelect({ label, value, onChange, options = [], placeholder =
           fontWeight: displayLabel ? 600 : 400, textAlign: 'left',
         }}
       >
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayLabel || placeholder}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', flex: 1 }}>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayLabel || placeholder}</span>
+          {selected && renderBadge(selected.badge)}
+        </span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A92A6" strokeWidth="2" style={{ flexShrink: 0, transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none' }}>
           <polyline points="6 9 12 15 18 9" />
         </svg>
@@ -68,7 +81,10 @@ export function FormSelect({ label, value, onChange, options = [], placeholder =
                 onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = '#F5F8FB' }}
                 onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent' }}
               >
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', flex: 1 }}>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
+                  {renderBadge(opt.badge)}
+                </span>
                 {active && <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="3" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12" /></svg>}
               </button>
             )

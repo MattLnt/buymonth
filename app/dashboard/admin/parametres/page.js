@@ -15,6 +15,8 @@ export default async function AdminParametresPage() {
           apportPct: settings.apportPct,
           tauxAnnuel: settings.tauxAnnuel,
           dureeMois: settings.dureeMois,
+          essaiActif: settings.essaiActif,
+          essaiJours: settings.essaiJours,
           leadEmails: settings.leadEmails || [],
         }}
       />

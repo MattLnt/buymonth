@@ -10,16 +10,25 @@ function Suffix({ children, suffix }) {
   return <div style={{ position: 'relative' }}>{children}<span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: '#9AA2B4', pointerEvents: 'none' }}>{suffix}</span></div>
 }
 
+function Toggle({ on, onChange }) {
+  return (
+    <button type="button" onClick={() => onChange(!on)} style={{ width: 46, height: 26, borderRadius: 20, border: 'none', cursor: 'pointer', background: on ? '#7CB8A8' : '#D8DFE9', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+      <span style={{ position: 'absolute', top: 3, left: on ? 23 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+    </button>
+  )
+}
+
 export function ParametresForm({ initial }) {
   const [apportPct, setApportPct] = useState(Math.round((initial.apportPct ?? 0.10) * 100))
   const [tauxAnnuel, setTauxAnnuel] = useState(((initial.tauxAnnuel ?? 0.0345) * 100).toFixed(2))
   const [dureeAns, setDureeAns] = useState(Math.round((initial.dureeMois ?? 300) / 12))
+  const [essaiActif, setEssaiActif] = useState(!!initial.essaiActif)
+  const [essaiJours, setEssaiJours] = useState(initial.essaiJours ?? 14)
   const [emails, setEmails] = useState(initial.leadEmails || [])
   const [newEmail, setNewEmail] = useState('')
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
 
-  // recalcul
   const [recalcOpen, setRecalcOpen] = useState(false)
   const [recalcLoading, setRecalcLoading] = useState(false)
   const [recalcMsg, setRecalcMsg] = useState('')
@@ -46,6 +55,8 @@ export function ParametresForm({ initial }) {
           apportPct: Number(apportPct) / 100,
           tauxAnnuel: Number(tauxAnnuel) / 100,
           dureeMois: Number(dureeAns) * 12,
+          essaiActif,
+          essaiJours: Number(essaiJours),
           leadEmails: emails,
         }),
       })
@@ -94,6 +105,26 @@ export function ParametresForm({ initial }) {
             <Suffix suffix="ans"><input type="number" value={dureeAns} onChange={(e) => setDureeAns(e.target.value)} style={{ ...inputStyle, paddingRight: 42 }} /></Suffix>
           </div>
         </div>
+      </div>
+
+      {/* Essai gratuit */}
+      <div style={card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+          <div>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 4px' }}>Essai gratuit</h2>
+            <p style={{ fontSize: 13.5, color: '#8A92A6', margin: 0, lineHeight: 1.55 }}>
+              Si activé, les nouveaux promoteurs bénéficient d'une période d'essai avant le premier prélèvement.
+            </p>
+          </div>
+          <Toggle on={essaiActif} onChange={setEssaiActif} />
+        </div>
+
+        {essaiActif && (
+          <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid #F2F5FA', maxWidth: 220 }}>
+            <label style={labelStyle}>Durée de l'essai</label>
+            <Suffix suffix="jours"><input type="number" value={essaiJours} onChange={(e) => setEssaiJours(e.target.value)} style={{ ...inputStyle, paddingRight: 56 }} /></Suffix>
+          </div>
+        )}
       </div>
 
       {/* Emails de destination des leads */}

@@ -14,6 +14,23 @@ export function Sidebar({ items, societe, email }) {
     href === pathname ||
     (href !== '/dashboard/client' && href !== '/dashboard/admin' && pathname.startsWith(href))
 
+  // Aplatit les sections en liste simple (pour le mobile)
+  const flatItems = items.flatMap((it) => (it.section ? it.items : [it]))
+
+  // Rendu d'un lien (desktop)
+  const renderLink = (item) => {
+    const active = isActive(item.href)
+    return (
+      <Link key={item.href} href={item.href} className="bm-nav-item" title={collapsed ? item.label : ''}
+        style={{ display: 'flex', alignItems: 'center', gap: collapsed ? 0 : 11, justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? '11px 0' : '10px 11px', borderRadius: 9, marginBottom: 3, textDecoration: 'none', background: active ? 'rgba(124,184,168,0.16)' : 'transparent', color: active ? '#fff' : '#9CA8BA', fontWeight: active ? 600 : 500, fontSize: 13.5, transition: 'all 0.15s', borderLeft: active && !collapsed ? '2px solid #7CB8A8' : '2px solid transparent' }}>
+        <span style={{ flexShrink: 0, display: 'flex', color: active ? '#7CB8A8' : '#6B7A90' }}>
+          <Icon name={item.icon} size={18} />
+        </span>
+        {!collapsed && <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
+      </Link>
+    )
+  }
+
   return (
     <div style={{ display: 'contents' }}>
       <style>{`
@@ -53,17 +70,23 @@ export function Sidebar({ items, societe, email }) {
         )}
 
         <nav style={{ flex: 1, padding: collapsed ? '12px 8px' : '14px 12px', overflowY: 'auto' }}>
-          {items.map((item) => {
-            const active = isActive(item.href)
-            return (
-              <Link key={item.href} href={item.href} className="bm-nav-item" title={collapsed ? item.label : ''}
-                style={{ display: 'flex', alignItems: 'center', gap: collapsed ? 0 : 11, justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? '11px 0' : '10px 11px', borderRadius: 9, marginBottom: 3, textDecoration: 'none', background: active ? 'rgba(124,184,168,0.16)' : 'transparent', color: active ? '#fff' : '#9CA8BA', fontWeight: active ? 600 : 500, fontSize: 13.5, transition: 'all 0.15s', borderLeft: active && !collapsed ? '2px solid #7CB8A8' : '2px solid transparent' }}>
-                <span style={{ flexShrink: 0, display: 'flex', color: active ? '#7CB8A8' : '#6B7A90' }}>
-                  <Icon name={item.icon} size={18} />
-                </span>
-                {!collapsed && <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
-              </Link>
-            )
+          {items.map((item, i) => {
+            // Section avec titre + sous-liens
+            if (item.section) {
+              return (
+                <div key={`sec-${i}`} style={{ marginTop: i > 0 ? 14 : 0, marginBottom: 4 }}>
+                  {!collapsed && (
+                    <div style={{ fontSize: 10.5, fontWeight: 700, color: '#5E6E84', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '4px 11px 8px' }}>
+                      {item.section}
+                    </div>
+                  )}
+                  {collapsed && i > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 6px' }} />}
+                  {item.items.map((sub) => renderLink(sub))}
+                </div>
+              )
+            }
+            // Lien simple
+            return renderLink(item)
           })}
         </nav>
 
@@ -76,10 +99,10 @@ export function Sidebar({ items, societe, email }) {
         </div>
       </aside>
 
-      {/* BOTTOM NAV MOBILE */}
+      {/* BOTTOM NAV MOBILE (liste aplatie) */}
       <div className="bm-mobile" style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: '#16324F', borderTop: '1px solid rgba(255,255,255,0.08)', zIndex: 50, paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="bm-bottomnav" style={{ display: 'flex', overflowX: 'auto', height: 64, alignItems: 'center', padding: '0 4px' }}>
-          {items.map((item) => {
+          {flatItems.map((item) => {
             const active = isActive(item.href)
             return (
               <Link key={item.href} href={item.href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, textDecoration: 'none', padding: '6px 12px', flexShrink: 0, minWidth: 60, position: 'relative' }}>

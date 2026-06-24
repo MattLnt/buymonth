@@ -1,9 +1,15 @@
 export const CLIENT_NAV = [
   { href: "/dashboard/client", label: "Tableau de bord", short: "Accueil", icon: "home" },
   { href: "/dashboard/client/biens", label: "Mes biens", short: "Biens", icon: "building" },
-  { href: "/dashboard/client/widgets", label: "Mes widgets", short: "Widgets", icon: "code" },
+  {
+    section: "Widgets",
+    items: [
+      { href: "/dashboard/client/widgets", label: "Générer un widget", short: "Widgets", icon: "code" },
+      { href: "/dashboard/client/widgets/paiements", label: "Historique des paiements", short: "Paiements", icon: "card" },
+    ],
+  },
   { href: "/dashboard/client/leads", label: "Mes leads", short: "Leads", icon: "users" },
-  { href: "/dashboard/client/abonnement", label: "Abonnement", short: "Abo", icon: "card" },
+  { href: "/dashboard/client/abonnement", label: "Abonnement", short: "Abo", icon: "inbox" },
   { href: "/dashboard/client/profil", label: "Profil", short: "Profil", icon: "settings" },
 ];
 

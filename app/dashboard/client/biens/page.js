@@ -5,11 +5,13 @@ import { BienCard } from '@/app/components/dashboard/BienCard'
 import { Icon } from '@/app/components/dashboard/Icon'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function BiensPage() {
-  const { client } = await getCurrentClient()
+  const client = await getCurrentClient()
 
   const biens = await prisma.bien.findMany({
-    where: { clientId: client?.id },
+    where: { clientId: client.id },
     orderBy: { createdAt: 'desc' },
   })
 
