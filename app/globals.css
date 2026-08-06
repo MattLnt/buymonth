@@ -1,9 +1,51 @@
 @import "tailwindcss";
 
 :root {
-  --navy: #1A1E49;
-  --green: #249E7C;
-  --navy-light: #2a3070;
-  --green-light: #2db891;
-  --green-bg: #f0faf6;
+  /* ---- Charte BuyMonth V9 ---- */
+  --navy: #183b5e;        /* bleu principal : titres, éléments forts */
+  --navy-d: #102a44;      /* navy foncé : hover boutons */
+  --navy-light: #22507e;  /* navy clair */
+  --green: #88b49e;       /* vert BuyMonth : accents, badges */
+  --green-d: #749d89;     /* vert foncé : accents de texte, eyebrows */
+  --green-light: #d1e2da; /* vert clair : fonds doux, cartes */
+  --green-bg: #f3f7f5;    /* fond teinté très doux */
+  --tint: #f3f7f5;        /* alias fond doux (maquette) */
+  --tint2: #d1e2da;       /* alias vert clair (maquette) */
+  --proplus: #4e7dd4;     /* bleu Pro+ : réservé aux éléments Pro+ */
+
+  --ink: #1a2a38;         /* texte courant */
+  --muted: #5c6b78;       /* texte secondaire */
+  --bg: #ffffff;          /* fond */
+  --line: #e3eaee;        /* bordures */
+  --shadow: 0 10px 30px rgba(16, 42, 68, .08);
+
+  /* ---- Polices (injectées par layout.js) ---- */
+  --font-titre: var(--font-fraunces), Georgia, 'Times New Roman', serif;
+  --font-texte: var(--font-montserrat), system-ui, -apple-system, sans-serif;
 }
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-texte);
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-titre);
+  color: var(--navy);
+  line-height: 1.15;
+  letter-spacing: -.01em;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* Classe utilitaire si besoin de forcer la police titre sur un élément */
+.font-titre { font-family: var(--font-titre); }
+.font-texte { font-family: var(--font-texte); }
