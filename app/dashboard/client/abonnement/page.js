@@ -1,6 +1,8 @@
 import { getCurrentClient } from '@/lib/session'
+import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/app/components/dashboard/Ui'
 import { AbonnementClient } from './AbonnementClient'
+import { decompteFacturation, MISE_EN_SERVICE } from '@/lib/facturation'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,15 +10,28 @@ export default async function AbonnementPage({ searchParams }) {
   const client = await getCurrentClient()
   const sp = await searchParams
 
+  // Décompte « au bien actif » : nb de biens ACTIF × tarif de la formule
+  const biens = await prisma.bien.findMany({
+    where: { clientId: client.id },
+    select: { statut: true },
+  })
+  const facturation = decompteFacturation(biens, client.formule)
+
   // On lit tout depuis la base (rempli à la création + par le webhook) → instantané
   const details = client.stripeSubId ? {
     currentPeriodEnd: client.subEndsAt ? new Date(client.subEndsAt).getTime() : null,
     cancelAtPeriodEnd: false, // info détaillée disponible dans le portail Stripe
     cancelAt: null,
     trialEnd: client.trialEndsAt ? new Date(client.trialEndsAt).getTime() : null,
-    montant: 500,
+    montant: facturation.montantMensuel, // nb biens actifs × tarif formule
     devise: 'eur',
   } : null
+
+  const miseEnService = {
+    payee: client.miseEnServicePayee,
+    montant: MISE_EN_SERVICE,
+    date: client.miseEnServiceAt ? new Date(client.miseEnServiceAt).getTime() : null,
+  }
 
   return (
     <>
@@ -34,7 +49,13 @@ export default async function AbonnementPage({ searchParams }) {
         </div>
       )}
 
-      <AbonnementClient subStatus={client.subStatus} details={details} createdAt={client.createdAt} />
+      <AbonnementClient
+        subStatus={client.subStatus}
+        details={details}
+        createdAt={client.createdAt}
+        facturation={facturation}
+        miseEnService={miseEnService}
+      />
     </>
   )
 }

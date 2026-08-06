@@ -15,13 +15,20 @@ function formatDate(ms) {
   return new Date(ms).toLocaleDateString('fr-BE', { day: '2-digit', month: 'long', year: 'numeric' })
 }
 
-export function AbonnementClient({ subStatus, details, createdAt }) {
+function euro(n) {
+  return (n || 0).toLocaleString('fr-BE') + ' €'
+}
+
+export function AbonnementClient({ subStatus, details, createdAt, facturation, miseEnService }) {
   const [loading, setLoading] = useState('')
   const [error, setError] = useState('')
 
   const statut = STATUT_LABEL[subStatus] || STATUT_LABEL.none
   const estActif = subStatus === 'active' || subStatus === 'trialing'
   const resiliationProgrammee = details?.cancelAtPeriodEnd
+
+  const f = facturation || { formuleLabel: 'BuyMonth Pro', actifs: 0, total: 0, unitaire: 39, montantMensuel: 0, surMesure: false }
+  const mes = miseEnService || { payee: false, montant: 1490, date: null }
 
   function souscrire() {
     window.location.href = '/dashboard/client/abonnement/checkout'
@@ -51,33 +58,53 @@ export function AbonnementClient({ subStatus, details, createdAt }) {
         </div>
       )}
 
+      {/* Bandeau mise en service à régler */}
+      {!mes.payee && (
+        <div style={{ background: 'rgba(78,125,212,0.08)', border: '1px solid rgba(78,125,212,0.25)', borderRadius: 12, padding: '14px 18px', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4E7DD4" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+          <span style={{ fontSize: 13.5, fontWeight: 600, color: '#3B62A8' }}>
+            Frais de mise en service ({euro(mes.montant)} HTVA, une seule fois) réglés à la première souscription.
+          </span>
+        </div>
+      )}
+
       <div className="abo-grid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 22, alignItems: 'start' }}>
         <style>{`@media (max-width: 880px){ .abo-grid { grid-template-columns: 1fr !important; } }`}</style>
 
-        {/* Colonne gauche : carte offre premium */}
+        {/* Colonne gauche : carte offre */}
         <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 18, padding: 32, position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: -50, right: -40, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.2) 0%, transparent 65%)' }} />
           <div style={{ position: 'relative' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-              <div style={{ display: 'inline-block', background: 'rgba(124,184,168,0.18)', color: '#7CB8A8', fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 20, letterSpacing: '0.05em' }}>ABONNEMENT PLATEFORME</div>
+              <div style={{ display: 'inline-block', background: 'rgba(124,184,168,0.18)', color: '#7CB8A8', fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 20, letterSpacing: '0.05em' }}>{f.formuleLabel.toUpperCase()}</div>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, color: statut.color, background: '#fff' }}>
                 <span style={{ width: 7, height: 7, borderRadius: '50%', background: statut.dot }} />
                 {statut.label}
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 22 }}>
-              <span style={{ fontSize: 46, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{details?.montant ? details.montant.toLocaleString('fr-BE') : '500'} €</span>
-              <span style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)' }}>/ mois</span>
+            {/* montant mensuel = nb actifs × unitaire */}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
+              <span style={{ fontSize: 46, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{euro(f.montantMensuel)}</span>
+              <span style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)' }}>/ mois HTVA</span>
+            </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 22 }}>
+              {f.actifs} bien{f.actifs > 1 ? 's' : ''} actif{f.actifs > 1 ? 's' : ''} × {euro(f.unitaire)} / mois
             </div>
 
+            {f.surMesure && (
+              <div style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, padding: '10px 14px', marginBottom: 20, fontSize: 12.5, color: 'rgba(255,255,255,0.8)' }}>
+                Au-delà de 125 biens actifs, une offre sur mesure s'applique — contactez-nous.
+              </div>
+            )}
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 28 }}>
-              {['Accès complet à la plateforme', 'Biens illimités affichés en mensualités', 'Génération de widgets pour votre site', 'Réception de leads qualifiés'].map((f) => (
-                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {['Vous ne payez que vos biens actifs', 'Widgets, badges & QR codes illimités inclus', 'Réception de leads qualifiés', 'Aucune commission sur vos ventes'].map((ft) => (
+                <div key={ft} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(124,184,168,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
                   </span>
-                  <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.82)' }}>{f}</span>
+                  <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.82)' }}>{ft}</span>
                 </div>
               ))}
             </div>
@@ -103,6 +130,11 @@ export function AbonnementClient({ subStatus, details, createdAt }) {
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {[
                 { label: 'Statut', node: <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 700, color: statut.color }}><span style={{ width: 7, height: 7, borderRadius: '50%', background: statut.dot }} />{statut.label}</span> },
+                { label: 'Formule', value: f.formuleLabel },
+                { label: 'Biens actifs facturés', value: `${f.actifs} / ${f.total}` },
+                { label: 'Tarif par bien', value: `${euro(f.unitaire)} / mois` },
+                { label: 'Total mensuel', value: `${euro(f.montantMensuel)} HTVA`, strong: true },
+                { label: 'Mise en service', value: mes.payee ? `Réglée${mes.date ? ' le ' + formatDate(mes.date) : ''}` : `${euro(mes.montant)} (à régler)`, color: mes.payee ? '#249E7C' : '#3B62A8' },
                 subStatus === 'trialing' && details?.trialEnd && { label: 'Fin de l\'essai', value: formatDate(details.trialEnd) },
                 estActif && !resiliationProgrammee && { label: 'Prochain prélèvement', value: formatDate(details?.currentPeriodEnd) },
                 resiliationProgrammee && { label: 'Fin d\'accès', value: formatDate(details?.cancelAt || details?.currentPeriodEnd), color: '#E5484D' },
@@ -110,7 +142,7 @@ export function AbonnementClient({ subStatus, details, createdAt }) {
               ].filter(Boolean).map((row, i, arr) => (
                 <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid #F2F5FA' : 'none' }}>
                   <span style={{ fontSize: 13, color: '#8A92A6' }}>{row.label}</span>
-                  {row.node || <span style={{ fontSize: 13.5, fontWeight: 600, color: row.color || '#193B5E' }}>{row.value}</span>}
+                  {row.node || <span style={{ fontSize: row.strong ? 15 : 13.5, fontWeight: row.strong ? 700 : 600, color: row.color || '#193B5E' }}>{row.value}</span>}
                 </div>
               ))}
             </div>
@@ -140,7 +172,7 @@ export function AbonnementClient({ subStatus, details, createdAt }) {
       </div>
 
       <p style={{ fontSize: 12, color: '#A9B0BE', margin: '22px 0 0', lineHeight: 1.5, textAlign: 'center' }}>
-        Paiement sécurisé via Stripe. La modification du moyen de paiement et la résiliation se font dans l'espace de gestion Stripe.
+        Vous ne payez que vos biens actifs — un bien vendu ou hors-ligne sort automatiquement du décompte. Paiement sécurisé via Stripe.
       </p>
     </div>
   )

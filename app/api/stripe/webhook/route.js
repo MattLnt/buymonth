@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { stripe } from '@/lib/stripe'
+import { stripe, PRICE_MISE_EN_SERVICE } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(req) {
@@ -33,7 +33,6 @@ export async function POST(req) {
               subStatus: sub.status,
               subEndsAt: periodEnd ? new Date(periodEnd * 1000) : null,
               trialEndsAt: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-              plan: (sub.status === 'active' || sub.status === 'trialing') ? 'PREMIUM' : 'CLASSIC',
             },
           })
         }
@@ -47,30 +46,27 @@ export async function POST(req) {
         if (client) {
           await prisma.client.update({
             where: { id: client.id },
-            data: { subStatus: 'canceled', plan: 'CLASSIC' },
+            data: { subStatus: 'canceled' },
           })
         }
         break
       }
 
-      // Paiement widget réussi (PaymentIntent direct, one-time 90€)
-      case 'payment_intent.succeeded': {
-        const pi = event.data.object
-        if (pi.metadata?.type === 'widget' && pi.metadata?.clientId && pi.metadata?.bienId) {
-          // Évite les doublons si l'event est reçu plusieurs fois
-          const existant = await prisma.widgetPayment.findFirst({
-            where: { stripeSessionId: pi.id },
-          })
-          if (!existant) {
-            await prisma.widgetPayment.create({
-              data: {
-                clientId: pi.metadata.clientId,
-                bienId: pi.metadata.bienId,
-                montant: pi.amount ? Math.round(pi.amount / 100) : 90,
-                devise: pi.currency || 'eur',
-                statut: 'paid',
-                stripeSessionId: pi.id,
-              },
+      // Facture payée → réconciliation de la mise en service (source de vérité)
+      case 'invoice.paid': {
+        const invoice = event.data.object
+        const client = await prisma.client.findFirst({ where: { stripeCustomerId: invoice.customer } })
+        if (client && PRICE_MISE_EN_SERVICE && !client.miseEnServicePayee) {
+          const lignes = invoice.lines?.data || []
+          const contientMES = lignes.some(
+            (l) =>
+              l.price?.id === PRICE_MISE_EN_SERVICE ||
+              l.pricing?.price_details?.price === PRICE_MISE_EN_SERVICE
+          )
+          if (contientMES) {
+            await prisma.client.update({
+              where: { id: client.id },
+              data: { miseEnServicePayee: true, miseEnServiceAt: new Date() },
             })
           }
         }

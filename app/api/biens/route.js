@@ -3,6 +3,10 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { calculMensualiteServeur } from '@/lib/settings'
+import { syncQuantiteAbonnement } from '@/lib/facturationSync'
+
+const STATUTS = ['ACTIF', 'OPTION', 'HORS_LIGNE', 'VENDU']
+const normStatut = (s) => (STATUTS.includes(s) ? s : 'ACTIF')
 
 async function getClient() {
   const session = await getServerSession(authOptions)
@@ -38,9 +42,13 @@ export async function POST(req) {
         adresse: b.adresse || null,
         urlClient: b.urlClient || null,
         images: Array.isArray(b.images) ? b.images : [],
+        statut: normStatut(b.statut),
         published: b.published !== false,
       },
     })
+
+    // Nouveau bien actif → répercute la quantité sur l'abonnement
+    await syncQuantiteAbonnement(client.id)
 
     return NextResponse.json({ ok: true, bien })
   } catch (e) {
@@ -67,6 +75,7 @@ export async function PUT(req) {
     }
 
     const mensualite = await calculMensualiteServeur(prixTotal)
+    const nouveauStatut = b.statut !== undefined ? normStatut(b.statut) : existing.statut
 
     const bien = await prisma.bien.update({
       where: { id: b.id },
@@ -83,9 +92,15 @@ export async function PUT(req) {
         adresse: b.adresse || null,
         urlClient: b.urlClient || null,
         images: Array.isArray(b.images) ? b.images : existing.images,
+        statut: nouveauStatut,
         published: b.published !== false,
       },
     })
+
+    // Si le statut a changé, la quantité facturée peut changer → synchro
+    if (nouveauStatut !== existing.statut) {
+      await syncQuantiteAbonnement(client.id)
+    }
 
     return NextResponse.json({ ok: true, bien })
   } catch (e) {
@@ -108,6 +123,12 @@ export async function DELETE(req) {
     }
 
     await prisma.bien.delete({ where: { id } })
+
+    // Un bien actif supprimé réduit la quantité facturée
+    if (existing.statut === 'ACTIF') {
+      await syncQuantiteAbonnement(client.id)
+    }
+
     return NextResponse.json({ ok: true })
   } catch (e) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })

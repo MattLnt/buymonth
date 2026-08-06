@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { FormSection } from '@/app/components/dashboard/FormSection'
 import { FormSelect } from '@/app/components/dashboard/FormSelect'
 import { Badge } from './Badge'
-import { WidgetPaymentModal } from './WidgetPaymentModal'
+import { MENSUALITE_CONFIG } from '@/lib/mensualiteConfig'
 
 const BASE_URL = typeof window !== 'undefined' ? window.location.origin : ''
+
+const pct = (t) => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(t * 100) + ' %'
 
 const ic = {
   bien: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>,
@@ -19,7 +21,7 @@ function buildSVG({ mensualite, premium, theme, primaire, accent }) {
   const bg = dark ? '#16324F' : '#FFFFFF'
   const textMain = dark ? '#FFFFFF' : '#16324F'
   const textMuted = dark ? '#9FB0C4' : '#8A92A6'
-  const w = 320, h = 280
+  const w = 320, h = 288
   const header = premium
     ? `<rect x="137" y="20" width="46" height="46" rx="10" fill="${accent}"/>`
     : `<text x="160" y="50" font-family="system-ui,Arial,sans-serif" font-size="22" font-weight="700" text-anchor="middle"><tspan fill="#FFFFFF">Buy</tspan><tspan fill="${accent}">Month</tspan></text>`
@@ -29,16 +31,17 @@ function buildSVG({ mensualite, premium, theme, primaire, accent }) {
   <path d="M0 16 Q0 0 16 0 H304 Q320 0 320 16 V84 H0 Z" fill="${primaire}"/>
   ${header}
   <text x="160" y="128" font-family="system-ui,Arial,sans-serif" font-size="14" font-weight="600" fill="${textMain}" text-anchor="middle">Propriétaire de ce bien dès</text>
-  <text x="160" y="178" font-family="system-ui,Arial,sans-serif" font-size="40" font-weight="700" fill="${accent}" text-anchor="middle">${mensualite ? mensualite.toLocaleString('fr-BE') : '—'} €<tspan font-size="19">/mois</tspan></text>
+  <text x="160" y="178" font-family="system-ui,Arial,sans-serif" font-size="40" font-weight="700" fill="${accent}" text-anchor="middle">${mensualite ? mensualite.toLocaleString('fr-BE') : '—'} €<tspan font-size="19">/mois*</tspan></text>
   <line x1="24" y1="200" x2="296" y2="200" stroke="#EEF2F7"/>
-  <text x="160" y="222" font-family="system-ui,Arial,sans-serif" font-size="9" fill="${textMuted}" text-anchor="middle">Simulation indicative (apport 10 %, 25 ans, TAEG 3,45 % hors assurances).</text>
-  <text x="160" y="236" font-family="system-ui,Arial,sans-serif" font-size="9" fill="${textMuted}" text-anchor="middle">Sous réserve d'acceptation du crédit par l'organisme prêteur.</text>
-  <text x="160" y="256" font-family="system-ui,Arial,sans-serif" font-size="9" font-weight="600" fill="${textMuted}" text-anchor="middle">JG Management — FSMA 1021.366.349</text>
+  <text x="160" y="220" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">* Emprunter de l'argent coûte aussi de l'argent. Estimation indicative hors frais</text>
+  <text x="160" y="233" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">(apport ${Math.round(MENSUALITE_CONFIG.apportPct * 100)} %, ${Math.round(MENSUALITE_CONFIG.dureeMois / 12)} ans, taux ${pct(MENSUALITE_CONFIG.tauxAnnuel)}, TAEG ${pct(MENSUALITE_CONFIG.taegAnnuel)}).</text>
+  <text x="160" y="246" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">Sous réserve d'acceptation du crédit.</text>
+  <text x="160" y="264" font-family="system-ui,Arial,sans-serif" font-size="9" font-weight="600" fill="${textMuted}" text-anchor="middle">Crédit : BuyMonth Finance — FSMA 1021.366.349</text>
 </svg>`
 }
 
 export function WidgetGenerator({ biens, plan }) {
-  const isPremiumPlan = plan === 'PREMIUM'
+  const isPremiumPlan = plan === 'PRO_PLUS' || plan === 'PREMIUM'
   const [bienId, setBienId] = useState(biens[0]?.id || '')
   const [theme, setTheme] = useState('light')
   const [premium, setPremium] = useState(false)
@@ -50,27 +53,8 @@ export function WidgetGenerator({ biens, plan }) {
   const [copied, setCopied] = useState('')
   const logoInput = useRef(null)
 
-  const [biensPayes, setBiensPayes] = useState([])
-  const [credits, setCredits] = useState(0)
-  const [loaded, setLoaded] = useState(false)
-  const [showPayment, setShowPayment] = useState(false)
-  const [genLoading, setGenLoading] = useState(false)
-  const [genError, setGenError] = useState('')
-
   const bien = biens.find((b) => b.id === bienId)
   const mensualite = bien?.mensualite || null
-  const paye = biensPayes.includes(bienId)
-
-  // Charge biens payés + crédits gratuits au montage
-  useEffect(() => {
-    Promise.all([
-      fetch('/api/widget/payes').then((r) => r.json()).catch(() => ({})),
-      fetch('/api/widget/credits').then((r) => r.json()).catch(() => ({})),
-    ]).then(([payes, cr]) => {
-      if (Array.isArray(payes.bienIds)) setBiensPayes(payes.bienIds)
-      if (typeof cr.creditsRestants === 'number') setCredits(cr.creditsRestants)
-    }).finally(() => setLoaded(true))
-  }, [])
 
   const effPrimaire = premium && couleurMode === 'perso' ? primaire : '#16324F'
   const effAccent = premium && couleurMode === 'perso' ? accent : '#7CB8A8'
@@ -86,7 +70,7 @@ export function WidgetGenerator({ biens, plan }) {
   if (premium && logoUrl) params.set('logo', encodeURIComponent(logoUrl))
   const embedUrl = `${BASE_URL}/embed/badge?${params.toString()}`
 
-  const iframeCode = `<iframe src="${embedUrl}" title="Mensualité BuyMonth" loading="lazy" referrerpolicy="no-referrer" style="border:0;width:344px;height:304px;"></iframe>`
+  const iframeCode = `<iframe src="${embedUrl}" title="Mensualité BuyMonth" loading="lazy" referrerpolicy="no-referrer" style="border:0;width:344px;height:312px;"></iframe>`
   const htmlCode = `<a href="${bien?.urlClient || '#'}" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none">\n  <img src="${BASE_URL}/api/widget/image?${params.toString()}" alt="Propriétaire dès ${mensualite} €/mois" style="width:320px;height:auto" />\n</a>`
 
   function copy(text, key) {
@@ -112,30 +96,6 @@ export function WidgetGenerator({ biens, plan }) {
     }
   }
 
-  // Génération via crédit gratuit (pas de Stripe)
-  async function genererGratuit() {
-    setGenLoading(true); setGenError('')
-    try {
-      const res = await fetch('/api/widget/payer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bienId }),
-      })
-      const data = await res.json()
-      if (!res.ok) { setGenError(data.error || 'Erreur.'); setGenLoading(false); return }
-      if (data.gratuit || data.dejaPaye) {
-        setBiensPayes((prev) => prev.includes(bienId) ? prev : [...prev, bienId])
-        setCredits((c) => Math.max(0, c - 1))
-      } else if (data.clientSecret) {
-        // plus de crédit → bascule sur la modale payante
-        setShowPayment(true)
-      }
-    } catch {
-      setGenError('Erreur réseau.')
-    }
-    setGenLoading(false)
-  }
-
   function downloadSVG() {
     const svg = buildSVG({ mensualite, premium, theme, primaire: effPrimaire, accent: effAccent })
     const blob = new Blob([svg], { type: 'image/svg+xml' })
@@ -156,7 +116,7 @@ export function WidgetGenerator({ biens, plan }) {
       const scale = 3
       const canvas = document.createElement('canvas')
       canvas.width = 320 * scale
-      canvas.height = 280 * scale
+      canvas.height = 288 * scale
       const ctx = canvas.getContext('2d')
       ctx.scale(scale, scale)
       ctx.drawImage(img, 0, 0)
@@ -189,20 +149,11 @@ export function WidgetGenerator({ biens, plan }) {
   const bienOptions = biens.map((b) => ({
     value: b.id,
     label: `${b.titre} — ${b.mensualite} €/mois`,
-    badge: biensPayes.includes(b.id) ? { label: 'Généré', color: '#249E7C', bg: 'rgba(36,158,124,0.12)', dot: true } : null,
   }))
 
   return (
     <div className="wg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16, alignItems: 'start' }}>
       <style>{`@media (max-width: 1024px){ .wg-grid { grid-template-columns: 1fr !important; } }`}</style>
-
-      {showPayment && bien && (
-        <WidgetPaymentModal
-          bien={bien}
-          onClose={() => setShowPayment(false)}
-          onSuccess={() => { setBiensPayes((prev) => prev.includes(bienId) ? prev : [...prev, bienId]); setShowPayment(false) }}
-        />
-      )}
 
       {/* COLONNE CONFIG */}
       <div style={{ minWidth: 0 }}>
@@ -226,13 +177,13 @@ export function WidgetGenerator({ biens, plan }) {
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="button" onClick={() => setPremium(false)} style={toggleBtn(!premium)}>Classique</button>
             <button type="button" onClick={() => { if (isPremiumPlan) setPremium(true) }} disabled={!isPremiumPlan} style={toggleBtn(premium, !isPremiumPlan)}>
-              Premium{!isPremiumPlan && ' 🔒'}
+              Pro+{!isPremiumPlan && ' 🔒'}
             </button>
           </div>
 
           {!isPremiumPlan && (
             <p style={{ fontSize: 12, color: '#A9B0BE', margin: '14px 0 0', lineHeight: 1.5 }}>
-              La personnalisation (logo, couleurs) est réservée au forfait Premium.
+              La personnalisation (logo, couleurs) est réservée à la formule Pro+.
             </p>
           )}
 
@@ -283,87 +234,35 @@ export function WidgetGenerator({ biens, plan }) {
           )}
         </FormSection>
 
-        {/* Code d'intégration — verrouillé si non payé/généré */}
-        <FormSection icon={ic.code} title="Code d'intégration" subtitle={paye ? 'Copiez le code sur le site du bien' : 'Générez votre widget pour obtenir le code'}>
-          {!loaded ? (
-            <div style={{ padding: '20px 0', textAlign: 'center', color: '#8A92A6', fontSize: 13.5 }}>Vérification...</div>
-          ) : paye ? (
-            <>
-              <label style={labelStyle}>Option A — iframe (recommandée)</label>
-              <div style={{ position: 'relative', marginBottom: 18 }}>
-                <pre style={preBox}>{iframeCode}</pre>
-                <button type="button" onClick={() => copy(iframeCode, 'iframe')} style={copyBtn}>{copied === 'iframe' ? 'Copié ✓' : 'Copier'}</button>
-              </div>
-              <label style={labelStyle}>Option B — image (HTML)</label>
-              <div style={{ position: 'relative' }}>
-                <pre style={preBox}>{htmlCode}</pre>
-                <button type="button" onClick={() => copy(htmlCode, 'html')} style={copyBtn}>{copied === 'html' ? 'Copié ✓' : 'Copier'}</button>
-              </div>
-            </>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '12px 0' }}>
-              <div style={{ display: 'inline-flex', width: 48, height: 48, borderRadius: 14, background: 'rgba(124,184,168,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
-              </div>
-              <p style={{ fontSize: 14, color: '#193B5E', fontWeight: 600, margin: '0 0 4px' }}>Widget non généré pour ce bien</p>
-
-              {credits > 0 ? (
-                <>
-                  <p style={{ fontSize: 13, color: '#8A92A6', margin: '0 0 6px', lineHeight: 1.5 }}>
-                    Vous disposez de widgets gratuits offerts.
-                  </p>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(36,158,124,0.1)', color: '#1B7A5E', fontSize: 12.5, fontWeight: 700, padding: '5px 12px', borderRadius: 20, marginBottom: 18 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#249E7C' }} />
-                    {credits} widget{credits > 1 ? 's' : ''} gratuit{credits > 1 ? 's' : ''} restant{credits > 1 ? 's' : ''}
-                  </div>
-                  {genError && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#ef4444', fontSize: 13, borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>{genError}</div>}
-                  <div>
-                    <button type="button" onClick={genererGratuit} disabled={genLoading} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '13px 26px', borderRadius: 11, background: '#7CB8A8', color: '#0F2A22', border: 'none', fontSize: 14.5, fontWeight: 700, cursor: genLoading ? 'wait' : 'pointer' }}>
-                      {genLoading ? 'Génération...' : 'Générer gratuitement'}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p style={{ fontSize: 13, color: '#8A92A6', margin: '0 0 18px', lineHeight: 1.5 }}>
-                    Générez votre widget pour ce bien (90 € une fois) et obtenez le code à intégrer sur votre site.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setShowPayment(true)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '13px 26px', borderRadius: 11, background: 'linear-gradient(135deg, #1D4267 0%, #16324F 100%)', color: '#fff', border: 'none', fontSize: 14.5, fontWeight: 700, cursor: 'pointer' }}
-                  >
-                    <span style={{ display: 'flex', width: 26, height: 26, borderRadius: 8, background: 'rgba(124,184,168,0.18)', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#7CB8A8" stroke="#7CB8A8" strokeWidth="1.5" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
-                    </span>
-                    Générer mon widget — 90 €
-                  </button>
-                </>
-              )}
-            </div>
-          )}
+        {/* Code d'intégration — toujours disponible (widget gratuit/inclus) */}
+        <FormSection icon={ic.code} title="Code d'intégration" subtitle="Copiez le code sur le site du bien">
+          <label style={labelStyle}>Option A — iframe (recommandée)</label>
+          <div style={{ position: 'relative', marginBottom: 18 }}>
+            <pre style={preBox}>{iframeCode}</pre>
+            <button type="button" onClick={() => copy(iframeCode, 'iframe')} style={copyBtn}>{copied === 'iframe' ? 'Copié ✓' : 'Copier'}</button>
+          </div>
+          <label style={labelStyle}>Option B — image (HTML)</label>
+          <div style={{ position: 'relative' }}>
+            <pre style={preBox}>{htmlCode}</pre>
+            <button type="button" onClick={() => copy(htmlCode, 'html')} style={copyBtn}>{copied === 'html' ? 'Copié ✓' : 'Copier'}</button>
+          </div>
         </FormSection>
       </div>
 
       {/* COLONNE PREVIEW */}
       <div style={{ position: 'sticky', top: 24, minWidth: 0 }}>
-        <div style={{ background: checker, border: '1px solid #EEF2F7', borderRadius: 16, padding: 28, display: 'flex', justifyContent: 'center', marginBottom: 16, position: 'relative' }}>
+        <div style={{ background: checker, border: '1px solid #EEF2F7', borderRadius: 16, padding: 28, display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
           <Badge mensualite={mensualite} premium={premium} theme={theme} couleurPrimaire={effPrimaire} couleurAccent={effAccent} logoUrl={premium ? logoUrl : null} width={280} />
-          {loaded && !paye && (
-            <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', background: 'rgba(22,50,79,0.85)', color: '#fff', fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 20 }}>Aperçu</div>
-          )}
         </div>
 
-        {paye && (
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button type="button" onClick={downloadSVG} style={{ flex: 1, padding: '11px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-              Télécharger SVG
-            </button>
-            <button type="button" onClick={downloadPNG} style={{ flex: 1, padding: '11px', borderRadius: 10, background: '#fff', color: '#193B5E', border: '1.5px solid #E8EDF2', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-              Télécharger PNG
-            </button>
-          </div>
-        )}
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button type="button" onClick={downloadSVG} style={{ flex: 1, padding: '11px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            Télécharger SVG
+          </button>
+          <button type="button" onClick={downloadPNG} style={{ flex: 1, padding: '11px', borderRadius: 10, background: '#fff', color: '#193B5E', border: '1.5px solid #E8EDF2', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            Télécharger PNG
+          </button>
+        </div>
       </div>
     </div>
   )

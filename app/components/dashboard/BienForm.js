@@ -12,6 +12,13 @@ import { FormRecap } from './FormRecap'
 const TYPES = ['Appartement', 'Maison', 'Studio', 'Villa', 'Terrain', 'Bureau', 'Commerce']
 const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', 'Flandre-Occidentale', 'Flandre-Orientale', 'Hainaut', 'Liège', 'Limbourg', 'Luxembourg', 'Namur']
 
+const STATUTS = [
+  { value: 'ACTIF', label: 'Actif — en vente (facturé)' },
+  { value: 'OPTION', label: 'Sous option (hors décompte)' },
+  { value: 'HORS_LIGNE', label: 'Hors-ligne (hors décompte)' },
+  { value: 'VENDU', label: 'Vendu (hors décompte)' },
+]
+
 const ic = {
   pin: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>,
   euro: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>,
@@ -19,6 +26,7 @@ const ic = {
   grid: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>,
   photo: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>,
   doc: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>,
+  tag: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>,
 }
 
 export function BienForm({ initial = null, mode = 'create' }) {
@@ -34,6 +42,7 @@ export function BienForm({ initial = null, mode = 'create' }) {
     province: initial?.province || '',
     adresse: initial?.adresse || '',
     urlClient: initial?.urlClient || '',
+    statut: initial?.statut || 'ACTIF',
     published: initial?.published !== false,
   })
   const [photos, setPhotos] = useState(initial?.images || [])
@@ -131,6 +140,21 @@ export function BienForm({ initial = null, mode = 'create' }) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <FormInput label="Chambres" name="chambres" type="number" value={form.chambres} onChange={handle('chambres')} placeholder="2" min="0" />
                 <FormInput label="Surface (m²)" name="surface" type="number" value={form.surface} onChange={handle('surface')} placeholder="85" min="0" />
+              </div>
+            </FormSection>
+
+            <FormSection icon={ic.tag} title="Statut & visibilité" subtitle="Le statut détermine si le bien est facturé">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
+                <FormSelect
+                  label="Statut du bien"
+                  value={form.statut}
+                  onChange={(v) => setField('statut', v)}
+                  options={STATUTS}
+                />
+                <p style={{ fontSize: 12.5, color: '#8A92A6', margin: '2px 0 0', lineHeight: 1.5 }}>
+                  Seuls les biens <strong style={{ color: '#193B5E' }}>Actifs</strong> sont comptés dans votre abonnement.
+                  Un bien en option, vendu ou hors-ligne sort automatiquement du décompte (ajustement au prorata).
+                </p>
               </div>
             </FormSection>
 
