@@ -12,6 +12,18 @@ enum Role {
   ADMIN
 }
 
+enum Formule {
+  PRO
+  PRO_PLUS
+}
+
+enum BienStatut {
+  ACTIF
+  OPTION
+  HORS_LIGNE
+  VENDU
+}
+
 model User {
   id          String   @id @default(cuid())
   email       String   @unique
@@ -23,49 +35,66 @@ model User {
 }
 
 model Client {
-  id               String   @id @default(cuid())
-  userId           String   @unique
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  societe          String
-  contactNom       String?
-  telephone        String?
-  adresse          String?
-  numeroTva        String?
-  logoUrl          String?
-  plan             String   @default("CLASSIC")
-  stripeCustomerId String?
-  stripeSubId      String?
-  subStatus        String?
-  subEndsAt        DateTime?
-  trialEndsAt      DateTime?
-  widgetsGratuits  Int      @default(0)
-  biens            Bien[]
-  widgetPayments   WidgetPayment[]
-  createdAt        DateTime @default(now())
+  id                 String     @id @default(cuid())
+  userId             String     @unique
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  societe            String
+  contactNom         String?
+  contactOpe         String?
+  contactFacturation String?
+  telephone          String?
+  adresse            String?
+  adresseAdmin       String?
+  numeroTva          String?
+  logoUrl            String?
+  formule            Formule    @default(PRO)
+  miseEnServicePayee Boolean    @default(false)
+  miseEnServiceAt    DateTime?
+  stripeCustomerId   String?
+  stripeSubId        String?
+  subStatus          String?
+  subEndsAt          DateTime?
+  trialEndsAt        DateTime?
+  biens              Bien[]
+  createdAt          DateTime   @default(now())
+
+  // --- déprécié (ancien modèle : abo fixe + widget payant). Conservé le temps de la migration. ---
+  plan            String          @default("CLASSIC")
+  widgetsGratuits Int             @default(0)
+  widgetPayments  WidgetPayment[]
 }
 
 model Bien {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   clientId    String
-  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
   titre       String
   description String?
   prixTotal   Int
   mensualite  Int
   type        String?
   chambres    Int?
+  sallesDeBain Int?
   surface     Int?
+  terrasse    Int?
+  jardin      Int?
   ville       String?
   province    String?
   adresse     String?
+  projet      String?
+  unite       String?
+  pebNumero   String?
+  pebClasse   String?
+  pebKwh      String?
   images      String[]
   urlClient   String?
-  published   Boolean  @default(true)
-  vues        Int      @default(0)
+  statut      BienStatut @default(ACTIF)
+  published   Boolean    @default(true)
+  vues        Int        @default(0)
   leads       Lead[]
   widgets     Widget[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Widget {
@@ -78,6 +107,7 @@ model Widget {
   createdAt DateTime @default(now())
 }
 
+// --- déprécié : le widget est désormais gratuit. Modèle conservé pour l'historique. ---
 model WidgetPayment {
   id              String   @id @default(cuid())
   clientId        String
@@ -91,16 +121,20 @@ model WidgetPayment {
 }
 
 model Lead {
-  id        String   @id @default(cuid())
-  bienId    String?
-  bien      Bien?    @relation(fields: [bienId], references: [id], onDelete: SetNull)
-  nom       String?
-  email     String?
-  telephone String?
-  revenu    Int?
-  apport    Int?
-  source    String
-  createdAt DateTime @default(now())
+  id              String    @id @default(cuid())
+  bienId          String?
+  bien            Bien?     @relation(fields: [bienId], references: [id], onDelete: SetNull)
+  nom             String?
+  societe         String?
+  email           String?
+  telephone       String?
+  revenu          Int?
+  apport          Int?
+  source          String
+  statutPromoteur String    @default("À contacter")
+  statutAdmin     String    @default("À contacter")
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
 }
 
 model Settings {
