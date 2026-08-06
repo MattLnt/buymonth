@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Mensualite from '@/app/components/Mensualite'
 
 export function BienPublicCard({ bien }) {
   return (
@@ -25,8 +26,8 @@ export function BienPublicCard({ bien }) {
           </div>
 
           <div style={{ marginTop: 'auto' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
-              <span style={{ fontSize: 24, fontWeight: 700, color: '#7CB8A8', letterSpacing: '-0.02em' }}>{bien.mensualite} €<span style={{ fontSize: 14 }}>/mois</span></span>
+            <div style={{ marginBottom: 12 }}>
+              <Mensualite prix={bien.prixTotal} variant="card" showExemple={false} prefix="À partir de" />
             </div>
             <div style={{ display: 'flex', gap: 14, fontSize: 12.5, color: '#5A6275', flexWrap: 'wrap' }}>
               {bien.chambres != null && <span>{bien.chambres} ch.</span>}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { evalueBien } from '@/lib/capacite'
+import { MENSUALITE_CONFIG, AVERTISSEMENT_LEGAL } from '@/lib/mensualiteConfig'
 
 const labelStyle = { display: 'block', fontSize: 12, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }
 const inputStyle = { width: '100%', padding: '13px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 15, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
@@ -9,6 +10,8 @@ const inputStyle = { width: '100%', padding: '13px 14px', borderRadius: 10, bord
 function Euro({ children }) {
   return <div style={{ position: 'relative' }}>{children}<span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: '#9AA2B4', pointerEvents: 'none' }}>€</span></div>
 }
+
+const pct = (t) => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(t * 100) + ' %'
 
 export function Simulateur({ bien, onStepChange }) {
   const [step, setStep] = useState(1)
@@ -18,6 +21,9 @@ export function Simulateur({ bien, onStepChange }) {
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
+
+  const cfgM = MENSUALITE_CONFIG
+  const dureeAns = Math.round(cfgM.dureeMois / 12)
 
   useEffect(() => { onStepChange?.(done ? 1 : step) }, [step, done, onStepChange])
 
@@ -65,7 +71,7 @@ export function Simulateur({ bien, onStepChange }) {
         </span>
         <h2 style={{ fontSize: 22, fontWeight: 700, color: '#193B5E', margin: '0 0 10px' }}>Demande envoyée !</h2>
         <p style={{ fontSize: 15, color: '#5A6275', margin: 0, lineHeight: 1.6, maxWidth: 420, marginLeft: 'auto', marginRight: 'auto' }}>
-          Un conseiller en crédit agréé va étudier votre dossier et vous recontacter rapidement pour une offre personnalisée.
+          BuyMonth Finance, intermédiaire en crédit agréé FSMA, va étudier votre dossier et vous recontacter rapidement pour une offre personnalisée.
         </p>
       </div>
     )
@@ -148,7 +154,7 @@ export function Simulateur({ bien, onStepChange }) {
                 { label: 'Mensualité max', value: `${result.mensualiteMax.toLocaleString('fr-BE')} €` },
                 { label: 'Capital empruntable', value: `${result.capitalEmpruntable.toLocaleString('fr-BE')} €` },
                 { label: 'Apport pris en compte', value: `${(parseInt(sim.apport, 10) || 0).toLocaleString('fr-BE')} €` },
-                { label: 'Taux d\'endettement', value: '33 %' },
+                { label: 'Taux d\'endettement', value: `${Math.round((result.tauxEndettement || 0.40) * 100)} %` },
               ].map((row) => (
                 <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
                   <span style={{ fontSize: 13, color: '#5A6275' }}>{row.label}</span>
@@ -158,7 +164,7 @@ export function Simulateur({ bien, onStepChange }) {
             </div>
 
             <p style={{ fontSize: 11, color: '#8A92A6', margin: '14px 0 0', lineHeight: 1.5 }}>
-              Estimation sur base d'un crédit à 25 ans, taux 3,45 %. Indicatif uniquement.
+              Estimation hors frais, sur base d'un crédit à {dureeAns} ans, taux débiteur {pct(cfgM.tauxAnnuel)}, TAEG {pct(cfgM.taegAnnuel)}. Indicatif uniquement.
             </p>
           </div>
 
@@ -198,7 +204,7 @@ export function Simulateur({ bien, onStepChange }) {
 
       {/* Mention légale */}
       <p style={{ fontSize: 11, color: '#A9B0BE', margin: '20px 0 0', lineHeight: 1.5, textAlign: 'center' }}>
-        Simulation purement indicative, sans valeur contractuelle. Sous réserve d'analyse et d'acceptation du dossier par l'organisme prêteur. JG Management — FSMA 1021.366.349
+        {AVERTISSEMENT_LEGAL} Simulation purement indicative, sans valeur contractuelle. Sous réserve d'analyse et d'acceptation du dossier. Crédit : BuyMonth Finance — intermédiaire agréé FSMA n° 1021.366.349.
       </p>
     </div>
   )

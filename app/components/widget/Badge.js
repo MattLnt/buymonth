@@ -1,7 +1,11 @@
+import Mensualite from '@/app/components/Mensualite'
+import { MENSUALITE_CONFIG } from '@/lib/mensualiteConfig'
+
 // Composant badge pur (présentation). Utilisé par /embed/badge ET la preview du générateur.
 
 export function Badge({
   mensualite,
+  prix,
   premium = false,
   theme = 'light',
   couleurPrimaire = '#16324F',
@@ -15,6 +19,9 @@ export function Badge({
   const textMain = dark ? '#FFFFFF' : '#16324F'
   const textMuted = dark ? 'rgba(255,255,255,0.6)' : '#8A92A6'
   const border = dark ? 'rgba(255,255,255,0.1)' : '#EEF2F7'
+
+  const cfg = MENSUALITE_CONFIG
+  const pct = (t) => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(t * 100) + ' %'
 
   return (
     <div style={{ width, fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif', borderRadius: 16, overflow: 'hidden', border: `1px solid ${border}`, background: bg, boxShadow: '0 8px 28px rgba(22,50,79,0.12)' }}>
@@ -37,12 +44,14 @@ export function Badge({
       <div style={{ padding: '22px 20px 18px', textAlign: 'center' }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: textMain, marginBottom: 10 }}>Propriétaire de ce bien dès</div>
         <div style={{ fontSize: 40, fontWeight: 700, color: couleurAccent, letterSpacing: '-0.02em', lineHeight: 1 }}>
-          {mensualite ? mensualite.toLocaleString('fr-BE') : '—'} €<span style={{ fontSize: 19 }}>/mois</span>
+          {mensualite ? mensualite.toLocaleString('fr-BE') : '—'} €<span style={{ fontSize: 19 }}>/mois*</span>
         </div>
 
         <div style={{ fontSize: 9.5, color: textMuted, marginTop: 16, lineHeight: 1.5, borderTop: `1px solid ${border}`, paddingTop: 12 }}>
-          Simulation indicative sur base d'un exemple représentatif (apport 10 %, durée 25 ans, taux 3,45 %, TAEG 3,45 % hors assurances). Sous réserve d'acceptation du crédit par l'organisme prêteur.
-          <div style={{ marginTop: 6, fontWeight: 600 }}>JG Management — FSMA 1021.366.349</div>
+          * Attention, emprunter de l'argent coûte aussi de l'argent. Estimation indicative hors frais,
+          sur base d'un exemple représentatif (apport {Math.round(cfg.apportPct * 100)} %, durée {Math.round(cfg.dureeMois / 12)} ans,
+          taux débiteur {pct(cfg.tauxAnnuel)}, TAEG {pct(cfg.taegAnnuel)}). Sous réserve d'acceptation du crédit.
+          <div style={{ marginTop: 6, fontWeight: 600 }}>Crédit : BuyMonth Finance — FSMA 1021.366.349</div>
         </div>
       </div>
     </div>

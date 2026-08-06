@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { BienGallery } from '@/app/components/public/BienGallery'
 import { SimulateurModal } from '@/app/components/public/SimulateurModal'
+import Mensualite from '@/app/components/Mensualite'
 import PublicNav from '@/app/components/PublicNav'
 import PublicFooter from '@/app/components/PublicFooter'
 
@@ -44,8 +45,6 @@ export default async function BienDetailPage({ params }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#EEF1F6' }}>
-      <PublicNav />
-
       <PublicNav />
 
       {/* Bandeau navy pour lisibilité de la nav + breadcrumb */}
@@ -104,12 +103,9 @@ export default async function BienDetailPage({ params }) {
             <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 16, padding: 26, position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: -40, right: -30, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.2) 0%, transparent 65%)' }} />
               <div style={{ position: 'relative' }}>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>Propriétaire de ce bien dès</div>
-                <div style={{ fontSize: 40, fontWeight: 700, color: '#7CB8A8', letterSpacing: '-0.02em', lineHeight: 1 }}>
-                  {mensualite.toLocaleString('fr-BE')} €<span style={{ fontSize: 18 }}>/mois</span>
-                </div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 10, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                  Prix total : <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{bien.prixTotal.toLocaleString('fr-BE')} €</strong>
+                <Mensualite prix={bien.prixTotal} variant="hero" tone="dark" prefix="Propriétaire dès" />
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                  Prix du bien : <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{bien.prixTotal.toLocaleString('fr-BE')} €</strong>
                 </div>
               </div>
             </div>
@@ -143,7 +139,7 @@ export default async function BienDetailPage({ params }) {
             )}
 
             <p style={{ fontSize: 10.5, color: '#A9B0BE', margin: 0, lineHeight: 1.5, textAlign: 'center', padding: '0 8px' }}>
-              Simulation indicative (apport 10 %, 25 ans, TAEG 3,45 % hors assurances). Sous réserve d'acceptation du crédit. JG Management — FSMA 1021.366.349
+              Sous réserve d'acceptation du crédit. Étude réalisée par BuyMonth Finance, intermédiaire en crédit agréé FSMA n° 1021.366.349.
             </p>
           </div>
         </div>
