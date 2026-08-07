@@ -11,10 +11,11 @@ import { FormRecap } from './FormRecap'
 
 const TYPES = ['Appartement', 'Maison', 'Studio', 'Villa', 'Terrain', 'Bureau', 'Commerce']
 const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', 'Flandre-Occidentale', 'Flandre-Orientale', 'Hainaut', 'Liège', 'Limbourg', 'Luxembourg', 'Namur']
+const PEB_CLASSES = ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G']
 
 const STATUTS = [
   { value: 'ACTIF', label: 'Actif — en vente (facturé)' },
-  { value: 'OPTION', label: 'Sous option (hors décompte)' },
+  { value: 'OPTION', label: 'Sous option (en ligne, facturé)' },
   { value: 'HORS_LIGNE', label: 'Hors-ligne (hors décompte)' },
   { value: 'VENDU', label: 'Vendu (hors décompte)' },
 ]
@@ -27,21 +28,31 @@ const ic = {
   photo: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>,
   doc: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>,
   tag: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>,
+  layers: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></svg>,
+  zap: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
 }
 
-export function BienForm({ initial = null, mode = 'create' }) {
+export function BienForm({ initial = null, mode = 'create', projets = [] }) {
   const router = useRouter()
   const [form, setForm] = useState({
+    projet: initial?.projet || 'Hors projet',
+    unite: initial?.unite || '',
     titre: initial?.titre || '',
     description: initial?.description || '',
-    prixTotal: initial?.prixTotal || '',
     type: initial?.type || '',
+    prixTotal: initial?.prixTotal || '',
     chambres: initial?.chambres || '',
+    sallesDeBain: initial?.sallesDeBain || '',
     surface: initial?.surface || '',
+    terrasse: initial?.terrasse || '',
+    jardin: initial?.jardin || '',
     ville: initial?.ville || '',
     province: initial?.province || '',
     adresse: initial?.adresse || '',
     urlClient: initial?.urlClient || '',
+    pebNumero: initial?.pebNumero || '',
+    pebClasse: initial?.pebClasse || '',
+    pebKwh: initial?.pebKwh || '',
     statut: initial?.statut || 'ACTIF',
     published: initial?.published !== false,
   })
@@ -54,11 +65,20 @@ export function BienForm({ initial = null, mode = 'create' }) {
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }))
   const handle = (k) => (e) => setField(k, e.target.value)
 
+  // Liste des projets pour l'autocomplétion (existants + "Hors projet"), sans doublon
+  const projetOptions = [...new Set(['Hors projet', ...projets, form.projet].filter(Boolean))]
+
   const isFormValid = form.titre && parseInt(form.prixTotal, 10) > 0
+  const estVisible = form.statut === 'ACTIF' || form.statut === 'OPTION'
 
   async function handleSubmit(e) {
     e.preventDefault()
     if (!isFormValid) { setError('Titre et prix valides requis.'); return }
+    // Au moins une photo obligatoire pour un bien visible en ligne
+    if (estVisible && photos.length === 0) {
+      setError('Ajoutez au moins une photo pour mettre ce bien en ligne.')
+      return
+    }
     setLoading(true); setError('')
 
     try {
@@ -86,6 +106,9 @@ export function BienForm({ initial = null, mode = 'create' }) {
     } catch { setDeleting(false) }
   }
 
+  const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
+  const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
+
   return (
     <div style={{ maxWidth: '100%' }}>
       <style>{`
@@ -106,9 +129,31 @@ export function BienForm({ initial = null, mode = 'create' }) {
 
           {/* COLONNE PRINCIPALE */}
           <div>
-            <FormSection icon={ic.doc} title="Informations générales" subtitle="Titre et description du bien">
+            <FormSection icon={ic.layers} title="Projet & unité" subtitle="Rattachez ce bien à un programme (facultatif)">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={labelStyle}>Projet</label>
+                  <input
+                    list="projets-list"
+                    value={form.projet}
+                    onChange={handle('projet')}
+                    placeholder="Nom du programme"
+                    style={inputStyle}
+                  />
+                  <datalist id="projets-list">
+                    {projetOptions.map((p) => <option key={p} value={p} />)}
+                  </datalist>
+                </div>
+                <FormInput label="Unité" name="unite" value={form.unite} onChange={handle('unite')} placeholder="B2.03" />
+              </div>
+            </FormSection>
+
+            <FormSection icon={ic.doc} title="Informations générales" subtitle="Titre, type et description du bien">
               <div style={{ marginBottom: 16 }}>
                 <FormInput label="Titre de l'annonce" name="titre" value={form.titre} onChange={handle('titre')} placeholder="Bel appartement neuf 2 chambres" required />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <FormSelect label="Type de bien" value={form.type} onChange={(v) => setField('type', v)} options={TYPES} placeholder="Sélectionner un type" />
               </div>
               <FormInput label="Description" name="description" type="textarea" value={form.description} onChange={handle('description')} placeholder="Points forts, emplacement, particularités..." />
             </FormSection>
@@ -117,10 +162,9 @@ export function BienForm({ initial = null, mode = 'create' }) {
               <FormInput label="Prix total de vente" name="prixTotal" type="number" value={form.prixTotal} onChange={handle('prixTotal')} placeholder="215000" suffix="€" required min="0" />
             </FormSection>
 
-            <FormSection icon={ic.home} title="Type & localisation" subtitle="Catégorie et adresse du bien">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-                <FormSelect label="Type" value={form.type} onChange={(v) => setField('type', v)} options={TYPES} />
-                <FormSelect label="Province" value={form.province} onChange={(v) => setField('province', v)} options={PROVINCES} />
+            <FormSection icon={ic.pin} title="Localisation" subtitle="Adresse et province du bien">
+              <div style={{ marginBottom: 16 }}>
+                <FormSelect label="Province" value={form.province} onChange={(v) => setField('province', v)} options={PROVINCES} placeholder="Sélectionner une province" />
               </div>
               <AddressInput
                 label="Adresse / Localisation"
@@ -137,9 +181,23 @@ export function BienForm({ initial = null, mode = 'create' }) {
             </FormSection>
 
             <FormSection icon={ic.grid} title="Caractéristiques" subtitle="Surface et aménagements">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <FormInput label="Chambres" name="chambres" type="number" value={form.chambres} onChange={handle('chambres')} placeholder="2" min="0" />
+                <FormInput label="Salles de bain" name="sallesDeBain" type="number" value={form.sallesDeBain} onChange={handle('sallesDeBain')} placeholder="1" min="0" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 <FormInput label="Surface (m²)" name="surface" type="number" value={form.surface} onChange={handle('surface')} placeholder="85" min="0" />
+                <FormInput label="Terrasse (m²)" name="terrasse" type="number" value={form.terrasse} onChange={handle('terrasse')} placeholder="12" min="0" />
+                <FormInput label="Jardin (m²)" name="jardin" type="number" value={form.jardin} onChange={handle('jardin')} placeholder="0" min="0" />
+              </div>
+            </FormSection>
+
+            <FormSection icon={ic.zap} title="Performance énergétique (PEB)" subtitle="Facultatif">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                <FormInput label="N° de PEB" name="pebNumero" value={form.pebNumero} onChange={handle('pebNumero')} placeholder="20230000123456" />
+                <FormSelect label="Classe PEB" value={form.pebClasse} onChange={(v) => setField('pebClasse', v)}
+                  options={[{ value: '', label: 'Non renseigné' }, ...PEB_CLASSES.map((c) => ({ value: c, label: c }))]} />
+                <FormInput label="Consommation (kWh/an)" name="pebKwh" value={form.pebKwh} onChange={handle('pebKwh')} placeholder="145" />
               </div>
             </FormSection>
 
@@ -152,13 +210,13 @@ export function BienForm({ initial = null, mode = 'create' }) {
                   options={STATUTS}
                 />
                 <p style={{ fontSize: 12.5, color: '#8A92A6', margin: '2px 0 0', lineHeight: 1.5 }}>
-                  Seuls les biens <strong style={{ color: '#193B5E' }}>Actifs</strong> sont comptés dans votre abonnement.
-                  Un bien en option, vendu ou hors-ligne sort automatiquement du décompte (ajustement au prorata).
+                  Les biens <strong style={{ color: '#193B5E' }}>Actifs</strong> et <strong style={{ color: '#193B5E' }}>Sous option</strong> sont comptés dans votre abonnement.
+                  Un bien hors-ligne ou vendu en sort automatiquement (ajustement au prorata).
                 </p>
               </div>
             </FormSection>
 
-            <FormSection icon={ic.photo} title="Photos" subtitle="Images du bien (maximum 10)">
+            <FormSection icon={ic.photo} title="Photos" subtitle="Au moins une photo pour publier (10 max)">
               <PhotoUploader photos={photos} setPhotos={setPhotos} uploading={uploading} setUploading={setUploading} setError={setError} />
             </FormSection>
 

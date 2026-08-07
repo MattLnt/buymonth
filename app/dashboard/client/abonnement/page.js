@@ -2,7 +2,7 @@ import { getCurrentClient } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/app/components/dashboard/Ui'
 import { AbonnementClient } from './AbonnementClient'
-import { decompteFacturation, MISE_EN_SERVICE } from '@/lib/facturation'
+import { decompteFacturation } from '@/lib/facturation'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +10,7 @@ export default async function AbonnementPage({ searchParams }) {
   const client = await getCurrentClient()
   const sp = await searchParams
 
-  // Décompte « au bien actif » : nb de biens ACTIF × tarif de la formule
+  // Décompte « au bien actif » : nb de biens ACTIF + OPTION × tarif de la formule
   const biens = await prisma.bien.findMany({
     where: { clientId: client.id },
     select: { statut: true },
@@ -26,12 +26,6 @@ export default async function AbonnementPage({ searchParams }) {
     montant: facturation.montantMensuel, // nb biens actifs × tarif formule
     devise: 'eur',
   } : null
-
-  const miseEnService = {
-    payee: client.miseEnServicePayee,
-    montant: MISE_EN_SERVICE,
-    date: client.miseEnServiceAt ? new Date(client.miseEnServiceAt).getTime() : null,
-  }
 
   return (
     <>
@@ -54,7 +48,6 @@ export default async function AbonnementPage({ searchParams }) {
         details={details}
         createdAt={client.createdAt}
         facturation={facturation}
-        miseEnService={miseEnService}
       />
     </>
   )

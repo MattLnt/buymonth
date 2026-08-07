@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { stripe, PRICE_MISE_EN_SERVICE } from '@/lib/stripe'
+import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(req) {
@@ -48,27 +48,6 @@ export async function POST(req) {
             where: { id: client.id },
             data: { subStatus: 'canceled' },
           })
-        }
-        break
-      }
-
-      // Facture payée → réconciliation de la mise en service (source de vérité)
-      case 'invoice.paid': {
-        const invoice = event.data.object
-        const client = await prisma.client.findFirst({ where: { stripeCustomerId: invoice.customer } })
-        if (client && PRICE_MISE_EN_SERVICE && !client.miseEnServicePayee) {
-          const lignes = invoice.lines?.data || []
-          const contientMES = lignes.some(
-            (l) =>
-              l.price?.id === PRICE_MISE_EN_SERVICE ||
-              l.pricing?.price_details?.price === PRICE_MISE_EN_SERVICE
-          )
-          if (contientMES) {
-            await prisma.client.update({
-              where: { id: client.id },
-              data: { miseEnServicePayee: true, miseEnServiceAt: new Date() },
-            })
-          }
         }
         break
       }

@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY)
 
+const euro = (n) => (n || 0).toLocaleString('fr-BE') + ' €'
+
 // ── Formulaire interne ──
 function InnerForm() {
   const stripe = useStripe()
@@ -82,9 +84,11 @@ function InnerForm() {
 }
 
 // ── Wrapper ──
-export function CheckoutForm() {
+export function CheckoutForm({ facturation = null }) {
   const [clientSecret, setClientSecret] = useState(null)
   const [error, setError] = useState('')
+
+  const f = facturation || { formuleLabel: 'BuyMonth Pro', actifs: 0, unitaire: 39, montantMensuel: 0 }
 
   useEffect(() => {
     fetch('/api/stripe/setup-intent', { method: 'POST' })
@@ -146,19 +150,31 @@ export function CheckoutForm() {
         <div style={{ position: 'absolute', top: -50, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.2) 0%, transparent 65%)' }} />
         <div style={{ position: 'relative' }}>
           <div style={{ display: 'inline-block', background: 'rgba(124,184,168,0.18)', color: '#7CB8A8', fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 20, marginBottom: 20, letterSpacing: '0.05em' }}>RÉCAPITULATIF</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 16, borderBottom: '1px solid rgba(255,255,255,0.12)', marginBottom: 16 }}>
-            <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)' }}>Abonnement plateforme</span>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>500 € / mois</span>
+
+          {/* Abonnement mensuel = nb biens actifs × tarif formule */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 14, borderBottom: '1px solid rgba(255,255,255,0.12)', marginBottom: 14 }}>
+            <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)' }}>
+              {f.formuleLabel}
+              <span style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{f.actifs} bien{f.actifs > 1 ? 's' : ''} × {euro(f.unitaire)}/mois</span>
+            </span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap' }}>{euro(f.montantMensuel)} / mois</span>
           </div>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24 }}>
-            <span style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>Total aujourd'hui</span>
-            <span style={{ fontSize: 28, fontWeight: 700, color: '#7CB8A8' }}>500 €</span>
+            <span style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>Total mensuel</span>
+            <span style={{ fontSize: 28, fontWeight: 700, color: '#7CB8A8', whiteSpace: 'nowrap' }}>{euro(f.montantMensuel)}</span>
           </div>
+
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', margin: '0 0 20px', lineHeight: 1.5 }}>
+            Montants HTVA. Le décompte des biens actifs est revu chaque mois — la facturation suit votre portefeuille.
+            Les frais de mise en service (1 490 € HTVA, une seule fois) sont facturés séparément.
+          </p>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {['Renouvellement automatique mensuel', 'Résiliable à tout moment', 'Accès immédiat après paiement'].map((f) => (
-              <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+            {['Vous ne payez que vos biens actifs', 'Widgets & QR codes inclus', 'Résiliable à tout moment'].map((f2) => (
+              <div key={f2} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
-                {f}
+                {f2}
               </div>
             ))}
           </div>

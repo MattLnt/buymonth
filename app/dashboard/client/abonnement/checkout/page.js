@@ -1,5 +1,7 @@
 import { getCurrentClient } from '@/lib/session'
+import { prisma } from '@/lib/prisma'
 import { abonnementActif } from '@/lib/abonnement'
+import { decompteFacturation } from '@/lib/facturation'
 import { redirect } from 'next/navigation'
 import { PageHeader } from '@/app/components/dashboard/Ui'
 import { CheckoutForm } from './CheckoutForm'
@@ -15,6 +17,13 @@ export default async function CheckoutPage() {
     redirect('/dashboard/client/abonnement')
   }
 
+  // Décompte au bien actif (ACTIF + OPTION) selon la formule du client
+  const biens = await prisma.bien.findMany({
+    where: { clientId: client.id },
+    select: { statut: true },
+  })
+  const facturation = decompteFacturation(biens, client.formule)
+
   return (
     <>
       <div style={{ marginBottom: 20 }}>
@@ -24,7 +33,7 @@ export default async function CheckoutPage() {
         </Link>
       </div>
       <PageHeader title="Finaliser votre abonnement" subtitle="Activez votre accès complet à la plateforme BuyMonth." />
-      <CheckoutForm />
+      <CheckoutForm facturation={facturation} />
     </>
   )
 }

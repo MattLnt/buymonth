@@ -7,6 +7,14 @@ import { FormSelect } from './FormSelect'
 const TYPES = ['Appartement', 'Maison', 'Studio', 'Villa', 'Terrain', 'Bureau', 'Commerce']
 const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', 'Flandre-Occidentale', 'Flandre-Orientale', 'Hainaut', 'Liège', 'Limbourg', 'Luxembourg', 'Namur']
 
+const STATUT_OPTIONS = [
+  { value: '', label: 'Tous les statuts' },
+  { value: 'ACTIF', label: 'Actifs (facturés)' },
+  { value: 'OPTION', label: 'Sous option' },
+  { value: 'HORS_LIGNE', label: 'Hors-ligne' },
+  { value: 'VENDU', label: 'Vendus' },
+]
+
 const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
@@ -50,8 +58,7 @@ export function MesBiensExplorer({ biens }) {
     return biens.filter((b) => {
       if (type && b.type !== type) return false
       if (province && b.province !== province) return false
-      if (statut === 'publie' && !b.published) return false
-      if (statut === 'brouillon' && b.published) return false
+      if (statut && (b.statut || 'ACTIF') !== statut) return false
       if (chambres && (b.chambres || 0) < chambres) return false
       if (minV && (b.mensualite || 0) < minV) return false
       if (maxV && (b.mensualite || 0) > maxV) return false
@@ -103,8 +110,8 @@ export function MesBiensExplorer({ biens }) {
 
         {/* Statut */}
         <div style={{ marginBottom: 18 }}>
-          <FormSelect label="Statut" value={statut} onChange={setStatut} placeholder="Tous"
-            options={[{ value: '', label: 'Tous' }, { value: 'publie', label: 'Publiés' }, { value: 'brouillon', label: 'Brouillons' }]} />
+          <FormSelect label="Statut" value={statut} onChange={setStatut} placeholder="Tous les statuts"
+            options={STATUT_OPTIONS} />
         </div>
 
         {/* Budget mensuel */}

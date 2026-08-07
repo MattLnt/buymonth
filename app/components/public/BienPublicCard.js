@@ -2,6 +2,8 @@ import Link from 'next/link'
 import Mensualite from '@/app/components/Mensualite'
 
 export function BienPublicCard({ bien }) {
+  const enOption = bien.statut === 'OPTION'
+
   return (
     <Link href={`/biens/${bien.id}`} style={{ textDecoration: 'none', display: 'block' }}>
       <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, overflow: 'hidden', transition: 'box-shadow 0.2s, transform 0.2s', height: '100%', display: 'flex', flexDirection: 'column' }}
@@ -11,8 +13,16 @@ export function BienPublicCard({ bien }) {
           {!bien.images?.[0] && (
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#B7C4D6" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
           )}
+
+          {/* Bandeau orange OPTION sur la première photo */}
+          {enOption && (
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: 'linear-gradient(90deg, #E89923, #D98410)', color: '#fff', fontSize: 11.5, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', textAlign: 'center', padding: '5px 8px' }}>
+              Sous option
+            </div>
+          )}
+
           {bien.type && (
-            <span style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(255,255,255,0.95)', color: '#193B5E', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20 }}>
+            <span style={{ position: 'absolute', top: enOption ? 34 : 12, left: 12, background: 'rgba(255,255,255,0.95)', color: '#193B5E', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20 }}>
               {bien.type}
             </span>
           )}

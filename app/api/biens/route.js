@@ -4,9 +4,13 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { calculMensualiteServeur } from '@/lib/settings'
 import { syncQuantiteAbonnement } from '@/lib/facturationSync'
+import { STATUTS_FACTURABLES } from '@/lib/facturation'
 
 const STATUTS = ['ACTIF', 'OPTION', 'HORS_LIGNE', 'VENDU']
 const normStatut = (s) => (STATUTS.includes(s) ? s : 'ACTIF')
+
+// La visibilité publique découle du statut : seuls ACTIF et OPTION sont visibles.
+const estVisible = (statut) => statut === 'ACTIF' || statut === 'OPTION'
 
 async function getClient() {
   const session = await getServerSession(authOptions)
@@ -26,6 +30,7 @@ export async function POST(req) {
     }
 
     const mensualite = await calculMensualiteServeur(prixTotal)
+    const statut = normStatut(b.statut)
 
     const bien = await prisma.bien.create({
       data: {
@@ -36,18 +41,26 @@ export async function POST(req) {
         mensualite,
         type: b.type || null,
         chambres: b.chambres ? parseInt(b.chambres, 10) : null,
+        sallesDeBain: b.sallesDeBain ? parseInt(b.sallesDeBain, 10) : null,
         surface: b.surface ? parseInt(b.surface, 10) : null,
+        terrasse: b.terrasse ? parseInt(b.terrasse, 10) : null,
+        jardin: b.jardin ? parseInt(b.jardin, 10) : null,
         ville: b.ville || null,
         province: b.province || null,
         adresse: b.adresse || null,
+        projet: b.projet || null,
+        unite: b.unite || null,
+        pebNumero: b.pebNumero || null,
+        pebClasse: b.pebClasse || null,
+        pebKwh: b.pebKwh || null,
         urlClient: b.urlClient || null,
         images: Array.isArray(b.images) ? b.images : [],
-        statut: normStatut(b.statut),
-        published: b.published !== false,
+        statut,
+        published: estVisible(statut), // dérivé du statut
       },
     })
 
-    // Nouveau bien actif → répercute la quantité sur l'abonnement
+    // Nouveau bien facturable → répercute la quantité sur l'abonnement
     await syncQuantiteAbonnement(client.id)
 
     return NextResponse.json({ ok: true, bien })
@@ -86,14 +99,22 @@ export async function PUT(req) {
         mensualite,
         type: b.type || null,
         chambres: b.chambres ? parseInt(b.chambres, 10) : null,
+        sallesDeBain: b.sallesDeBain ? parseInt(b.sallesDeBain, 10) : null,
         surface: b.surface ? parseInt(b.surface, 10) : null,
+        terrasse: b.terrasse ? parseInt(b.terrasse, 10) : null,
+        jardin: b.jardin ? parseInt(b.jardin, 10) : null,
         ville: b.ville || null,
         province: b.province || null,
         adresse: b.adresse || null,
+        projet: b.projet || null,
+        unite: b.unite || null,
+        pebNumero: b.pebNumero || null,
+        pebClasse: b.pebClasse || null,
+        pebKwh: b.pebKwh || null,
         urlClient: b.urlClient || null,
         images: Array.isArray(b.images) ? b.images : existing.images,
         statut: nouveauStatut,
-        published: b.published !== false,
+        published: estVisible(nouveauStatut), // dérivé du statut
       },
     })
 
@@ -124,8 +145,8 @@ export async function DELETE(req) {
 
     await prisma.bien.delete({ where: { id } })
 
-    // Un bien actif supprimé réduit la quantité facturée
-    if (existing.statut === 'ACTIF') {
+    // Un bien facturable (ACTIF ou OPTION) supprimé réduit la quantité facturée
+    if (STATUTS_FACTURABLES.includes(existing.statut)) {
       await syncQuantiteAbonnement(client.id)
     }
 

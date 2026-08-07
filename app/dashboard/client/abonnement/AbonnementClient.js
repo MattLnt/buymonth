@@ -19,7 +19,7 @@ function euro(n) {
   return (n || 0).toLocaleString('fr-BE') + ' €'
 }
 
-export function AbonnementClient({ subStatus, details, createdAt, facturation, miseEnService }) {
+export function AbonnementClient({ subStatus, details, createdAt, facturation }) {
   const [loading, setLoading] = useState('')
   const [error, setError] = useState('')
 
@@ -28,7 +28,6 @@ export function AbonnementClient({ subStatus, details, createdAt, facturation, m
   const resiliationProgrammee = details?.cancelAtPeriodEnd
 
   const f = facturation || { formuleLabel: 'BuyMonth Pro', actifs: 0, total: 0, unitaire: 39, montantMensuel: 0, surMesure: false }
-  const mes = miseEnService || { payee: false, montant: 1490, date: null }
 
   function souscrire() {
     window.location.href = '/dashboard/client/abonnement/checkout'
@@ -54,16 +53,6 @@ export function AbonnementClient({ subStatus, details, createdAt, facturation, m
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C2620C" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
           <span style={{ fontSize: 13.5, fontWeight: 600, color: '#C2620C' }}>
             Votre abonnement est résilié et prendra fin le {formatDate(details.cancelAt || details.currentPeriodEnd)}. Vous gardez l'accès jusqu'à cette date.
-          </span>
-        </div>
-      )}
-
-      {/* Bandeau mise en service à régler */}
-      {!mes.payee && (
-        <div style={{ background: 'rgba(78,125,212,0.08)', border: '1px solid rgba(78,125,212,0.25)', borderRadius: 12, padding: '14px 18px', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4E7DD4" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
-          <span style={{ fontSize: 13.5, fontWeight: 600, color: '#3B62A8' }}>
-            Frais de mise en service ({euro(mes.montant)} HTVA, une seule fois) réglés à la première souscription.
           </span>
         </div>
       )}
@@ -131,10 +120,9 @@ export function AbonnementClient({ subStatus, details, createdAt, facturation, m
               {[
                 { label: 'Statut', node: <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 700, color: statut.color }}><span style={{ width: 7, height: 7, borderRadius: '50%', background: statut.dot }} />{statut.label}</span> },
                 { label: 'Formule', value: f.formuleLabel },
-                { label: 'Biens actifs facturés', value: `${f.actifs} / ${f.total}` },
+                { label: 'Biens facturés', value: `${f.actifs} / ${f.total}` },
                 { label: 'Tarif par bien', value: `${euro(f.unitaire)} / mois` },
                 { label: 'Total mensuel', value: `${euro(f.montantMensuel)} HTVA`, strong: true },
-                { label: 'Mise en service', value: mes.payee ? `Réglée${mes.date ? ' le ' + formatDate(mes.date) : ''}` : `${euro(mes.montant)} (à régler)`, color: mes.payee ? '#249E7C' : '#3B62A8' },
                 subStatus === 'trialing' && details?.trialEnd && { label: 'Fin de l\'essai', value: formatDate(details.trialEnd) },
                 estActif && !resiliationProgrammee && { label: 'Prochain prélèvement', value: formatDate(details?.currentPeriodEnd) },
                 resiliationProgrammee && { label: 'Fin d\'accès', value: formatDate(details?.cancelAt || details?.currentPeriodEnd), color: '#E5484D' },
@@ -146,6 +134,9 @@ export function AbonnementClient({ subStatus, details, createdAt, facturation, m
                 </div>
               ))}
             </div>
+            <p style={{ fontSize: 11.5, color: '#A9B0BE', margin: '14px 0 0', lineHeight: 1.5 }}>
+              Frais de mise en service (1 490 € HTVA, une seule fois) facturés séparément, hors plateforme.
+            </p>
           </div>
 
           {/* Gestion (infos sur le portail) */}

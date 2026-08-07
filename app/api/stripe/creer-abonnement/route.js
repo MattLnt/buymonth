@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { stripe, priceForFormule, PRICE_MISE_EN_SERVICE } from '@/lib/stripe'
+import { stripe, priceForFormule } from '@/lib/stripe'
+import { STATUTS_FACTURABLES } from '@/lib/facturation'
 import { getSettings } from '@/lib/settings'
 
 export async function POST(req) {
@@ -20,10 +21,12 @@ export async function POST(req) {
 
     const customerId = client.stripeCustomerId
 
-    // Décompte : on facture les biens ACTIFS uniquement
-    const quantite = await prisma.bien.count({ where: { clientId: client.id, statut: 'ACTIF' } })
+    // Décompte : on facture les biens ACTIF + OPTION (« bien actif » au sens contractuel)
+    const quantite = await prisma.bien.count({
+      where: { clientId: client.id, statut: { in: STATUTS_FACTURABLES } },
+    })
     if (quantite < 1) {
-      return NextResponse.json({ error: 'Ajoutez au moins un bien actif avant de vous abonner.' }, { status: 400 })
+      return NextResponse.json({ error: 'Ajoutez au moins un bien actif (ou en option) avant de vous abonner.' }, { status: 400 })
     }
 
     const price = priceForFormule(client.formule)
@@ -45,12 +48,6 @@ export async function POST(req) {
     }
     if (avecEssai) subData.trial_period_days = settings.essaiJours
 
-    // Frais de mise en service (une seule fois) → ajoutés à la première facture
-    const inclutMiseEnService = !client.miseEnServicePayee && !!PRICE_MISE_EN_SERVICE
-    if (inclutMiseEnService) {
-      subData.add_invoice_items = [{ price: PRICE_MISE_EN_SERVICE }]
-    }
-
     const sub = await stripe.subscriptions.create(subData)
 
     // Date de fin de période : sur l'item dans les versions récentes de l'API
@@ -63,7 +60,6 @@ export async function POST(req) {
         subStatus: sub.status,
         subEndsAt: periodEnd ? new Date(periodEnd * 1000) : null,
         trialEndsAt: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-        ...(inclutMiseEnService ? { miseEnServicePayee: true, miseEnServiceAt: new Date() } : {}),
       },
     })
 
