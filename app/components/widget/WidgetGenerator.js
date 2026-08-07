@@ -16,9 +16,9 @@ const ic = {
   code: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>,
 }
 
-function buildSVG({ mensualite, premium, theme, primaire, accent }) {
-  const dark = theme === 'dark'
-  const bg = dark ? '#16324F' : '#FFFFFF'
+function buildSVG({ mensualite, premium, style, primaire, accent, fond }) {
+  const dark = style === 'dark'
+  const bg = fond || (dark ? '#16324F' : '#FFFFFF')
   const textMain = dark ? '#FFFFFF' : '#16324F'
   const textMuted = dark ? '#9FB0C4' : '#8A92A6'
   const w = 320, h = 288
@@ -43,11 +43,12 @@ function buildSVG({ mensualite, premium, theme, primaire, accent }) {
 export function WidgetGenerator({ biens, plan }) {
   const isPremiumPlan = plan === 'PRO_PLUS' || plan === 'PREMIUM'
   const [bienId, setBienId] = useState(biens[0]?.id || '')
-  const [theme, setTheme] = useState('light')
+  const [style, setStyle] = useState('light')
   const [premium, setPremium] = useState(false)
   const [couleurMode, setCouleurMode] = useState('buymonth')
   const [primaire, setPrimaire] = useState('#16324F')
   const [accent, setAccent] = useState('#7CB8A8')
+  const [fond, setFond] = useState('#FFFFFF')
   const [logoUrl, setLogoUrl] = useState('')
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [copied, setCopied] = useState('')
@@ -56,19 +57,25 @@ export function WidgetGenerator({ biens, plan }) {
   const bien = biens.find((b) => b.id === bienId)
   const mensualite = bien?.mensualite || null
 
-  const effPrimaire = premium && couleurMode === 'perso' ? primaire : '#16324F'
-  const effAccent = premium && couleurMode === 'perso' ? accent : '#7CB8A8'
+  const perso = premium && couleurMode === 'perso'
+  const effPrimaire = perso ? primaire : '#16324F'
+  const effAccent = perso ? accent : '#7CB8A8'
+  const effFond = perso ? fond : (style === 'dark' ? '#16324F' : '#FFFFFF')
 
   const params = new URLSearchParams()
   if (bienId) params.set('bien', bienId)
   if (premium) params.set('premium', '1')
-  if (theme === 'dark') params.set('theme', 'dark')
-  if (premium && couleurMode === 'perso') {
+  if (style === 'dark') params.set('theme', 'dark')
+  if (perso) {
     params.set('primaire', primaire.replace('#', ''))
     params.set('accent', accent.replace('#', ''))
+    params.set('fond', fond.replace('#', ''))
   }
   if (premium && logoUrl) params.set('logo', encodeURIComponent(logoUrl))
   const embedUrl = `${BASE_URL}/embed/badge?${params.toString()}`
+
+  // Lien du simulateur pour ce bien (bouton « Simuler ma mensualité »)
+  const simulateurUrl = bienId ? `${BASE_URL}/biens/${bienId}#simuler` : `${BASE_URL}/biens`
 
   const iframeCode = `<iframe src="${embedUrl}" title="Mensualité BuyMonth" loading="lazy" referrerpolicy="no-referrer" style="border:0;width:344px;height:312px;"></iframe>`
   const htmlCode = `<a href="${bien?.urlClient || '#'}" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none">\n  <img src="${BASE_URL}/api/widget/image?${params.toString()}" alt="Propriétaire dès ${mensualite} €/mois" style="width:320px;height:auto" />\n</a>`
@@ -97,7 +104,7 @@ export function WidgetGenerator({ biens, plan }) {
   }
 
   function downloadSVG() {
-    const svg = buildSVG({ mensualite, premium, theme, primaire: effPrimaire, accent: effAccent })
+    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond })
     const blob = new Blob([svg], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -108,7 +115,7 @@ export function WidgetGenerator({ biens, plan }) {
   }
 
   function downloadPNG() {
-    const svg = buildSVG({ mensualite, premium, theme, primaire: effPrimaire, accent: effAccent })
+    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond })
     const img = new Image()
     const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
     const url = URL.createObjectURL(svgBlob)
@@ -166,14 +173,14 @@ export function WidgetGenerator({ biens, plan }) {
           />
         </FormSection>
 
-        <FormSection icon={ic.palette} title="Apparence" subtitle="Thème et personnalisation">
-          <label style={labelStyle}>Thème</label>
+        <FormSection icon={ic.palette} title="Apparence" subtitle="Style et personnalisation">
+          <label style={labelStyle}>Style</label>
           <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-            <button type="button" onClick={() => setTheme('light')} style={toggleBtn(theme === 'light')}>Clair</button>
-            <button type="button" onClick={() => setTheme('dark')} style={toggleBtn(theme === 'dark')}>Foncé</button>
+            <button type="button" onClick={() => setStyle('light')} style={toggleBtn(style === 'light')}>Clair</button>
+            <button type="button" onClick={() => setStyle('dark')} style={toggleBtn(style === 'dark')}>Foncé</button>
           </div>
 
-          <label style={labelStyle}>Type de partenaire</label>
+          <label style={labelStyle}>Thème</label>
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="button" onClick={() => setPremium(false)} style={toggleBtn(!premium)}>Classique</button>
             <button type="button" onClick={() => { if (isPremiumPlan) setPremium(true) }} disabled={!isPremiumPlan} style={toggleBtn(premium, !isPremiumPlan)}>
@@ -222,10 +229,17 @@ export function WidgetGenerator({ biens, plan }) {
                     </div>
                   </div>
                   <div>
-                    <label style={labelStyle}>Couleur accent</label>
+                    <label style={labelStyle}>Couleur mensualité</label>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1.5px solid #E8EDF2', borderRadius: 10, padding: '6px 10px' }}>
                       <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} style={{ width: 30, height: 30, border: 'none', borderRadius: 6, cursor: 'pointer', background: 'none', flexShrink: 0 }} />
                       <span style={{ fontSize: 12.5, color: '#5A6B7D' }}>{accent}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Couleur de fond</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1.5px solid #E8EDF2', borderRadius: 10, padding: '6px 10px' }}>
+                      <input type="color" value={fond} onChange={(e) => setFond(e.target.value)} style={{ width: 30, height: 30, border: 'none', borderRadius: 6, cursor: 'pointer', background: 'none', flexShrink: 0 }} />
+                      <span style={{ fontSize: 12.5, color: '#5A6B7D' }}>{fond}</span>
                     </div>
                   </div>
                 </div>
@@ -252,8 +266,14 @@ export function WidgetGenerator({ biens, plan }) {
       {/* COLONNE PREVIEW */}
       <div style={{ position: 'sticky', top: 24, minWidth: 0 }}>
         <div style={{ background: checker, border: '1px solid #EEF2F7', borderRadius: 16, padding: 28, display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <Badge mensualite={mensualite} premium={premium} theme={theme} couleurPrimaire={effPrimaire} couleurAccent={effAccent} logoUrl={premium ? logoUrl : null} width={280} />
+          <Badge mensualite={mensualite} premium={premium} theme={style} couleurPrimaire={effPrimaire} couleurAccent={effAccent} couleurFond={effFond} logoUrl={premium ? logoUrl : null} width={280} />
         </div>
+
+        {/* Bouton « Simuler ma mensualité » → simulateur du bien */}
+        <a href={simulateurUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px', borderRadius: 10, background: '#7CB8A8', color: '#0F2A22', textDecoration: 'none', fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2" /><line x1="8" y1="6" x2="16" y2="6" /><line x1="8" y1="10" x2="16" y2="10" /><line x1="8" y1="14" x2="12" y2="14" /></svg>
+          Simuler ma mensualité
+        </a>
 
         <div style={{ display: 'flex', gap: 10 }}>
           <button type="button" onClick={downloadSVG} style={{ flex: 1, padding: '11px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>

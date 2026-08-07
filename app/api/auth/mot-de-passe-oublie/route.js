@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
-import { sendResetPassword } from "@/lib/emails";
+import { sendResetPassword } from "@/lib/email";
 
 export async function POST(req) {
   try {
@@ -31,7 +31,7 @@ export async function POST(req) {
         },
       });
 
-      const baseUrl = process.env.NEXTAUTH_URL || "https://courtier-tawny.vercel.app";
+      const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
       const resetUrl = `${baseUrl}/reinitialiser-mot-de-passe?token=${token}`;
 
       try {

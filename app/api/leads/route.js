@@ -11,7 +11,14 @@ export async function POST(req) {
     if (b.bienId) {
       bien = await prisma.bien.findUnique({
         where: { id: b.bienId },
-        select: { id: true, titre: true, ville: true },
+        select: {
+          id: true,
+          titre: true,
+          ville: true,
+          projet: true,
+          unite: true,
+          client: { select: { user: { select: { email: true } }, societe: true } },
+        },
       })
     }
 
@@ -34,7 +41,17 @@ export async function POST(req) {
     // notification email (non bloquant)
     try {
       const settings = await getSettings()
-      await envoyerEmailLead({ lead, bien, destinataires: settings.leadEmails || [] })
+
+      // Destinataires = adresses plateforme + e-mail du promoteur du bien concerné
+      const emailPromoteur = bien?.client?.user?.email
+      const destinataires = [
+        ...(settings.leadEmails || []),
+        ...(emailPromoteur ? [emailPromoteur] : []),
+      ]
+      // dédoublonnage
+      const uniques = [...new Set(destinataires.filter(Boolean))]
+
+      await envoyerEmailLead({ lead, bien, destinataires: uniques })
     } catch (e) {
       // on n'échoue jamais la requête si l'email plante
     }

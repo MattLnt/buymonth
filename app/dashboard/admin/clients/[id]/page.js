@@ -3,13 +3,9 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { PageHeader, StatCard } from '@/app/components/dashboard/Ui'
 import { EssaiCard } from './EssaiCard'
+import { ClientEditForm } from './ClientEditForm'
 
 export const dynamic = 'force-dynamic'
-
-const planLabel = {
-  CLASSIC: { label: 'Classic', color: '#5A6275', bg: '#F2F5FA' },
-  PREMIUM: { label: 'Premium', color: '#7CB8A8', bg: 'rgba(124,184,168,0.14)' },
-}
 
 export default async function AdminClientDetailPage({ params }) {
   const { id } = await params
@@ -19,21 +15,29 @@ export default async function AdminClientDetailPage({ params }) {
     include: {
       user: { select: { email: true } },
       biens: { orderBy: { createdAt: 'desc' } },
-      _count: { select: { biens: true, widgetPayments: true } },
+      _count: { select: { biens: true } },
     },
   })
 
   if (!client) notFound()
 
-  const nbLeads = await prisma.lead.count({ where: { bien: { clientId: client.id } } })
-  const plan = planLabel[client.plan] || planLabel.CLASSIC
+  const nbLeads = await prisma.lead.count({ where: { bien: { clientId: client.id }, deletedAt: null } })
+  const nbBiensActifs = client.biens.filter((b) => b.statut === 'ACTIF' || b.statut === 'OPTION').length
 
-  const infoRow = (label, value) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: '1px solid #F4F7FB' }}>
-      <span style={{ fontSize: 13, color: '#8A92A6' }}>{label}</span>
-      <span style={{ fontSize: 13.5, color: '#193B5E', fontWeight: 600, textAlign: 'right' }}>{value || '—'}</span>
-    </div>
-  )
+  // Données passées au formulaire d'édition
+  const editable = {
+    id: client.id,
+    societe: client.societe,
+    email: client.user?.email,
+    contactNom: client.contactNom,
+    contactOpe: client.contactOpe,
+    contactFacturation: client.contactFacturation,
+    telephone: client.telephone,
+    numeroTva: client.numeroTva,
+    adresse: client.adresse,
+    adresseAdmin: client.adresseAdmin,
+    formule: client.formule,
+  }
 
   return (
     <>
@@ -47,8 +51,8 @@ export default async function AdminClientDetailPage({ params }) {
       <PageHeader title={client.societe || 'Sans nom'} subtitle={client.user?.email} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 26 }}>
-        <StatCard label="Biens" value={client._count.biens} icon="building" />
-        <StatCard label="Widgets générés" value={client._count.widgetPayments} icon="code" />
+        <StatCard label="Biens facturés" value={nbBiensActifs} icon="building" />
+        <StatCard label="Biens (total)" value={client._count.biens} icon="building" />
         <StatCard label="Leads reçus" value={nbLeads} icon="users" />
       </div>
 
@@ -57,20 +61,8 @@ export default async function AdminClientDetailPage({ params }) {
 
         {/* Colonne principale */}
         <div>
-          {/* Infos */}
-          <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 24, marginBottom: 22 }}>
-            <h3 style={{ fontSize: 15.5, fontWeight: 700, color: '#193B5E', margin: '0 0 14px' }}>Informations</h3>
-            {infoRow('Société', client.societe)}
-            {infoRow('Contact', client.contactNom)}
-            {infoRow('Email', client.user?.email)}
-            {infoRow('Téléphone', client.telephone)}
-            {infoRow('Adresse', client.adresse)}
-            {infoRow('N° TVA', client.numeroTva)}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0' }}>
-              <span style={{ fontSize: 13, color: '#8A92A6' }}>Plan</span>
-              <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 600, color: plan.color, background: plan.bg }}>{plan.label}</span>
-            </div>
-          </div>
+          {/* Formulaire d'édition (remplace le bloc lecture seule) */}
+          <ClientEditForm client={editable} />
 
           {/* Grille des biens */}
           <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 24 }}>
@@ -92,8 +84,13 @@ export default async function AdminClientDetailPage({ params }) {
                           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
                         </div>
                       )}
-                      {!b.published && (
-                        <span style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(22,50,79,0.85)', color: '#fff', fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 6 }}>Brouillon</span>
+                      {(b.statut === 'HORS_LIGNE' || b.statut === 'VENDU') && (
+                        <span style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(22,50,79,0.85)', color: '#fff', fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 6 }}>
+                          {b.statut === 'VENDU' ? 'Vendu' : 'Hors-ligne'}
+                        </span>
+                      )}
+                      {b.statut === 'OPTION' && (
+                        <span style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(232,153,35,0.92)', color: '#fff', fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 6 }}>Option</span>
                       )}
                     </div>
                     <div style={{ padding: '12px 13px' }}>

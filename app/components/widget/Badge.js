@@ -10,11 +10,12 @@ export function Badge({
   theme = 'light',
   couleurPrimaire = '#16324F',
   couleurAccent = '#7CB8A8',
+  couleurFond = null,
   logoUrl = null,
   width = 320,
 }) {
   const dark = theme === 'dark'
-  const bg = dark ? '#16324F' : '#FFFFFF'
+  const bg = couleurFond || (dark ? '#16324F' : '#FFFFFF')
   const headerBg = couleurPrimaire
   const textMain = dark ? '#FFFFFF' : '#16324F'
   const textMuted = dark ? 'rgba(255,255,255,0.6)' : '#8A92A6'

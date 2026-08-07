@@ -11,6 +11,8 @@ export default async function EmbedBadgePage({ searchParams }) {
   const theme = sp.theme === 'dark' ? 'dark' : 'light'
   const couleurPrimaire = sp.primaire ? `#${sp.primaire.replace('#', '')}` : '#16324F'
   const couleurAccent = sp.accent ? `#${sp.accent.replace('#', '')}` : '#7CB8A8'
+  const couleurFond = sp.fond ? `#${sp.fond.replace('#', '')}` : null
+  const logoUrl = premium && sp.logo ? decodeURIComponent(sp.logo) : null
 
   let mensualite = null
   let urlClient = null
@@ -32,6 +34,8 @@ export default async function EmbedBadgePage({ searchParams }) {
       theme={theme}
       couleurPrimaire={couleurPrimaire}
       couleurAccent={couleurAccent}
+      couleurFond={couleurFond}
+      logoUrl={logoUrl}
       width={320}
     />
   )

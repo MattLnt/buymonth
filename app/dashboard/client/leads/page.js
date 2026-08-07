@@ -1,16 +1,26 @@
 import { getCurrentClient } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
 import { PageHeader, Card, StatCard } from '@/app/components/dashboard/Ui'
+import { MesLeadsClient } from '@/app/components/dashboard/MesLeadsClient'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ClientLeadsPage() {
   const client = await getCurrentClient()
 
+  // Conformité : on ne requête JAMAIS revenu/apport côté promoteur (réservés à l'admin)
   const leads = await prisma.lead.findMany({
-    where: { bien: { clientId: client.id } },
+    where: { bien: { clientId: client.id }, deletedAt: null },
     orderBy: { createdAt: 'desc' },
-    include: { bien: { select: { titre: true, ville: true } } },
+    select: {
+      id: true,
+      nom: true,
+      email: true,
+      telephone: true,
+      statutPromoteur: true,
+      createdAt: true,
+      bien: { select: { titre: true, ville: true, projet: true, unite: true } },
+    },
   })
 
   // leads ce mois-ci
@@ -36,43 +46,7 @@ export default async function ClientLeadsPage() {
           </div>
         </Card>
       ) : (
-        <Card style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
-              <thead>
-                <tr style={{ background: '#FAFBFE', borderBottom: '1px solid #EEF2F7' }}>
-                  {['Contact', 'Bien', 'Revenus', 'Apport', 'Date'].map((h) => (
-                    <th key={h} style={{ textAlign: 'left', padding: '13px 18px', fontSize: 11.5, fontWeight: 700, color: '#8A92A6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {leads.map((lead) => (
-                  <tr key={lead.id} style={{ borderBottom: '1px solid #F4F7FB' }}>
-                    <td style={{ padding: '14px 18px' }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: '#193B5E', marginBottom: 2 }}>{lead.nom || 'Sans nom'}</div>
-                      <div style={{ fontSize: 12.5, color: '#7A8499' }}>{lead.email || '—'}</div>
-                      {lead.telephone && <div style={{ fontSize: 12.5, color: '#7A8499' }}>{lead.telephone}</div>}
-                    </td>
-                    <td style={{ padding: '14px 18px', fontSize: 13, color: '#3D4759' }}>
-                      {lead.bien ? (
-                        <>
-                          <div style={{ fontWeight: 600 }}>{lead.bien.titre}</div>
-                          {lead.bien.ville && <div style={{ fontSize: 12, color: '#A9B0BE' }}>{lead.bien.ville}</div>}
-                        </>
-                      ) : <span style={{ color: '#C2C8D4' }}>—</span>}
-                    </td>
-                    <td style={{ padding: '14px 18px', fontSize: 13.5, color: '#3D4759' }}>{lead.revenu ? `${lead.revenu.toLocaleString('fr-BE')} €` : '—'}</td>
-                    <td style={{ padding: '14px 18px', fontSize: 13.5, color: '#3D4759' }}>{lead.apport ? `${lead.apport.toLocaleString('fr-BE')} €` : '—'}</td>
-                    <td style={{ padding: '14px 18px', fontSize: 12.5, color: '#A9B0BE', whiteSpace: 'nowrap' }}>
-                      {new Date(lead.createdAt).toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit', year: '2-digit' })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        <MesLeadsClient leads={leads} />
       )}
     </>
   )
