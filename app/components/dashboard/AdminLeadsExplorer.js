@@ -66,7 +66,7 @@ export function AdminLeadsExplorer({ leads }) {
     let res = leads.filter((l) => {
       if (source && l.source !== source) return false
       if (qLow) {
-        const hay = `${l.nom || ''} ${l.email || ''} ${l.telephone || ''} ${l.bienTitre || ''} ${l.promoteur || ''} ${l.projet || ''} ${l.unite || ''}`.toLowerCase()
+        const hay = `${l.nom || ''} ${l.societe || ''} ${l.email || ''} ${l.telephone || ''} ${l.bienTitre || ''} ${l.promoteur || ''} ${l.projet || ''} ${l.unite || ''}`.toLowerCase()
         if (!hay.includes(qLow)) return false
       }
       return true
@@ -129,7 +129,7 @@ export function AdminLeadsExplorer({ leads }) {
             <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#A9B0BE', display: 'flex' }}>
               <Icon name="search" size={16} />
             </span>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher nom, email, bien, promoteur..." style={{ ...inputStyle, paddingLeft: 36 }} />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher nom, entreprise, email, bien, promoteur..." style={{ ...inputStyle, paddingLeft: 36 }} />
           </div>
 
           <FormSelect value={source} onChange={setSource} placeholder="Toutes les sources"
@@ -178,6 +178,7 @@ export function AdminLeadsExplorer({ leads }) {
                     <tr key={lead.id} style={{ borderBottom: '1px solid #F4F7FB', opacity: deleting === lead.id ? 0.4 : 1 }}>
                       <td style={{ padding: '14px 18px' }}>
                         <div style={{ fontSize: 14, fontWeight: 600, color: '#193B5E', marginBottom: 2 }}>{lead.nom || 'Sans nom'}</div>
+                        {lead.societe && <div style={{ fontSize: 12.5, color: '#7CB8A8', fontWeight: 600 }}>{lead.societe}</div>}
                         <div style={{ fontSize: 12.5, color: '#7A8499' }}>{lead.email || '—'}</div>
                         {lead.telephone && <div style={{ fontSize: 12.5, color: '#7A8499' }}>{lead.telephone}</div>}
                       </td>

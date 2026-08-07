@@ -30,6 +30,7 @@ export async function POST(req) {
       data: {
         bienId: bien?.id || null,
         nom: b.nom || null,
+        societe: b.societe || null,
         email: b.email || null,
         telephone: b.telephone || null,
         revenu: b.revenu ? parseInt(b.revenu, 10) : null,

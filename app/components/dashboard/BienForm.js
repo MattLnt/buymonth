@@ -159,7 +159,7 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
             </FormSection>
 
             <FormSection icon={ic.euro} title="Prix" subtitle="La mensualité est calculée automatiquement">
-              <FormInput label="Prix total de vente" name="prixTotal" type="number" value={form.prixTotal} onChange={handle('prixTotal')} placeholder="215000" suffix="€" required min="0" />
+              <FormInput label="Prix du bien" name="prixTotal" type="number" value={form.prixTotal} onChange={handle('prixTotal')} placeholder="215000" suffix="€" required min="0" />
             </FormSection>
 
             <FormSection icon={ic.pin} title="Localisation" subtitle="Adresse et province du bien">

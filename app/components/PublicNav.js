@@ -23,8 +23,6 @@ export default function PublicNav({ variant = "dark" }) {
 
   const navLinks = [
     { href: "/biens", label: "Les biens", desc: "Découvrir les biens disponibles" },
-    { href: "/#process", label: "Process", desc: "En 7 étapes clé en main" },
-    { href: "/#tarifs", label: "Tarifs", desc: "Simple et transparent" },
     { href: "/contact", label: "Contact", desc: "Notre équipe vous répond" },
   ];
 
@@ -56,7 +54,7 @@ export default function PublicNav({ variant = "dark" }) {
         borderBottom: menuOpen ? "1px solid rgba(255,255,255,0.07)" : `1px solid ${scrolled ? "rgba(255,255,255,0.08)" : "transparent"}`,
         transition: "background 0.4s ease, border-color 0.3s ease",
       }}>
-        <Link href="/" onClick={() => setMenuOpen(false)}
+        <Link href="/biens" onClick={() => setMenuOpen(false)}
           style={{ display: "flex", alignItems: "center", textDecoration: "none", zIndex: 201, fontSize: 20, fontWeight: 700, color: logoColor, letterSpacing: "-0.02em", transition: "color 0.3s ease" }}>
           Buy<span style={{ color: "#7CB8A8" }}>Month</span>
         </Link>

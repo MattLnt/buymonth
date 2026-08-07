@@ -13,7 +13,7 @@ export function FormRecap({ form, photos = [], loading, isFormValid, mode, onDel
     { label: 'Projet', value: form.projet && form.projet !== 'Hors projet' ? form.projet : null },
     { label: 'Unité', value: form.unite },
     { label: 'Titre', value: form.titre },
-    { label: 'Prix total', value: prix > 0 ? `${prix.toLocaleString('fr-BE')} €` : null },
+    { label: 'Prix du bien', value: prix > 0 ? `${prix.toLocaleString('fr-BE')} €` : null },
     { label: 'Type', value: form.type },
     { label: 'Province', value: form.province },
     { label: 'Ville', value: localisation },
