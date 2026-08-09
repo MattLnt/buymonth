@@ -10,7 +10,7 @@ export default async function BienDetailPage({ params }) {
 
   const bien = await prisma.bien.findUnique({
     where: { id },
-    include: { client: { select: { societe: true, logoUrl: true, telephone: true } } },
+    include: { client: { select: { id: true, societe: true, slug: true, logoUrl: true, telephone: true } } },
   })
 
   if (!bien || !bien.published) notFound()

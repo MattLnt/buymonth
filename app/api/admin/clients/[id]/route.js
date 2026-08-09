@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { genererSlugUnique } from '@/lib/slug'
 
 const FORMULES = ['PRO', 'PRO_PLUS']
 
@@ -35,10 +36,19 @@ export async function PUT(req, { params }) {
       await prisma.user.update({ where: { id: client.user.id }, data: { email: nouvelEmail } })
     }
 
+    const societe = b.societe.trim()
+
+    // Slug : régénéré seulement si la société change, ou si le client n'en a pas encore
+    let slug = client.slug
+    if (!slug || societe !== client.societe) {
+      slug = await genererSlugUnique(societe, client.id)
+    }
+
     await prisma.client.update({
       where: { id },
       data: {
-        societe: b.societe.trim(),
+        societe,
+        slug,
         contactNom: b.contactNom || null,
         contactOpe: b.contactOpe || null,
         contactFacturation: b.contactFacturation || null,

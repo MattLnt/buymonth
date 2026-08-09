@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { genererSlugUnique } from '@/lib/slug'
 import bcrypt from 'bcryptjs'
 
 const FORMULES = ['PRO', 'PRO_PLUS']
@@ -29,6 +30,9 @@ export async function POST(req) {
 
     const hash = await bcrypt.hash(password, 10)
 
+    // Slug unique dérivé de la société (pour la page publique /agences/[slug])
+    const slug = await genererSlugUnique(societe)
+
     // Création User (role CLIENT) + Client en une transaction
     const client = await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -38,6 +42,7 @@ export async function POST(req) {
         data: {
           userId: user.id,
           societe,
+          slug,
           contactNom: b.contactNom || null,
           contactOpe: b.contactOpe || null,
           contactFacturation: b.contactFacturation || null,

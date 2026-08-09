@@ -35,6 +35,36 @@ export function BienFiche({ bien, apercu = false }) {
   const WRAP = { maxWidth: 1240, margin: '0 auto', padding: '0 24px' }
   const card = { background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 28 }
 
+  // La carte agence est cliquable vers /agences/[slug] uniquement en public (pas en aperçu) et si un slug existe
+  const agenceHref = !apercu && bien.client?.slug ? `/agences/${bien.client.slug}` : null
+
+  const agenceInner = bien.client?.societe ? (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: bien.client.telephone ? 16 : 0 }}>
+        <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#16324F', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7CB8A8', fontWeight: 700, fontSize: 17, flexShrink: 0, overflow: 'hidden' }}>
+          {bien.client.logoUrl ? <img src={bien.client.logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : bien.client.societe[0]?.toUpperCase()}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, color: '#8A92A6' }}>Proposé par</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', display: 'flex', alignItems: 'center', gap: 6 }}>
+            {bien.client.societe}
+            {agenceHref && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2" style={{ flexShrink: 0 }}><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>}
+          </div>
+        </div>
+      </div>
+      {bien.client.telephone && (
+        <div style={{ fontSize: 13, color: '#5A6275', paddingTop: 14, borderTop: '1px solid #F2F5FA' }}>
+          <span style={{ color: '#8A92A6' }}>Téléphone : </span>{bien.client.telephone}
+        </div>
+      )}
+      {agenceHref && (
+        <div style={{ fontSize: 12.5, color: '#7CB8A8', fontWeight: 600, marginTop: bien.client.telephone ? 12 : 14, paddingTop: bien.client.telephone ? 12 : 14, borderTop: '1px solid #F2F5FA' }}>
+          Voir tous les biens de cette agence →
+        </div>
+      )}
+    </>
+  ) : null
+
   return (
     <div style={{ minHeight: '100vh', background: '#EEF1F6' }}>
       <PublicNav />
@@ -126,23 +156,16 @@ export function BienFiche({ bien, apercu = false }) {
               )}
             </div>
 
-            {bien.client?.societe && (
-              <div style={{ ...card, padding: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: bien.client.telephone ? 16 : 0 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#16324F', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7CB8A8', fontWeight: 700, fontSize: 17, flexShrink: 0, overflow: 'hidden' }}>
-                    {bien.client.logoUrl ? <img src={bien.client.logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : bien.client.societe[0]?.toUpperCase()}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 12, color: '#8A92A6' }}>Proposé par</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: '#193B5E' }}>{bien.client.societe}</div>
-                  </div>
+            {agenceInner && (
+              agenceHref ? (
+                <Link href={agenceHref} style={{ ...card, padding: 20, textDecoration: 'none', display: 'block', transition: 'border-color 0.15s ease' }}>
+                  {agenceInner}
+                </Link>
+              ) : (
+                <div style={{ ...card, padding: 20 }}>
+                  {agenceInner}
                 </div>
-                {bien.client.telephone && (
-                  <div style={{ fontSize: 13, color: '#5A6275', paddingTop: 14, borderTop: '1px solid #F2F5FA' }}>
-                    <span style={{ color: '#8A92A6' }}>Téléphone : </span>{bien.client.telephone}
-                  </div>
-                )}
-              </div>
+              )
             )}
 
             <p style={{ fontSize: 10.5, color: '#A9B0BE', margin: 0, lineHeight: 1.5, textAlign: 'center', padding: '0 8px' }}>
