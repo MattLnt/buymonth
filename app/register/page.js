@@ -49,11 +49,15 @@ export default function RegisterPage() {
           .reg-aside { display: none !important; }
           .reg-form-col { padding: 32px 24px !important; }
         }
+        .reg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 520px) {
+          .reg-row { grid-template-columns: 1fr; gap: 0; }
+        }
       `}</style>
 
       {/* ===== COLONNE GAUCHE : formulaire ===== */}
       <div className="reg-form-col" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 40px" }}>
-        <div style={{ width: "100%", maxWidth: 420 }}>
+        <div style={{ width: "100%", maxWidth: 480 }}>
           <Link href="/" style={{ fontSize: 24, fontWeight: 700, color: "#193B5E", textDecoration: "none", letterSpacing: "-0.02em", display: "inline-block", marginBottom: 32 }}>
             Buy<span style={{ color: "#7CB8A8" }}>Month</span>
           </Link>
@@ -63,9 +67,11 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit}>
             <Field label="Société" value={form.societe} onChange={set("societe")} placeholder="Nom de votre société" required />
-            <Field label="Nom du contact" value={form.contactNom} onChange={set("contactNom")} placeholder="Votre nom" />
+            <div className="reg-row">
+              <Field label="Nom du contact" value={form.contactNom} onChange={set("contactNom")} placeholder="Votre nom" />
+              <Field label="Téléphone" value={form.telephone} onChange={set("telephone")} placeholder="+32 ..." />
+            </div>
             <Field label="Email" type="email" value={form.email} onChange={set("email")} placeholder="vous@societe.be" required />
-            <Field label="Téléphone" value={form.telephone} onChange={set("telephone")} placeholder="+32 ..." />
             <PasswordField value={form.password} onChange={set("password")} />
 
             {error && <p style={{ color: "#E5484D", fontSize: 13, margin: "0 0 16px" }}>{error}</p>}
@@ -99,7 +105,7 @@ export default function RegisterPage() {
             Espace promoteur
           </span>
 
-          <h2 style={{ fontSize: 34, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1.15, margin: "0 0 18px" }}>
+          <h2 style={{ fontSize: 34, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1.3, margin: "0 0 18px", color: "#fff" }}>
             Transformez chaque visite en <span style={{ color: "#7CB8A8" }}>opportunité</span>.
           </h2>
           <p style={{ fontSize: 15, color: "rgba(255,255,255,0.65)", lineHeight: 1.7, margin: "0 0 44px" }}>
