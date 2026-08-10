@@ -9,7 +9,11 @@ import PublicFooter from '@/app/components/PublicFooter'
 const specIcon = {
   type: <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />,
   bed: <><path d="M2 4v16M2 8h18a2 2 0 012 2v10M2 17h20M6 8V6a2 2 0 012-2h8" /></>,
+  bath: <><path d="M4 12V5a2 2 0 012-2 2 2 0 012 2M4 12h16v3a4 4 0 01-4 4H8a4 4 0 01-4-4v-3zM6 20l-1 2M18 20l1 2" /></>,
   ruler: <><path d="M21.3 8.7L8.7 21.3a1 1 0 01-1.4 0l-4.6-4.6a1 1 0 010-1.4L15.3 2.7a1 1 0 011.4 0l4.6 4.6a1 1 0 010 1.4z" /></>,
+  terrasse: <><path d="M3 21h18M5 21V11l7-5 7 5v10M9 21v-6h6v6" /></>,
+  jardin: <><path d="M12 22V12M12 12c0-3 2-5 5-5 0 3-2 5-5 5zM12 12c0-3-2-5-5-5 0 3 2 5 5 5zM12 8c0-2 1.5-4 4-4M8 4c2.5 0 4 2 4 4" /></>,
+  peb: <><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></>,
   pin: <><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></>,
 }
 
@@ -24,9 +28,13 @@ export function BienFiche({ bien, apercu = false }) {
   const mensualite = bien.mensualite || calculMensualite(bien.prixTotal)
 
   const specs = [
-    bien.type && { icon: 'type', label: 'Type', value: bien.type },
+    bien.type && { icon: 'type', label: 'Type de bien', value: bien.type },
     bien.chambres != null && { icon: 'bed', label: 'Chambres', value: bien.chambres },
-    bien.surface != null && { icon: 'ruler', label: 'Surface', value: `${bien.surface} m²` },
+    bien.sallesDeBain != null && { icon: 'bath', label: 'Salles de bain', value: bien.sallesDeBain },
+    bien.surface != null && { icon: 'ruler', label: 'Surface habitable', value: `${bien.surface} m²` },
+    bien.terrasse != null && bien.terrasse > 0 && { icon: 'terrasse', label: 'Terrasse', value: `${bien.terrasse} m²` },
+    bien.jardin != null && bien.jardin > 0 && { icon: 'jardin', label: 'Jardin', value: `${bien.jardin} m²` },
+    bien.pebClasse && { icon: 'peb', label: 'Classe PEB', value: bien.pebClasse + (bien.pebKwh ? ` · ${bien.pebKwh} kWh/m²·an` : '') },
     (bien.ville || bien.province) && { icon: 'pin', label: 'Localisation', value: [bien.ville, bien.province].filter(Boolean).join(', ') },
   ].filter(Boolean)
 
@@ -120,26 +128,32 @@ export function BienFiche({ bien, apercu = false }) {
         <BienGallery images={bien.images} titre={bien.titre} />
 
         <div className="bien-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 28, marginTop: 28, alignItems: 'start' }}>
-          <style>{`@media (max-width: 1024px){ .bien-detail-grid { grid-template-columns: 1fr !important; } }`}</style>
+          <style>{`
+            @media (max-width: 1024px){ .bien-detail-grid { grid-template-columns: 1fr !important; } }
+            @media (max-width: 560px){ .bien-specs-grid { grid-template-columns: 1fr !important; } }
+          `}</style>
 
           {/* COLONNE PRINCIPALE */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
             <div style={card}>
               <h1 style={{ fontSize: 28, fontWeight: 700, color: '#193B5E', margin: '0 0 6px', letterSpacing: '-0.02em' }}>{bien.titre}</h1>
-              <div style={{ fontSize: 15, color: '#8A92A6', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ fontSize: 15, color: '#8A92A6', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
                 {[bien.ville, bien.province].filter(Boolean).join(', ') || 'Belgique'}
               </div>
+            </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12 }}>
+            <div style={card}>
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: '#193B5E', margin: '0 0 18px' }}>Caractéristiques</h2>
+              <div className="bien-specs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 {specs.map((s) => (
-                  <div key={s.label} style={{ background: '#FAFDFD', border: '1px solid #EEF2F7', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(124,184,168,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{specIcon[s.icon]}</svg>
+                  <div key={s.label} style={{ background: '#FAFDFD', border: '1px solid #EEF2F7', borderRadius: 12, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <span style={{ width: 42, height: 42, borderRadius: 11, background: 'rgba(124,184,168,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{specIcon[s.icon]}</svg>
                     </span>
-                    <div>
-                      <div style={{ fontSize: 11.5, color: '#8A92A6' }}>{s.label}</div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: '#193B5E' }}>{s.value}</div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 11.5, color: '#8A92A6', marginBottom: 2 }}>{s.label}</div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', lineHeight: 1.3 }}>{s.value}</div>
                     </div>
                   </div>
                 ))}
