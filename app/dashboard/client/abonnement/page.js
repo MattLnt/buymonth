@@ -45,6 +45,7 @@ export default async function AbonnementPage({ searchParams }) {
 
       <AbonnementClient
         subStatus={client.subStatus}
+        formule={client.formule}
         details={details}
         createdAt={client.createdAt}
         facturation={facturation}
