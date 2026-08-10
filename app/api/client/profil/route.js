@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { genererSlugUnique } from '@/lib/slug'
 
 export async function PUT(req) {
   try {
@@ -16,16 +17,25 @@ export async function PUT(req) {
       return NextResponse.json({ error: 'Le nom de société est requis.' }, { status: 400 })
     }
 
+    const societe = b.societe.trim()
+
+    // Régénère le slug si la société change OU si le client n'a pas encore de slug
+    const data = {
+      societe,
+      contactNom: b.contactNom || null,
+      telephone: b.telephone || null,
+      adresse: b.adresse || null,
+      numeroTva: b.numeroTva || null,
+      logoUrl: b.logoUrl || null,
+    }
+
+    if (societe !== client.societe || !client.slug) {
+      data.slug = await genererSlugUnique(societe, client.id)
+    }
+
     const updated = await prisma.client.update({
       where: { id: client.id },
-      data: {
-        societe: b.societe.trim(),
-        contactNom: b.contactNom || null,
-        telephone: b.telephone || null,
-        adresse: b.adresse || null,
-        numeroTva: b.numeroTva || null,
-        logoUrl: b.logoUrl || null,
-      },
+      data,
     })
 
     return NextResponse.json({ ok: true, client: updated })
