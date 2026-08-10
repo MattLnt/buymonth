@@ -20,6 +20,9 @@ const STATUTS = [
   { value: 'VENDU', label: 'Vendu (hors décompte)' },
 ]
 
+// Valeur spéciale du select pour déclencher la saisie d'un nouveau projet
+const NOUVEAU = '__nouveau__'
+
 const ic = {
   pin: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>,
   euro: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>,
@@ -62,11 +65,30 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
   const [loading, setLoading] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
+  // Liste des projets existants (hors "Hors projet"), sans doublon
+  const projetsExistants = [...new Set(projets.filter((p) => p && p !== 'Hors projet'))]
+
+  // Mode "nouveau projet" : actif si le projet courant n'est ni "Hors projet" ni dans la liste existante
+  const [nouveauProjet, setNouveauProjet] = useState(
+    !!form.projet && form.projet !== 'Hors projet' && !projetsExistants.includes(form.projet)
+  )
+
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }))
   const handle = (k) => (e) => setField(k, e.target.value)
 
-  // Liste des projets pour l'autocomplétion (existants + "Hors projet"), sans doublon
-  const projetOptions = [...new Set(['Hors projet', ...projets, form.projet].filter(Boolean))]
+  // Valeur affichée dans le <select> : soit le projet courant, soit l'option "nouveau"
+  const selectValue = nouveauProjet ? NOUVEAU : form.projet
+
+  function onSelectProjet(e) {
+    const v = e.target.value
+    if (v === NOUVEAU) {
+      setNouveauProjet(true)
+      setField('projet', '') // on vide pour laisser saisir
+    } else {
+      setNouveauProjet(false)
+      setField('projet', v)
+    }
+  }
 
   const isFormValid = form.titre && parseInt(form.prixTotal, 10) > 0
   const estVisible = form.statut === 'ACTIF' || form.statut === 'OPTION'
@@ -79,13 +101,16 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
       setError('Ajoutez au moins une photo pour mettre ce bien en ligne.')
       return
     }
+    // Si "nouveau projet" activé mais champ vide, on retombe sur "Hors projet"
+    const projetFinal = nouveauProjet && !form.projet.trim() ? 'Hors projet' : form.projet.trim() || 'Hors projet'
+
     setLoading(true); setError('')
 
     try {
       const res = await fetch('/api/biens', {
         method: mode === 'edit' ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, images: photos, ...(mode === 'edit' ? { id: initial.id } : {}) }),
+        body: JSON.stringify({ ...form, projet: projetFinal, images: photos, ...(mode === 'edit' ? { id: initial.id } : {}) }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Erreur.'); setLoading(false); return }
@@ -133,16 +158,20 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={labelStyle}>Projet</label>
-                  <input
-                    list="projets-list"
-                    value={form.projet}
-                    onChange={handle('projet')}
-                    placeholder="Nom du programme"
-                    style={inputStyle}
-                  />
-                  <datalist id="projets-list">
-                    {projetOptions.map((p) => <option key={p} value={p} />)}
-                  </datalist>
+                  <select value={selectValue} onChange={onSelectProjet} style={{ ...inputStyle, cursor: 'pointer', appearance: 'auto' }}>
+                    <option value="Hors projet">Hors projet</option>
+                    {projetsExistants.map((p) => <option key={p} value={p}>{p}</option>)}
+                    <option value={NOUVEAU}>+ Nouveau projet…</option>
+                  </select>
+                  {nouveauProjet && (
+                    <input
+                      value={form.projet}
+                      onChange={handle('projet')}
+                      placeholder="Nom du nouveau programme"
+                      autoFocus
+                      style={{ ...inputStyle, marginTop: 8 }}
+                    />
+                  )}
                 </div>
                 <FormInput label="Unité" name="unite" value={form.unite} onChange={handle('unite')} placeholder="B2.03" />
               </div>

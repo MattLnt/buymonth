@@ -1,7 +1,12 @@
+"use client";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 import CalMark from "./CalMark";
 
 export default function Nav() {
+  const { status } = useSession();
+  const isLoggedIn = status === "authenticated";
+
   return (
     <nav>
       <div className="wrap nav-in">
@@ -17,12 +22,25 @@ export default function Nav() {
           <a href="/pro#contact">Contact</a>
         </div>
         <div className="nav-actions">
-          <Link className="nav-login" href="/login">
-            Connexion
-          </Link>
-          <Link className="btn btn-primary" href="/contact">
-            Réserver une démo
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <button className="nav-login" onClick={() => signOut({ callbackUrl: "/" })} style={{ background: "none", border: "none", cursor: "pointer", font: "inherit" }}>
+                Déconnexion
+              </button>
+              <Link className="btn btn-primary" href="/dashboard">
+                Mon espace →
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link className="nav-login" href="/login">
+                Connexion
+              </Link>
+              <Link className="btn btn-primary" href="/contact">
+                Réserver une démo
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>
