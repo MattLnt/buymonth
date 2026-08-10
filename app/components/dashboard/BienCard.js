@@ -121,8 +121,8 @@ export function BienCard({ bien }) {
           <div style={{ display: 'flex', gap: 8 }}>
             <Link
               href={voirHref}
-              target={meta.visible ? '_blank' : undefined}
-              rel={meta.visible ? 'noopener noreferrer' : undefined}
+              target="_blank"
+              rel="noopener noreferrer"
               style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 9, background: '#fff', color: '#5A6275', border: '1px solid #E8EDF2', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
