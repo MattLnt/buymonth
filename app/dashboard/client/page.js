@@ -68,7 +68,7 @@ export default async function ClientDashboard() {
   // Cartes KPI en grille 2×2 (« Biens en option » remplace « Widgets générés »)
   const kpis = [
     { label: 'Biens actifs', value: nbBiensActifs, sub: `${nbBiens} au total`, icon: 'building', grad: 'linear-gradient(135deg, #16324F 0%, #2E6388 100%)', href: '/dashboard/client/biens?statut=ACTIF' },
-    { label: 'Biens en option', value: nbBiensOption, sub: `${nbBiensFactures} facturés`, icon: 'tag', grad: 'linear-gradient(135deg, #B4791C 0%, #E89923 100%)', href: '/dashboard/client/biens?statut=OPTION' },
+    { label: 'Biens en option', value: nbBiensOption, sub: `${nbBiens} au total`, icon: 'tag', grad: 'linear-gradient(135deg, #B4791C 0%, #E89923 100%)', href: '/dashboard/client/biens?statut=OPTION' },
     { label: 'Leads reçus', value: nbLeads, sub: `${tauxConversion}% de conversion`, icon: 'users', grad: 'linear-gradient(135deg, #1D7A5E 0%, #7CB8A8 100%)', href: '/dashboard/client/leads' },
     { label: 'Vues totales', value: totalVues.toLocaleString('fr-BE'), sub: 'Sur tous vos biens', icon: 'eye', grad: 'linear-gradient(135deg, #2E6388 0%, #4A7DA8 100%)', href: '/dashboard/client/biens' },
   ]
