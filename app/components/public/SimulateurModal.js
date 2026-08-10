@@ -19,6 +19,19 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalis�
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // Ouverture auto si l'URL contient #simuler (ex. bouton « Simuler ma mensualité » du widget)
+  useEffect(() => {
+    function ouvrirSiHash() {
+      if (window.location.hash === '#simuler') {
+        setStep(1)
+        setOpen(true)
+      }
+    }
+    ouvrirSiHash()
+    window.addEventListener('hashchange', ouvrirSiHash)
+    return () => window.removeEventListener('hashchange', ouvrirSiHash)
+  }, [])
+
   // Étape 1 = layout 2 panneaux (large). Étape 2 = résultat (plus étroit, centré).
   const maxW = step === 1 ? 880 : 560
 
