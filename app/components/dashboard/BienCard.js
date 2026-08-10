@@ -19,7 +19,6 @@ export function BienCard({ bien }) {
   const [dupliquing, setDupliquing] = useState(false)
 
   const meta = STATUT_META[bien.statut] || STATUT_META.ACTIF
-  const voirHref = meta.visible ? `/biens/${bien.id}` : `/dashboard/client/biens/${bien.id}/apercu`
 
   async function handleDelete() {
     setDeleting(true)
@@ -120,7 +119,7 @@ export function BienCard({ bien }) {
           {/* Ligne 2 : Voir le bien + Dupliquer */}
           <div style={{ display: 'flex', gap: 8 }}>
             <Link
-              href={voirHref}
+              href={`/biens/${bien.id}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 9, background: '#fff', color: '#5A6275', border: '1px solid #E8EDF2', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}
