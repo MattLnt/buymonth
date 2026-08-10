@@ -51,6 +51,7 @@ export default function ProContactPage() {
       <div style={{ minHeight: "100vh", background: "#EEF1F6" }}>
         <style>{`
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+          .vitrine nav { background: #fff !important; }
           @media (max-width: 768px) {
             .procontact-layout { grid-template-columns: 1fr !important; padding: 40px 20px !important; gap: 32px !important; }
             .procontact-sidebar { position: static !important; }

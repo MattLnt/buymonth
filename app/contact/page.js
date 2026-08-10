@@ -53,7 +53,7 @@ export default function ContactPage() {
         }
       `}</style>
 
-      <PublicNav />
+      <PublicNav variant="light" />
 
       <div style={{ paddingTop: 64 }}>
         {/* Hero */}
