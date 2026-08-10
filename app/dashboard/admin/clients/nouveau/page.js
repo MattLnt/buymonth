@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { PageHeader } from '@/app/components/dashboard/Ui'
 import { ClientCreateForm } from './ClientCreateForm'
 
 export const dynamic = 'force-dynamic'
@@ -14,7 +13,10 @@ export default function NouveauClientPage() {
         </Link>
       </div>
 
-      <PageHeader title="Nouveau promoteur" subtitle="Créez un compte promoteur et ses informations." />
+      <div style={{ marginBottom: 22 }}>
+        <h1 style={{ fontSize: 26, fontWeight: 800, color: '#193B5E', margin: 0, letterSpacing: '-0.02em' }}>Nouveau promoteur</h1>
+        <p style={{ fontSize: 14, color: '#8A92A6', margin: '5px 0 0' }}>Créez un compte promoteur, ses contacts et sa formule.</p>
+      </div>
 
       <ClientCreateForm />
     </>

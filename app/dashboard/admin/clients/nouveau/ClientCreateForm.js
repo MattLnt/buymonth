@@ -9,8 +9,35 @@ const FORMULES = [
   { value: 'PRO_PLUS', label: 'BuyMonth Pro+ (45 €/bien)' },
 ]
 
+const FORMULE_LABEL = { PRO: 'BuyMonth Pro', PRO_PLUS: 'BuyMonth Pro+' }
+const FORMULE_PRIX = { PRO: '39 €/bien', PRO_PLUS: '45 €/bien' }
+
 const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
+
+function SectionCard({ num, titre, sousTitre, children }) {
+  return (
+    <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 24, marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+        <div style={{ width: 30, height: 30, borderRadius: 9, background: 'linear-gradient(135deg, #193B5E, #1D4267)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{num}</div>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#193B5E' }}>{titre}</div>
+          {sousTitre && <div style={{ fontSize: 12.5, color: '#8A92A6', marginTop: 1 }}>{sousTitre}</div>}
+        </div>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+function RecapLigne({ label, value, vide }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', flexShrink: 0 }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 600, color: vide ? 'rgba(255,255,255,0.35)' : '#fff', textAlign: 'right', wordBreak: 'break-word' }}>{value}</span>
+    </div>
+  )
+}
 
 export function ClientCreateForm() {
   const router = useRouter()
@@ -68,64 +95,105 @@ export function ClientCreateForm() {
     </div>
   )
 
+  const initiale = (form.societe.trim()[0] || '?').toUpperCase()
+
   return (
-    <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 24, maxWidth: 760 }}>
+    <form onSubmit={handleSubmit}>
+      <style>{`
+        @media (max-width: 980px){ .nouveau-promo-grid { grid-template-columns: 1fr !important; } .nouveau-promo-recap { position: static !important; } }
+      `}</style>
+
       {error && (
         <div style={{ marginBottom: 18, padding: '11px 14px', borderRadius: 10, fontSize: 13.5, fontWeight: 600, background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
           {error}
         </div>
       )}
 
-      {/* Identité + accès */}
-      <p style={{ fontSize: 12, fontWeight: 700, color: '#8A92A6', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 14px' }}>Identité & accès</p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
-        <Champ label="Société *" k="societe" placeholder="Nom de l'agence / promoteur" />
-        <Champ label="Email de connexion *" k="email" type="email" placeholder="contact@promoteur.be" />
-        <div style={{ gridColumn: '1 / -1' }}>
-          <label style={labelStyle}>Mot de passe initial *</label>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <input type="text" value={form.password} onChange={handle('password')} placeholder="Au moins 8 caractères" style={inputStyle} />
-            <button type="button" onClick={genererMotDePasse} style={{ whiteSpace: 'nowrap', padding: '0 16px', borderRadius: 10, border: '1.5px solid #E8EDF2', background: '#F2F5FA', color: '#193B5E', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-              Générer
-            </button>
+      <div className="nouveau-promo-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+
+        {/* Colonne formulaire */}
+        <div>
+          <SectionCard num="1" titre="Identité & accès" sousTitre="Société et identifiants de connexion.">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <Champ label="Société *" k="societe" placeholder="Nom de l'agence / promoteur" full />
+              <Champ label="Email de connexion *" k="email" type="email" placeholder="contact@promoteur.be" full />
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={labelStyle}>Mot de passe initial *</label>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <input type="text" value={form.password} onChange={handle('password')} placeholder="Au moins 8 caractères" style={inputStyle} />
+                  <button type="button" onClick={genererMotDePasse} style={{ whiteSpace: 'nowrap', padding: '0 16px', borderRadius: 10, border: '1.5px solid #E8EDF2', background: '#F2F5FA', color: '#193B5E', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                    Générer
+                  </button>
+                </div>
+                <p style={{ fontSize: 11.5, color: '#A9B0BE', margin: '7px 0 0' }}>Communiquez-le au promoteur ; il pourra le changer via « mot de passe oublié ».</p>
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard num="2" titre="Contacts" sousTitre="Interlocuteurs opérationnels et facturation.">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <Champ label="Contact opérationnel / marketing" k="contactOpe" placeholder="Nom du contact" />
+              <Champ label="Contact facturation" k="contactFacturation" placeholder="Nom du contact" />
+              <Champ label="Contact principal (affiché)" k="contactNom" placeholder="Nom du contact" full />
+              <Champ label="Téléphone" k="telephone" placeholder="+32 ..." />
+              <Champ label="N° TVA" k="numeroTva" placeholder="BE0123456789" />
+            </div>
+          </SectionCard>
+
+          <SectionCard num="3" titre="Adresses" sousTitre="Adresse affichée et adresse administrative.">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <Champ label="Adresse" k="adresse" placeholder="Rue, n°, ville" />
+              <Champ label="Adresse administrative" k="adresseAdmin" placeholder="Siège / facturation" />
+            </div>
+          </SectionCard>
+
+          <SectionCard num="4" titre="Formule" sousTitre="Tarif appliqué par bien actif.">
+            <div style={{ maxWidth: 360 }}>
+              <FormSelect value={form.formule} onChange={(v) => setField('formule', v)} options={FORMULES} />
+            </div>
+          </SectionCard>
+        </div>
+
+        {/* Colonne récap sticky */}
+        <div className="nouveau-promo-recap" style={{ position: 'sticky', top: 88 }}>
+          <div style={{ borderRadius: 18, overflow: 'hidden', boxShadow: '0 18px 44px rgba(25,59,94,0.18)' }}>
+            {/* En-tête récap */}
+            <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', padding: '24px 22px 20px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>Récapitulatif</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(124,184,168,0.22)', border: '1px solid rgba(124,184,168,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 800, color: '#A8D5C7', flexShrink: 0 }}>
+                  {initiale}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', wordBreak: 'break-word' }}>
+                    {form.societe.trim() || 'Nouveau promoteur'}
+                  </div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 5, fontSize: 11.5, fontWeight: 700, color: '#A8D5C7', background: 'rgba(124,184,168,0.16)', padding: '3px 10px', borderRadius: 20 }}>
+                    {FORMULE_LABEL[form.formule]} · {FORMULE_PRIX[form.formule]}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Corps récap */}
+            <div style={{ background: '#1B3B5A', padding: '6px 22px 20px' }}>
+              <RecapLigne label="Email" value={form.email.trim() || 'À renseigner'} vide={!form.email.trim()} />
+              <RecapLigne label="Mot de passe" value={form.password ? '••••••••' : 'À définir'} vide={!form.password} />
+              <RecapLigne label="Contact principal" value={form.contactNom.trim() || '—'} vide={!form.contactNom.trim()} />
+              <RecapLigne label="Contact facturation" value={form.contactFacturation.trim() || '—'} vide={!form.contactFacturation.trim()} />
+              <RecapLigne label="Téléphone" value={form.telephone.trim() || '—'} vide={!form.telephone.trim()} />
+              <RecapLigne label="N° TVA" value={form.numeroTva.trim() || '—'} vide={!form.numeroTva.trim()} />
+              <RecapLigne label="Adresse" value={form.adresse.trim() || '—'} vide={!form.adresse.trim()} />
+
+              <button type="submit" disabled={saving} style={{ width: '100%', marginTop: 18, padding: '13px 24px', borderRadius: 11, background: saving ? 'rgba(124,184,168,0.5)' : '#7CB8A8', color: '#0F2A40', border: 'none', fontSize: 14.5, fontWeight: 700, cursor: saving ? 'wait' : 'pointer', transition: 'background 0.15s' }}>
+                {saving ? 'Création...' : 'Créer le promoteur'}
+              </button>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textAlign: 'center', margin: '10px 0 0' }}>
+                Un compte et sa page agence seront créés.
+              </p>
+            </div>
           </div>
-          <p style={{ fontSize: 11.5, color: '#A9B0BE', margin: '7px 0 0' }}>Communiquez-le au promoteur ; il pourra le changer via « mot de passe oublié ».</p>
         </div>
-      </div>
-
-      {/* Contacts */}
-      <div style={{ borderTop: '1px solid #F2F5FA', paddingTop: 18, marginBottom: 20 }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: '#8A92A6', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 14px' }}>Contacts</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-          <Champ label="Contact opérationnel / marketing" k="contactOpe" placeholder="Nom du contact" />
-          <Champ label="Contact facturation" k="contactFacturation" placeholder="Nom du contact" />
-          <Champ label="Contact principal (affiché)" k="contactNom" placeholder="Nom du contact" full />
-          <Champ label="Téléphone" k="telephone" placeholder="+32 ..." />
-          <Champ label="N° TVA" k="numeroTva" placeholder="BE0123456789" />
-        </div>
-      </div>
-
-      {/* Adresses */}
-      <div style={{ borderTop: '1px solid #F2F5FA', paddingTop: 18, marginBottom: 20 }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: '#8A92A6', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 14px' }}>Adresses</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-          <Champ label="Adresse" k="adresse" placeholder="Rue, n°, ville" />
-          <Champ label="Adresse administrative" k="adresseAdmin" placeholder="Siège / facturation" />
-        </div>
-      </div>
-
-      {/* Formule */}
-      <div style={{ borderTop: '1px solid #F2F5FA', paddingTop: 18, marginBottom: 22 }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: '#8A92A6', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 14px' }}>Formule</p>
-        <div style={{ maxWidth: 320 }}>
-          <FormSelect value={form.formule} onChange={(v) => setField('formule', v)} options={FORMULES} />
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: 10 }}>
-        <button type="submit" disabled={saving} style={{ padding: '12px 24px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 14, fontWeight: 600, cursor: saving ? 'wait' : 'pointer' }}>
-          {saving ? 'Création...' : 'Créer le promoteur'}
-        </button>
       </div>
     </form>
   )
