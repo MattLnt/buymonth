@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import { evalueBien } from '@/lib/capacite'
 import { MENSUALITE_CONFIG, AVERTISSEMENT_LEGAL } from '@/lib/mensualiteConfig'
 
-const labelStyle = { display: 'block', fontSize: 12, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }
-const inputStyle = { width: '100%', padding: '13px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 15, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
+const labelStyle = { display: 'block', fontSize: 11.5, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }
+const inputStyle = { width: '100%', padding: '11px 13px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14.5, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
 function Euro({ children }) {
-  return <div style={{ position: 'relative' }}>{children}<span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: '#9AA2B4', pointerEvents: 'none' }}>€</span></div>
+  return <div style={{ position: 'relative' }}>{children}<span style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', fontSize: 13.5, color: '#9AA2B4', pointerEvents: 'none' }}>€</span></div>
 }
 
 const pct = (t) => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(t * 100) + ' %'
@@ -31,7 +31,6 @@ export function Simulateur({ bien, onStepChange }) {
   const setS = (k) => (e) => setSim({ ...sim, [k]: e.target.value })
   const setC = (k) => (e) => setContact({ ...contact, [k]: e.target.value })
 
-  // ÉTAPE 1 : coordonnées + données → on capte le lead, PUIS on calcule et affiche le résultat
   async function soumettre(e) {
     e.preventDefault()
     if (!sim.revenus) { setError('Indiquez vos revenus.'); return }
@@ -56,7 +55,6 @@ export function Simulateur({ bien, onStepChange }) {
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Erreur.'); setLoading(false); return }
 
-      // Lead créé → on calcule le résultat et on passe à l'étape 2
       const r = evalueBien({ revenus: sim.revenus, apport: sim.apport, creditsEnCours: sim.creditsEnCours, prixBien: bien?.prixTotal || 0 })
       setResult(r)
       setLoading(false)
@@ -69,61 +67,122 @@ export function Simulateur({ bien, onStepChange }) {
   const apportPrisEnCompte = parseInt(sim.apport, 10) || 0
   const budgetTotalMax = result ? (result.capitalEmpruntable || 0) + apportPrisEnCompte : 0
 
+  // ---- ÉTAPE 2 : résultat (centré, un seul panneau) ----
+  if (step === 2 && result) {
+    return (
+      <div style={{ padding: 32, maxHeight: 'calc(100vh - 40px)', overflowY: 'auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <span style={{ display: 'inline-flex', width: 54, height: 54, borderRadius: '50%', background: 'rgba(36,158,124,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#249E7C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+          </span>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>Votre demande est enregistrée</h2>
+          <p style={{ fontSize: 14, color: '#5A6275', margin: 0, lineHeight: 1.55, maxWidth: 420, marginLeft: 'auto', marginRight: 'auto' }}>
+            Voici votre capacité d'emprunt estimée. Un conseiller BuyMonth Finance vous recontactera pour l'affiner.
+          </p>
+        </div>
+
+        <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 16, padding: 24 }}>
+          {[
+            { label: 'Mensualité maximale', value: euro(result.mensualiteMax) },
+            { label: 'Capital empruntable maximum', value: euro(result.capitalEmpruntable) },
+            { label: 'Apport pris en compte', value: euro(apportPrisEnCompte) },
+            { label: 'Budget total maximum', value: euro(budgetTotalMax), strong: true },
+          ].map((row, i, arr) => (
+            <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
+              <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.7)' }}>{row.label}</span>
+              <span style={{ fontSize: row.strong ? 24 : 16, fontWeight: 700, color: row.strong ? '#7CB8A8' : '#fff', whiteSpace: 'nowrap' }}>{row.value}</span>
+            </div>
+          ))}
+        </div>
+
+        <p style={{ fontSize: 11, color: '#8A92A6', margin: '14px 0 0', lineHeight: 1.5 }}>
+          Estimation hors frais, sur base d'un crédit à {dureeAns} ans, taux débiteur {pct(cfgM.tauxAnnuel)}, TAEG {pct(cfgM.taegAnnuel)}. Le budget total maximum additionne le capital empruntable et votre apport. Indicatif uniquement.
+        </p>
+
+        <button type="button" onClick={() => setStep(1)} style={{ width: '100%', padding: '12px', marginTop: 14, borderRadius: 10, background: 'transparent', color: '#5A6275', border: '1.5px solid #E8EDF2', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>
+          ← Modifier mes informations
+        </button>
+
+        <p style={{ fontSize: 10.5, color: '#A9B0BE', margin: '16px 0 0', lineHeight: 1.5, textAlign: 'center' }}>
+          {AVERTISSEMENT_LEGAL} Crédit : BuyMonth Finance — intermédiaire agréé FSMA n° 1021.366.349.
+        </p>
+      </div>
+    )
+  }
+
+  // ---- ÉTAPE 1 : layout 2 panneaux ----
   return (
-    <div>
+    <div className="sim-wrap" style={{ display: 'grid', gridTemplateColumns: '300px 1fr' }}>
       <style>{`
-        .sim-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        @media (max-width: 560px){ .sim-row { grid-template-columns: 1fr; } }
+        .sim-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 720px){
+          .sim-wrap { grid-template-columns: 1fr !important; }
+          .sim-left { display: none !important; }
+        }
       `}</style>
 
-      {/* Stepper */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 0, marginBottom: 26 }}>
-        {[{ n: 1, t: 'Vos informations' }, { n: 2, t: 'Votre capacité' }].map((s, i) => (
-          <div key={s.n} style={{ display: 'flex', alignItems: 'flex-start', flex: i === 0 ? 1 : 'none' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-              <span style={{ width: 30, height: 30, borderRadius: '50%', background: step >= s.n ? '#193B5E' : '#E8EDF2', color: step >= s.n ? '#fff' : '#9AA2B4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700 }}>{s.n}</span>
-              <span style={{ fontSize: 12.5, fontWeight: 600, color: step >= s.n ? '#193B5E' : '#9AA2B4', whiteSpace: 'nowrap' }}>{s.t}</span>
-            </div>
-            {i === 0 && <div style={{ flex: 1, height: 2, background: step >= 2 ? '#193B5E' : '#E8EDF2', marginTop: 14, marginLeft: 8, marginRight: 8 }} />}
+      {/* PANNEAU GAUCHE (navy, décoratif + réassurance) */}
+      <div className="sim-left" style={{ background: 'linear-gradient(160deg, #16324F 0%, #1D4267 100%)', padding: 30, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.2) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(124,184,168,0.16)', border: '1px solid rgba(124,184,168,0.3)', borderRadius: 20, padding: '5px 12px', marginBottom: 20, alignSelf: 'flex-start' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#7CB8A8' }} />
+            <span style={{ fontSize: 10.5, fontWeight: 700, color: '#7CB8A8', letterSpacing: '0.05em' }}>SIMULATION GRATUITE</span>
           </div>
-        ))}
+
+          <h2 style={{ fontSize: 23, fontWeight: 700, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>Votre capacité d'emprunt</h2>
+          <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.6 }}>
+            {bien?.titre ? `Pour « ${bien.titre} ». ` : ''}Estimez en une minute ce que vous pouvez emprunter, sans engagement.
+          </p>
+
+          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 28 }}>
+            {['Réponse immédiate', 'Sans engagement', 'Étude par un conseiller agréé FSMA'].map((t) => (
+              <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(124,184,168,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                </span>
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.82)' }}>{t}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* ÉTAPE 1 : informations + coordonnées + consentement */}
-      {step === 1 && (
+      {/* PANNEAU DROIT (formulaire) */}
+      <div style={{ padding: 30, maxHeight: 'calc(100vh - 40px)', overflowY: 'auto' }}>
         <form onSubmit={soumettre}>
-          {/* Capacité — Revenus + Apport côte à côte, Crédits pleine largeur */}
-          <div className="sim-row" style={{ marginBottom: 14 }}>
+          {/* Capacité */}
+          <div className="sim-row" style={{ marginBottom: 12 }}>
             <div>
               <label style={labelStyle}>Revenus nets mensuels</label>
-              <Euro><input type="number" value={sim.revenus} onChange={setS('revenus')} placeholder="3500" style={{ ...inputStyle, paddingRight: 36 }} /></Euro>
+              <Euro><input type="number" value={sim.revenus} onChange={setS('revenus')} placeholder="3500" style={{ ...inputStyle, paddingRight: 34 }} /></Euro>
             </div>
             <div>
               <label style={labelStyle}>Apport disponible</label>
-              <Euro><input type="number" value={sim.apport} onChange={setS('apport')} placeholder="30000" style={{ ...inputStyle, paddingRight: 36 }} /></Euro>
+              <Euro><input type="number" value={sim.apport} onChange={setS('apport')} placeholder="30000" style={{ ...inputStyle, paddingRight: 34 }} /></Euro>
             </div>
           </div>
-          <div style={{ marginBottom: 20 }}>
+          <div style={{ marginBottom: 18 }}>
             <label style={labelStyle}>Crédits en cours (mensualités)</label>
-            <Euro><input type="number" value={sim.creditsEnCours} onChange={setS('creditsEnCours')} placeholder="0" style={{ ...inputStyle, paddingRight: 36 }} /></Euro>
+            <Euro><input type="number" value={sim.creditsEnCours} onChange={setS('creditsEnCours')} placeholder="0" style={{ ...inputStyle, paddingRight: 34 }} /></Euro>
           </div>
 
-          {/* Coordonnées (avant le résultat) */}
-          <div style={{ borderTop: '1px solid #F2F5FA', paddingTop: 20, marginBottom: 4 }}>
-            <p style={{ fontSize: 13.5, color: '#5A6275', margin: '0 0 16px', lineHeight: 1.55 }}>
-              Vos coordonnées permettent à <strong style={{ color: '#193B5E' }}>BuyMonth Finance</strong> (intermédiaire agréé FSMA) de vous préparer une offre personnalisée.
+          {/* Coordonnées */}
+          <div style={{ borderTop: '1px solid #F2F5FA', paddingTop: 16, marginBottom: 4 }}>
+            <p style={{ fontSize: 12.5, color: '#5A6275', margin: '0 0 14px', lineHeight: 1.5 }}>
+              Vos coordonnées permettent à <strong style={{ color: '#193B5E' }}>BuyMonth Finance</strong> de préparer votre offre.
             </p>
-            <div className="sim-row" style={{ marginBottom: 14 }}>
+            <div className="sim-row" style={{ marginBottom: 12 }}>
               <div>
                 <label style={labelStyle}>Nom complet</label>
                 <input value={contact.nom} onChange={setC('nom')} placeholder="Votre nom" style={inputStyle} />
               </div>
               <div>
-                <label style={labelStyle}>Entreprise <span style={{ textTransform: 'none', fontWeight: 500, color: '#A9B0BE' }}>(optionnel)</span></label>
+                <label style={labelStyle}>Entreprise <span style={{ textTransform: 'none', fontWeight: 500, color: '#A9B0BE' }}>(opt.)</span></label>
                 <input value={contact.societe} onChange={setC('societe')} placeholder="Via une société" style={inputStyle} />
               </div>
             </div>
-            <div className="sim-row" style={{ marginBottom: 18 }}>
+            <div className="sim-row" style={{ marginBottom: 16 }}>
               <div>
                 <label style={labelStyle}>Email</label>
                 <input type="email" value={contact.email} onChange={setC('email')} placeholder="vous@email.com" style={inputStyle} />
@@ -135,64 +194,25 @@ export function Simulateur({ bien, onStepChange }) {
             </div>
           </div>
 
-          {/* Opt-in RGPD (obligatoire) */}
-          <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer', marginBottom: 20 }}>
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ marginTop: 3, width: 16, height: 16, flexShrink: 0, cursor: 'pointer', accentColor: '#7CB8A8' }} />
-            <span style={{ fontSize: 12.5, color: '#5A6275', lineHeight: 1.5 }}>
-              J'accepte que mes données soient transmises à BuyMonth Finance (intermédiaire en crédit agréé FSMA) afin d'être recontacté(e) au sujet de mon projet. Consultez notre <a href="/confidentialite" target="_blank" rel="noopener noreferrer" style={{ color: '#7CB8A8', fontWeight: 600 }}>politique de confidentialité</a>.
+          {/* Opt-in RGPD */}
+          <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', cursor: 'pointer', marginBottom: 16 }}>
+            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ marginTop: 2, width: 15, height: 15, flexShrink: 0, cursor: 'pointer', accentColor: '#7CB8A8' }} />
+            <span style={{ fontSize: 11.5, color: '#5A6275', lineHeight: 1.45 }}>
+              J'accepte que mes données soient transmises à BuyMonth Finance (agréé FSMA) afin d'être recontacté(e). <a href="/confidentialite" target="_blank" rel="noopener noreferrer" style={{ color: '#7CB8A8', fontWeight: 600 }}>Confidentialité</a>.
             </span>
           </label>
 
-          {error && <p style={{ color: '#E5484D', fontSize: 13, margin: '0 0 16px' }}>{error}</p>}
+          {error && <p style={{ color: '#E5484D', fontSize: 13, margin: '0 0 14px' }}>{error}</p>}
 
-          <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 15, fontWeight: 600, cursor: loading ? 'wait' : 'pointer' }}>
+          <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: loading ? 'wait' : 'pointer' }}>
             {loading ? 'Envoi...' : 'Voir ma capacité'}
           </button>
-        </form>
-      )}
 
-      {/* ÉTAPE 2 : résultat (carte 4 lignes, sans comparaison au bien) */}
-      {step === 2 && result && (
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <span style={{ display: 'inline-flex', width: 56, height: 56, borderRadius: '50%', background: 'rgba(36,158,124,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#249E7C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
-            </span>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>Votre demande est enregistrée</h2>
-            <p style={{ fontSize: 14, color: '#5A6275', margin: 0, lineHeight: 1.55, maxWidth: 440, marginLeft: 'auto', marginRight: 'auto' }}>
-              Voici votre capacité d'emprunt estimée. Un conseiller BuyMonth Finance vous recontactera pour l'affiner.
-            </p>
-          </div>
-
-          {/* Carte résultat — 4 lignes */}
-          <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 16, padding: 26 }}>
-            {[
-              { label: 'Mensualité maximale', value: euro(result.mensualiteMax) },
-              { label: 'Capital empruntable maximum', value: euro(result.capitalEmpruntable) },
-              { label: 'Apport pris en compte', value: euro(apportPrisEnCompte) },
-              { label: 'Budget total maximum', value: euro(budgetTotalMax), strong: true },
-            ].map((row, i, arr) => (
-              <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '13px 0', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
-                <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.7)' }}>{row.label}</span>
-                <span style={{ fontSize: row.strong ? 24 : 16, fontWeight: 700, color: row.strong ? '#7CB8A8' : '#fff', whiteSpace: 'nowrap' }}>{row.value}</span>
-              </div>
-            ))}
-          </div>
-
-          <p style={{ fontSize: 11, color: '#8A92A6', margin: '16px 0 0', lineHeight: 1.5 }}>
-            Estimation hors frais, sur base d'un crédit à {dureeAns} ans, taux débiteur {pct(cfgM.tauxAnnuel)}, TAEG {pct(cfgM.taegAnnuel)}. Le budget total maximum additionne le capital empruntable et votre apport. Indicatif uniquement.
+          <p style={{ fontSize: 10, color: '#A9B0BE', margin: '12px 0 0', lineHeight: 1.4, textAlign: 'center' }}>
+            Simulation indicative, sans valeur contractuelle. FSMA n° 1021.366.349.
           </p>
-
-          <button type="button" onClick={() => setStep(1)} style={{ width: '100%', padding: '12px', marginTop: 16, borderRadius: 10, background: 'transparent', color: '#5A6275', border: '1.5px solid #E8EDF2', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>
-            ← Modifier mes informations
-          </button>
-        </div>
-      )}
-
-      {/* Mention légale */}
-      <p style={{ fontSize: 11, color: '#A9B0BE', margin: '20px 0 0', lineHeight: 1.5, textAlign: 'center' }}>
-        {AVERTISSEMENT_LEGAL} Simulation purement indicative, sans valeur contractuelle. Sous réserve d'analyse et d'acceptation du dossier. Crédit : BuyMonth Finance — intermédiaire agréé FSMA n° 1021.366.349.
-      </p>
+        </form>
+      </div>
     </div>
   )
 }

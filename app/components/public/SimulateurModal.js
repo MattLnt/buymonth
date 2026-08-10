@@ -19,8 +19,8 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalis�
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // largeur modale : large en étape 1 (formulaire 2 colonnes) et en étape 2 (résultat)
-  const maxW = step === 1 ? 640 : 620
+  // Étape 1 = layout 2 panneaux (large). Étape 2 = résultat (plus étroit, centré).
+  const maxW = step === 1 ? 880 : 560
 
   return (
     <>
@@ -55,25 +55,18 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalis�
       {open && (
         <div
           onClick={() => setOpen(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(15,36,56,0.6)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 20px', overflowY: 'auto' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(15,36,56,0.6)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{ background: '#fff', borderRadius: 20, padding: 32, width: '100%', maxWidth: maxW, position: 'relative', boxShadow: '0 24px 70px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease', margin: 'auto' }}
+            style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: maxW, maxHeight: 'calc(100vh - 40px)', position: 'relative', boxShadow: '0 24px 70px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease', overflow: 'hidden' }}
           >
             <button
               onClick={() => setOpen(false)}
-              style={{ position: 'absolute', top: 18, right: 18, width: 36, height: 36, borderRadius: '50%', background: '#F2F5FA', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5A6275', zIndex: 1 }}
+              style={{ position: 'absolute', top: 16, right: 16, width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5A6275', zIndex: 5 }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
             </button>
-
-            <div style={{ marginBottom: 24, paddingRight: 32 }}>
-              <h2 style={{ fontSize: 21, fontWeight: 700, color: '#193B5E', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Votre capacité d'emprunt</h2>
-              <p style={{ fontSize: 13.5, color: '#8A92A6', margin: 0 }}>
-                {bien?.titre ? `Pour « ${bien.titre} »` : 'Simulation gratuite et sans engagement'}
-              </p>
-            </div>
 
             <Simulateur bien={bien} onStepChange={setStep} />
           </div>
