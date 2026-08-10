@@ -15,6 +15,16 @@ const FORMULE_PRIX = { PRO: '39 €/bien', PRO_PLUS: '45 €/bien' }
 const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
+// Champ défini AU NIVEAU MODULE (pas dans le composant) — sinon il est recréé à chaque frappe et l'input perd le focus
+function Champ({ label, k, type = 'text', placeholder, full, value, onChange }) {
+  return (
+    <div style={{ gridColumn: full ? '1 / -1' : 'auto' }}>
+      <label style={labelStyle}>{label}</label>
+      <input type={type} value={value} onChange={(e) => onChange(k, e.target.value)} placeholder={placeholder} style={inputStyle} />
+    </div>
+  )
+}
+
 function SectionCard({ num, titre, sousTitre, children }) {
   return (
     <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 24, marginBottom: 16 }}>
@@ -58,7 +68,6 @@ export function ClientCreateForm() {
   const [error, setError] = useState('')
 
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }))
-  const handle = (k) => (e) => setField(k, e.target.value)
 
   function genererMotDePasse() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'
@@ -88,13 +97,6 @@ export function ClientCreateForm() {
     }
   }
 
-  const Champ = ({ label, k, type = 'text', placeholder, full }) => (
-    <div style={{ gridColumn: full ? '1 / -1' : 'auto' }}>
-      <label style={labelStyle}>{label}</label>
-      <input type={type} value={form[k]} onChange={handle(k)} placeholder={placeholder} style={inputStyle} />
-    </div>
-  )
-
   const initiale = (form.societe.trim()[0] || '?').toUpperCase()
 
   return (
@@ -115,12 +117,12 @@ export function ClientCreateForm() {
         <div>
           <SectionCard num="1" titre="Identité & accès" sousTitre="Société et identifiants de connexion.">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-              <Champ label="Société *" k="societe" placeholder="Nom de l'agence / promoteur" full />
-              <Champ label="Email de connexion *" k="email" type="email" placeholder="contact@promoteur.be" full />
+              <Champ label="Société *" k="societe" placeholder="Nom de l'agence / promoteur" full value={form.societe} onChange={setField} />
+              <Champ label="Email de connexion *" k="email" type="email" placeholder="contact@promoteur.be" full value={form.email} onChange={setField} />
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={labelStyle}>Mot de passe initial *</label>
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <input type="text" value={form.password} onChange={handle('password')} placeholder="Au moins 8 caractères" style={inputStyle} />
+                  <input type="text" value={form.password} onChange={(e) => setField('password', e.target.value)} placeholder="Au moins 8 caractères" style={inputStyle} />
                   <button type="button" onClick={genererMotDePasse} style={{ whiteSpace: 'nowrap', padding: '0 16px', borderRadius: 10, border: '1.5px solid #E8EDF2', background: '#F2F5FA', color: '#193B5E', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
                     Générer
                   </button>
@@ -132,18 +134,18 @@ export function ClientCreateForm() {
 
           <SectionCard num="2" titre="Contacts" sousTitre="Interlocuteurs opérationnels et facturation.">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-              <Champ label="Contact opérationnel / marketing" k="contactOpe" placeholder="Nom du contact" />
-              <Champ label="Contact facturation" k="contactFacturation" placeholder="Nom du contact" />
-              <Champ label="Contact principal (affiché)" k="contactNom" placeholder="Nom du contact" full />
-              <Champ label="Téléphone" k="telephone" placeholder="+32 ..." />
-              <Champ label="N° TVA" k="numeroTva" placeholder="BE0123456789" />
+              <Champ label="Contact opérationnel / marketing" k="contactOpe" placeholder="Nom du contact" value={form.contactOpe} onChange={setField} />
+              <Champ label="Contact facturation" k="contactFacturation" placeholder="Nom du contact" value={form.contactFacturation} onChange={setField} />
+              <Champ label="Contact principal (affiché)" k="contactNom" placeholder="Nom du contact" full value={form.contactNom} onChange={setField} />
+              <Champ label="Téléphone" k="telephone" placeholder="+32 ..." value={form.telephone} onChange={setField} />
+              <Champ label="N° TVA" k="numeroTva" placeholder="BE0123456789" value={form.numeroTva} onChange={setField} />
             </div>
           </SectionCard>
 
           <SectionCard num="3" titre="Adresses" sousTitre="Adresse affichée et adresse administrative.">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-              <Champ label="Adresse" k="adresse" placeholder="Rue, n°, ville" />
-              <Champ label="Adresse administrative" k="adresseAdmin" placeholder="Siège / facturation" />
+              <Champ label="Adresse" k="adresse" placeholder="Rue, n°, ville" value={form.adresse} onChange={setField} />
+              <Champ label="Adresse administrative" k="adresseAdmin" placeholder="Siège / facturation" value={form.adresseAdmin} onChange={setField} />
             </div>
           </SectionCard>
 
