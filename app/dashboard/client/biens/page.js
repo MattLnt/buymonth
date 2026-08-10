@@ -7,8 +7,14 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-export default async function BiensPage() {
+const STATUTS_VALIDES = ['ACTIF', 'OPTION', 'HORS_LIGNE', 'VENDU']
+
+export default async function BiensPage({ searchParams }) {
   const client = await getCurrentClient()
+  const sp = await searchParams
+
+  // Filtre statut pré-appliqué depuis l'URL (?statut=ACTIF / OPTION...) — venant des cartes KPI
+  const statutInitial = STATUTS_VALIDES.includes(sp?.statut) ? sp.statut : ''
 
   const biensRaw = await prisma.bien.findMany({
     where: { clientId: client.id },
@@ -45,7 +51,7 @@ export default async function BiensPage() {
           }
         />
       ) : (
-        <MesBiensExplorer biens={biens} />
+        <MesBiensExplorer biens={biens} statutInitial={statutInitial} />
       )}
     </>
   )

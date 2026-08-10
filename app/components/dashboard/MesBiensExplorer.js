@@ -18,11 +18,11 @@ const STATUT_OPTIONS = [
 const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
-export function MesBiensExplorer({ biens }) {
+export function MesBiensExplorer({ biens, statutInitial = '' }) {
   const [q, setQ] = useState('')
   const [type, setType] = useState('')
   const [province, setProvince] = useState('')
-  const [statut, setStatut] = useState('')
+  const [statut, setStatut] = useState(statutInitial)
   const [minM, setMinM] = useState('')
   const [maxM, setMaxM] = useState('')
   const [chambres, setChambres] = useState(0)
