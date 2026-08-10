@@ -3,18 +3,14 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 
-const planLabel = {
-  CLASSIC: { label: 'Classic', color: '#5A6275', bg: '#F2F5FA' },
-  PREMIUM: { label: 'Premium', color: '#7CB8A8', bg: 'rgba(124,184,168,0.14)' },
-}
-
-function essaiActifClient(c) {
-  return c.trialEndsAt && new Date(c.trialEndsAt).getTime() > Date.now()
+const formuleLabel = {
+  PRO: { label: 'Pro', color: '#5A6275', bg: '#F2F5FA' },
+  PRO_PLUS: { label: 'Pro+', color: '#3B62A8', bg: 'rgba(78,125,212,0.12)' },
 }
 
 export function ClientsTable({ clients }) {
   const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState('date') // 'date' | 'biens' | 'plan'
+  const [sortBy, setSortBy] = useState('date') // 'date' | 'biens' | 'formule'
 
   const filtered = useMemo(() => {
     let list = [...clients]
@@ -26,9 +22,9 @@ export function ClientsTable({ clients }) {
     // Tri
     if (sortBy === 'biens') {
       list.sort((a, b) => b.nbBiens - a.nbBiens)
-    } else if (sortBy === 'plan') {
-      const rank = { PREMIUM: 0, CLASSIC: 1 }
-      list.sort((a, b) => (rank[a.plan] ?? 9) - (rank[b.plan] ?? 9))
+    } else if (sortBy === 'formule') {
+      const rank = { PRO_PLUS: 0, PRO: 1 }
+      list.sort((a, b) => (rank[a.formule] ?? 9) - (rank[b.formule] ?? 9))
     } else {
       list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     }
@@ -67,26 +63,25 @@ export function ClientsTable({ clients }) {
           <span style={{ fontSize: 12.5, color: '#8A92A6', fontWeight: 600, marginRight: 2 }}>Trier :</span>
           {sortBtn('date', 'Date')}
           {sortBtn('biens', 'Biens')}
-          {sortBtn('plan', 'Plan')}
+          {sortBtn('formule', 'Formule')}
         </div>
       </div>
 
       <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 820 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 780 }}>
             <thead>
               <tr style={{ background: '#FAFBFE', borderBottom: '1px solid #EEF2F7' }}>
-                {['Société', 'Contact', 'Biens', 'Plan', 'Essai', 'Inscrit le', ''].map((h, i) => (
+                {['Société', 'Contact', 'Biens', 'Formule', 'Inscrit le', ''].map((h, i) => (
                   <th key={i} style={{ textAlign: 'left', padding: '13px 18px', fontSize: 11.5, fontWeight: 700, color: '#8A92A6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={7} style={{ padding: '40px 0', textAlign: 'center', color: '#A9B0BE', fontSize: 14 }}>Aucun client trouvé.</td></tr>
+                <tr><td colSpan={6} style={{ padding: '40px 0', textAlign: 'center', color: '#A9B0BE', fontSize: 14 }}>Aucun client trouvé.</td></tr>
               ) : filtered.map((c) => {
-                const plan = planLabel[c.plan] || planLabel.CLASSIC
-                const enEssai = essaiActifClient(c)
+                const formule = formuleLabel[c.formule] || formuleLabel.PRO
                 return (
                   <tr key={c.id} style={{ borderBottom: '1px solid #F4F7FB' }}>
                     <td style={{ padding: '14px 18px' }}>
@@ -103,17 +98,7 @@ export function ClientsTable({ clients }) {
                     <td style={{ padding: '14px 18px', fontSize: 13, color: '#5A6275' }}>{c.email || '—'}</td>
                     <td style={{ padding: '14px 18px', fontSize: 14, fontWeight: 600, color: '#193B5E' }}>{c.nbBiens}</td>
                     <td style={{ padding: '14px 18px' }}>
-                      <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 600, color: plan.color, background: plan.bg }}>{plan.label}</span>
-                    </td>
-                    <td style={{ padding: '14px 18px' }}>
-                      {enEssai ? (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 600, color: '#249E7C', background: 'rgba(36,158,124,0.12)' }}>
-                          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#249E7C' }} />
-                          {new Date(c.trialEndsAt).toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit' })}
-                        </span>
-                      ) : (
-                        <span style={{ fontSize: 12.5, color: '#C2C8D4' }}>—</span>
-                      )}
+                      <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 600, color: formule.color, background: formule.bg }}>{formule.label}</span>
                     </td>
                     <td style={{ padding: '14px 18px', fontSize: 12.5, color: '#A9B0BE', whiteSpace: 'nowrap' }}>
                       {new Date(c.createdAt).toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit', year: '2-digit' })}
