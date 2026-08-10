@@ -27,6 +27,7 @@ export default async function AdminLeadsPage() {
     nom: l.nom,
     email: l.email,
     telephone: l.telephone,
+    societe: l.societe || null,
     revenu: l.revenu,
     apport: l.apport,
     source: l.source,

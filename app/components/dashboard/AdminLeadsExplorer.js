@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { FormSelect } from './FormSelect'
 import { Icon } from './Icon'
@@ -9,9 +9,9 @@ import { ConfirmModal } from './ConfirmModal'
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
 const sourceLabel = {
-  SIMULATEUR: { label: 'Simulateur', color: '#7CB8A8', bg: 'rgba(124,184,168,0.14)' },
-  WIDGET: { label: 'Widget', color: '#5B8DEF', bg: 'rgba(91,141,239,0.12)' },
-  CONTACT: { label: 'Contact', color: '#E89923', bg: 'rgba(232,153,35,0.12)' },
+  SIMULATEUR: { label: 'Simulateur', color: '#1C6B52', bg: 'rgba(124,184,168,0.16)' },
+  WIDGET: { label: 'Widget', color: '#3B62A8', bg: 'rgba(91,141,239,0.14)' },
+  CONTACT: { label: 'Contact', color: '#8A6D1B', bg: 'rgba(232,153,35,0.14)' },
 }
 
 // Statuts internes ADMIN (jeu distinct du promoteur)
@@ -43,6 +43,105 @@ function formatDateHeure(d) {
   const date = new Date(d)
   return date.toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit', year: '2-digit' })
     + ' · ' + date.toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit' })
+}
+
+// Dropdown custom avec pastilles colorées — menu en position fixe, s'ouvre vers le haut si pas de place en bas
+function StatutDropdown({ value, onChange, disabled }) {
+  const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState(null)
+  const btnRef = useRef(null)
+  const menuRef = useRef(null)
+  const col = STATUT_COLOR[value] || STATUT_COLOR['À contacter']
+
+  function toggle() {
+    if (disabled) return
+    if (!open && btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect()
+      const MENU_H = 360
+      const placeEnBas = window.innerHeight - r.bottom
+      const versLeHaut = placeEnBas < MENU_H && r.top > placeEnBas
+      setPos({
+        top: versLeHaut ? undefined : r.bottom + 4,
+        bottom: versLeHaut ? (window.innerHeight - r.top + 4) : undefined,
+        left: r.left,
+        minWidth: Math.max(r.width, 210),
+      })
+    }
+    setOpen((o) => !o)
+  }
+
+  useEffect(() => {
+    if (!open) return
+    function onClick(e) {
+      if (btnRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return
+      setOpen(false)
+    }
+    function onScrollResize() { setOpen(false) }
+    document.addEventListener('mousedown', onClick)
+    window.addEventListener('scroll', onScrollResize, true)
+    window.addEventListener('resize', onScrollResize)
+    return () => {
+      document.removeEventListener('mousedown', onClick)
+      window.removeEventListener('scroll', onScrollResize, true)
+      window.removeEventListener('resize', onScrollResize)
+    }
+  }, [open])
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={toggle}
+        disabled={disabled}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          padding: '7px 12px 7px 14px', borderRadius: 20, border: 'none',
+          cursor: disabled ? 'wait' : 'pointer', fontSize: 12.5, fontWeight: 700,
+          color: col.c, background: col.bg, outline: 'none', whiteSpace: 'nowrap',
+        }}
+      >
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: col.c, flexShrink: 0 }} />
+        {value}
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={col.c} strokeWidth="2.5" style={{ transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : 'none' }}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {open && pos && (
+        <div
+          ref={menuRef}
+          style={{ position: 'fixed', top: pos.top, bottom: pos.bottom, left: pos.left, minWidth: pos.minWidth, zIndex: 1000, background: '#fff', border: '1px solid #EEF2F7', borderRadius: 12, boxShadow: '0 12px 32px rgba(25,59,94,0.16)', padding: 5, maxHeight: '70vh', overflowY: 'auto' }}
+        >
+          {STATUTS_ADMIN.map((s) => {
+            const sc = STATUT_COLOR[s] || STATUT_COLOR['À contacter']
+            const actif = s === value
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => { onChange(s); setOpen(false) }}
+                style={{
+                  width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 8,
+                  border: 'none', background: actif ? '#F5F8FB' : 'transparent', cursor: 'pointer',
+                  fontSize: 13, fontWeight: actif ? 700 : 500, color: '#3D4759',
+                  display: 'flex', alignItems: 'center', gap: 9,
+                }}
+                onMouseEnter={(e) => { if (!actif) e.currentTarget.style.background = '#FAFBFE' }}
+                onMouseLeave={(e) => { if (!actif) e.currentTarget.style.background = 'transparent' }}
+              >
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: sc.c, flexShrink: 0 }} />
+                {s}
+                {actif && (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="3" style={{ marginLeft: 'auto' }}><polyline points="20 6 9 17 4 12" /></svg>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </>
+  )
 }
 
 export function AdminLeadsExplorer({ leads }) {
@@ -125,13 +224,14 @@ export function AdminLeadsExplorer({ leads }) {
 
   return (
     <div>
+      <style>{`
+        @media (max-width: 800px){ .adm-leads-filters { grid-template-columns: 1fr !important; } }
+        @media (max-width: 720px){ .adm-lead-body { grid-template-columns: 1fr !important; } .adm-lead-money { border-left: none !important; border-top: 1px solid #EEF2F7 !important; padding-left: 0 !important; padding-top: 16px !important; margin-top: 4px; } }
+      `}</style>
+
       {/* Filtres */}
       <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 18, marginBottom: 18 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }} className="adm-leads-filters">
-          <style>{`
-            @media (max-width: 800px){ .adm-leads-filters { grid-template-columns: 1fr !important; } }
-          `}</style>
-
           <div style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#A9B0BE', display: 'flex' }}>
               <Icon name="search" size={16} />
@@ -162,100 +262,102 @@ export function AdminLeadsExplorer({ leads }) {
         {filtered.length} demande{filtered.length > 1 ? 's' : ''} {hasFilters ? 'trouvée' + (filtered.length > 1 ? 's' : '') : 'au total'}
       </div>
 
-      {/* Tableau */}
-      <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, overflow: 'hidden' }}>
-        {filtered.length === 0 ? (
-          <div style={{ padding: '48px 24px', textAlign: 'center', color: '#8A92A6', fontSize: 14 }}>Aucun lead ne correspond à ces filtres.</div>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 1080 }}>
-              <thead>
-                <tr style={{ background: '#FAFBFE', borderBottom: '1px solid #EEF2F7' }}>
-                  {['Contact', 'Promoteur', 'Bien', 'Projet', 'Unité', 'Revenus', 'Apport', 'Statut', 'Reçu le', ''].map((h, i) => (
-                    <th key={i} style={{ textAlign: 'left', padding: '13px 18px', fontSize: 11.5, fontWeight: 700, color: '#8A92A6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((lead) => {
-                  const src = sourceLabel[lead.source] || { label: lead.source, color: '#8A92A6', bg: '#F2F5FA' }
-                  const cur = statuts[lead.id]
-                  const col = STATUT_COLOR[cur] || STATUT_COLOR['À contacter']
-                  return (
-                    <tr key={lead.id} style={{ borderBottom: '1px solid #F4F7FB', opacity: deleting === lead.id ? 0.4 : 1 }}>
-                      <td style={{ padding: '14px 18px' }}>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: '#193B5E', marginBottom: 2 }}>{lead.nom || 'Sans nom'}</div>
-                        {lead.societe && <div style={{ fontSize: 12.5, color: '#7CB8A8', fontWeight: 600 }}>{lead.societe}</div>}
-                        <div style={{ fontSize: 12.5, color: '#7A8499' }}>{lead.email || '—'}</div>
-                        {lead.telephone && <div style={{ fontSize: 12.5, color: '#7A8499' }}>{lead.telephone}</div>}
-                      </td>
-                      <td style={{ padding: '14px 18px', fontSize: 13, color: '#3D4759', fontWeight: 600 }}>
-                        {lead.promoteur || <span style={{ color: '#C2C8D4', fontWeight: 400 }}>—</span>}
-                      </td>
-                      <td style={{ padding: '14px 18px', fontSize: 13, color: '#3D4759' }}>
-                        {lead.bienTitre ? (
-                          lead.bienId ? (
-                            <a href={`/biens/${lead.bienId}`} target="_blank" rel="noopener noreferrer"
-                              style={{ display: 'inline-flex', alignItems: 'flex-start', gap: 6, textDecoration: 'none', color: '#193B5E' }}>
-                              <span>
-                                <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
-                                  {lead.bienTitre}
-                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2" style={{ flexShrink: 0 }}><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-                                </span>
-                                {lead.bienVille && <span style={{ fontSize: 12, color: '#A9B0BE', fontWeight: 400 }}>{lead.bienVille}</span>}
-                              </span>
-                            </a>
-                          ) : (
-                            <>
-                              <div style={{ fontWeight: 600 }}>{lead.bienTitre}</div>
-                              {lead.bienVille && <div style={{ fontSize: 12, color: '#A9B0BE' }}>{lead.bienVille}</div>}
-                            </>
-                          )
-                        ) : <span style={{ color: '#C2C8D4' }}>—</span>}
-                      </td>
-                      <td style={{ padding: '14px 18px', fontSize: 13, color: '#3D4759' }}>{lead.projet || <span style={{ color: '#C2C8D4' }}>—</span>}</td>
-                      <td style={{ padding: '14px 18px', fontSize: 13, color: '#3D4759' }}>{lead.unite || <span style={{ color: '#C2C8D4' }}>—</span>}</td>
-                      <td style={{ padding: '14px 18px', fontSize: 13.5, color: '#3D4759' }}>{lead.revenu ? `${lead.revenu.toLocaleString('fr-BE')} €` : '—'}</td>
-                      <td style={{ padding: '14px 18px', fontSize: 13.5, color: '#3D4759' }}>{lead.apport ? `${lead.apport.toLocaleString('fr-BE')} €` : '—'}</td>
-                      <td style={{ padding: '14px 18px' }}>
-                        <div style={{ position: 'relative', display: 'inline-block' }}>
-                          <select
-                            value={cur}
-                            onChange={(e) => changerStatut(lead.id, e.target.value)}
-                            disabled={saving === lead.id}
-                            style={{
-                              appearance: 'none', WebkitAppearance: 'none',
-                              padding: '6px 30px 6px 12px', borderRadius: 20,
-                              border: 'none', cursor: 'pointer',
-                              fontSize: 12.5, fontWeight: 700,
-                              color: col.c, background: col.bg,
-                              outline: 'none',
-                            }}
-                          >
-                            {STATUTS_ADMIN.map((s) => <option key={s} value={s} style={{ color: '#193B5E', background: '#fff', fontWeight: 500 }}>{s}</option>)}
-                          </select>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={col.c} strokeWidth="2.5" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                            <polyline points="6 9 12 15 18 9" />
-                          </svg>
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 18px', fontSize: 12.5, color: '#A9B0BE', whiteSpace: 'nowrap' }}>
-                        {formatDateHeure(lead.createdAt)}
-                      </td>
-                      <td style={{ padding: '14px 18px' }}>
-                        <button onClick={() => setASupprimer(lead)} disabled={deleting === lead.id} title="Supprimer (soft delete)"
-                          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '8px', borderRadius: 8, background: '#FDF0F0', color: '#E5484D', border: 'none', cursor: 'pointer' }}>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {/* Liste de cartes */}
+      {filtered.length === 0 ? (
+        <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: '48px 24px', textAlign: 'center', color: '#8A92A6', fontSize: 14 }}>
+          Aucun lead ne correspond à ces filtres.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {filtered.map((lead) => {
+            const src = sourceLabel[lead.source] || { label: lead.source, color: '#8A92A6', bg: '#F2F5FA' }
+            const cur = statuts[lead.id]
+            return (
+              <div key={lead.id} style={{
+                background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 20,
+                opacity: deleting === lead.id ? 0.4 : 1, transition: 'opacity 0.2s ease',
+                display: 'flex', flexDirection: 'column', gap: 16,
+              }}>
+
+                {/* Ligne du haut : identité + source + statut + suppr */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: '#193B5E' }}>{lead.nom || 'Sans nom'}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: src.color, background: src.bg, padding: '3px 10px', borderRadius: 20, letterSpacing: '0.02em' }}>{src.label}</span>
+                    </div>
+                    {lead.societe && (
+                      <div style={{ fontSize: 13, color: '#1C6B52', fontWeight: 600, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" /></svg>
+                        {lead.societe}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', fontSize: 13, color: '#5A6275' }}>
+                      {lead.email && (
+                        <a href={`mailto:${lead.email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#5A6275', textDecoration: 'none' }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A9B0BE" strokeWidth="1.7"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-10 5L2 7" /></svg>
+                          {lead.email}
+                        </a>
+                      )}
+                      {lead.telephone && (
+                        <a href={`tel:${lead.telephone}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#5A6275', textDecoration: 'none' }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A9B0BE" strokeWidth="1.7"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                          {lead.telephone}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                    <StatutDropdown value={cur} onChange={(s) => changerStatut(lead.id, s)} disabled={saving === lead.id} />
+                    <button onClick={() => setASupprimer(lead)} disabled={deleting === lead.id} title="Supprimer (soft delete)"
+                      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '9px', borderRadius: 8, background: '#FDF0F0', color: '#E5484D', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Corps : bien/promoteur à gauche, montants à droite */}
+                <div className="adm-lead-body" style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 20, alignItems: 'stretch' }}>
+
+                  {/* Colonne info bien */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 14, background: '#FAFBFE', borderRadius: 12, padding: '14px 16px' }}>
+                    <Info label="Promoteur" value={lead.promoteur} />
+                    <Info label="Projet" value={lead.projet} />
+                    <Info label="Unité" value={lead.unite} />
+                    <div>
+                      <div style={{ fontSize: 10.5, fontWeight: 700, color: '#A9B0BE', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Bien</div>
+                      {lead.bienTitre ? (
+                        lead.bienId ? (
+                          <a href={`/biens/${lead.bienId}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none', color: '#193B5E', fontSize: 13, fontWeight: 600 }}>
+                            {lead.bienTitre}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2" style={{ flexShrink: 0 }}><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                          </a>
+                        ) : (
+                          <span style={{ fontSize: 13, fontWeight: 600, color: '#193B5E' }}>{lead.bienTitre}</span>
+                        )
+                      ) : <span style={{ fontSize: 13, color: '#C2C8D4' }}>—</span>}
+                      {lead.bienVille && <div style={{ fontSize: 12, color: '#A9B0BE', marginTop: 2 }}>{lead.bienVille}</div>}
+                    </div>
+                  </div>
+
+                  {/* Colonne montants */}
+                  <div className="adm-lead-money" style={{ borderLeft: '1px solid #EEF2F7', paddingLeft: 20, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 14 }}>
+                    <Money label="Revenus mensuels" value={lead.revenu} accent="#193B5E" />
+                    <Money label="Apport" value={lead.apport} accent="#1C6B52" />
+                  </div>
+                </div>
+
+                {/* Pied : date */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#A9B0BE', borderTop: '1px solid #F4F7FB', paddingTop: 12 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                  Reçu le {formatDateHeure(lead.createdAt)}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Modale de confirmation premium */}
       <ConfirmModal
@@ -272,6 +374,28 @@ export function AdminLeadsExplorer({ leads }) {
           </>
         }
       />
+    </div>
+  )
+}
+
+// Petit bloc info label + valeur
+function Info({ label, value }) {
+  return (
+    <div>
+      <div style={{ fontSize: 10.5, fontWeight: 700, color: '#A9B0BE', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 13, color: '#3D4759', fontWeight: 600 }}>{value || <span style={{ color: '#C2C8D4', fontWeight: 400 }}>—</span>}</div>
+    </div>
+  )
+}
+
+// Bloc montant, valeur sur UNE ligne
+function Money({ label, value, accent }) {
+  return (
+    <div>
+      <div style={{ fontSize: 10.5, fontWeight: 700, color: '#A9B0BE', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 20, fontWeight: 800, color: accent, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+        {value ? `${value.toLocaleString('fr-BE')} €` : <span style={{ fontSize: 15, color: '#C2C8D4', fontWeight: 500 }}>Non renseigné</span>}
+      </div>
     </div>
   )
 }
