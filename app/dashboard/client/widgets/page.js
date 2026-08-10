@@ -32,7 +32,7 @@ export default async function WidgetsPage() {
           }
         />
       ) : (
-        <WidgetGenerator biens={biens} plan={client.plan || 'CLASSIC'} />
+        <WidgetGenerator biens={biens} plan={client.formule} />
       )}
     </>
   )
