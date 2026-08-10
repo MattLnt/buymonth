@@ -19,7 +19,6 @@ export function BienCard({ bien }) {
   const [dupliquing, setDupliquing] = useState(false)
 
   const meta = STATUT_META[bien.statut] || STATUT_META.ACTIF
-  const enOption = bien.statut === 'OPTION'
   const voirHref = meta.visible ? `/biens/${bien.id}` : `/dashboard/client/biens/${bien.id}/apercu`
 
   async function handleDelete() {
@@ -54,15 +53,8 @@ export function BienCard({ bien }) {
       <div style={{ height: 150, background: bien.images?.[0] ? `url(${bien.images[0]}) center/cover` : 'linear-gradient(135deg, #EEF3FA, #E3ECF5)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {!bien.images?.[0] && <Icon name="building" size={36} color="#B7C4D6" />}
 
-        {/* Bandeau orange OPTION sur la première photo */}
-        {enOption && (
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: 'linear-gradient(90deg, #E89923, #D98410)', color: '#fff', fontSize: 11.5, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', textAlign: 'center', padding: '5px 8px' }}>
-            Option
-          </div>
-        )}
-
-        {/* Pastille statut (haut gauche) — décalée si bandeau option présent */}
-        <span style={{ position: 'absolute', top: enOption ? 34 : 12, left: 12, display: 'inline-flex', alignItems: 'center', gap: 6, background: meta.bg, color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, backdropFilter: 'blur(4px)' }}>
+        {/* Pastille statut (haut gauche) */}
+        <span style={{ position: 'absolute', top: 12, left: 12, display: 'inline-flex', alignItems: 'center', gap: 6, background: meta.bg, color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, backdropFilter: 'blur(4px)' }}>
           {!meta.visible && (
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
           )}
@@ -70,7 +62,7 @@ export function BienCard({ bien }) {
         </span>
 
         {/* Pastille leads en haut à droite */}
-        <span style={{ position: 'absolute', top: enOption ? 34 : 12, right: 12, display: 'inline-flex', alignItems: 'center', gap: 5, background: (bien.nbLeads || 0) > 0 ? 'rgba(25,59,94,0.92)' : 'rgba(255,255,255,0.92)', color: (bien.nbLeads || 0) > 0 ? '#fff' : '#8A92A6', fontSize: 11.5, fontWeight: 700, padding: '4px 9px', borderRadius: 20, backdropFilter: 'blur(4px)' }}>
+        <span style={{ position: 'absolute', top: 12, right: 12, display: 'inline-flex', alignItems: 'center', gap: 5, background: (bien.nbLeads || 0) > 0 ? 'rgba(25,59,94,0.92)' : 'rgba(255,255,255,0.92)', color: (bien.nbLeads || 0) > 0 ? '#fff' : '#8A92A6', fontSize: 11.5, fontWeight: 700, padding: '4px 9px', borderRadius: 20, backdropFilter: 'blur(4px)' }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
           {bien.nbLeads || 0}
         </span>
