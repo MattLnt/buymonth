@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { calculMensualite } from '@/lib/calcul'
 import { MENSUALITE_CONFIG } from '@/lib/mensualiteConfig'
+import { estPromoteurActif } from '@/lib/facturation'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,6 +31,22 @@ function buildSVG({ mensualite, premium, theme, primaire, accent, fond }) {
 </svg>`
 }
 
+// Badge neutre affiché quand le bien n'est pas diffusable (promoteur non abonné, bien retiré…)
+function buildSVGIndisponible({ theme, primaire, fond }) {
+  const dark = theme === 'dark'
+  const bg = fond || (dark ? '#16324F' : '#FFFFFF')
+  const textMain = dark ? '#FFFFFF' : '#16324F'
+  const textMuted = dark ? '#9FB0C4' : '#8A92A6'
+  const w = 320, h = 160
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  <rect width="${w}" height="${h}" rx="16" fill="${bg}" stroke="#EEF2F7"/>
+  <path d="M0 16 Q0 0 16 0 H304 Q320 0 320 16 V70 H0 Z" fill="${primaire}"/>
+  <text x="160" y="46" font-family="system-ui,Arial,sans-serif" font-size="22" font-weight="700" text-anchor="middle"><tspan fill="#FFFFFF">Buy</tspan><tspan fill="#7CB8A8">Month</tspan></text>
+  <text x="160" y="112" font-family="system-ui,Arial,sans-serif" font-size="14" font-weight="600" fill="${textMain}" text-anchor="middle">Bien non disponible</text>
+  <text x="160" y="134" font-family="system-ui,Arial,sans-serif" font-size="10" fill="${textMuted}" text-anchor="middle">Cette annonce n'est plus diffusée.</text>
+</svg>`
+}
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url)
   const bienId = searchParams.get('bien')
@@ -40,17 +57,29 @@ export async function GET(req) {
   const fond = searchParams.get('fond') ? `#${searchParams.get('fond')}` : null
 
   let mensualite = null
+  let diffusable = false
+
   if (bienId) {
-    const bien = await prisma.bien.findUnique({ where: { id: bienId } })
-    if (bien) mensualite = bien.mensualite || calculMensualite(bien.prixTotal)
+    const bien = await prisma.bien.findUnique({
+      where: { id: bienId },
+      include: { client: { select: { subStatus: true } } },
+    })
+    // Diffusable seulement si le bien est visible ET son promoteur abonné
+    if (bien && bien.published && estPromoteurActif(bien.client)) {
+      diffusable = true
+      mensualite = bien.mensualite || calculMensualite(bien.prixTotal)
+    }
   }
 
-  const svg = buildSVG({ mensualite, premium, theme, primaire, accent, fond })
+  const svg = diffusable
+    ? buildSVG({ mensualite, premium, theme, primaire, accent, fond })
+    : buildSVGIndisponible({ theme, primaire, fond })
 
   return new Response(svg, {
     headers: {
       'Content-Type': 'image/svg+xml',
-      'Cache-Control': 'public, max-age=3600',
+      // Cache court quand indisponible : le badge doit se réactiver vite dès que le promoteur s'abonne
+      'Cache-Control': diffusable ? 'public, max-age=3600' : 'public, max-age=60',
     },
   })
 }
