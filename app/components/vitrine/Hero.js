@@ -20,7 +20,7 @@ export default function Hero() {
             <Link className="btn btn-primary" href="/register">
               Commencer →
             </Link>
-            <Link className="btn btn-ghost" href="/contact">
+            <Link className="btn btn-ghost" href="/pro/contact">
               Réserver une démo
             </Link>
           </div>

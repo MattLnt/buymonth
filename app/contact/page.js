@@ -1,42 +1,22 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import PublicNav from "@/app/components/PublicNav";
 import PublicFooter from "@/app/components/PublicFooter";
 import { FormSelect } from "@/app/components/dashboard/FormSelect";
 
-const sujets = [
-  { value: "Question générale", label: "Question générale" },
-  { value: "Demander une démo", label: "Demander une démo" },
-  { value: "Devenir partenaire", label: "Devenir partenaire" },
-  { value: "Facturation / Paiement", label: "Facturation / Paiement" },
-  { value: "Problème technique", label: "Problème technique" },
-  { value: "Autre", label: "Autre" },
-];
-
-// Map des valeurs de ?sujet= vers un objet du menu
-const SUJET_PARAM = {
-  demo: "Demander une démo",
-  partenaire: "Devenir partenaire",
-  facturation: "Facturation / Paiement",
-  technique: "Problème technique",
-};
-
-function ContactInner() {
-  const searchParams = useSearchParams();
+export default function ContactPage() {
   const [form, setForm] = useState({ nom: "", email: "", sujet: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
 
-  // Pré-remplit le sujet depuis l'URL (ex. /contact?sujet=demo depuis le CTA « Réserver ma démo »)
-  const demoContext = searchParams.get("sujet") === "demo";
-  useEffect(() => {
-    const p = searchParams.get("sujet");
-    if (p && SUJET_PARAM[p]) {
-      setForm((f) => ({ ...f, sujet: SUJET_PARAM[p] }));
-    }
-  }, [searchParams]);
+  const sujets = [
+    { value: "Question générale", label: "Question générale" },
+    { value: "Devenir partenaire", label: "Devenir partenaire" },
+    { value: "Facturation / Paiement", label: "Facturation / Paiement" },
+    { value: "Problème technique", label: "Problème technique" },
+    { value: "Autre", label: "Autre" },
+  ];
 
   const isValid = form.nom && form.email && form.message;
 
@@ -79,12 +59,10 @@ function ContactInner() {
         {/* Hero */}
         <div style={{ background: "linear-gradient(150deg, #16324F 0%, #1D4267 100%)", padding: "72px 24px 60px", textAlign: "center", position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: "-30%", right: "-5%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,184,168,0.16) 0%, transparent 65%)", pointerEvents: "none" }} />
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.1em", margin: "0 0 14px", position: "relative" }}>{demoContext ? "DÉMO" : "CONTACT"}</p>
-          <h1 style={{ fontSize: 42, fontWeight: 700, color: "#fff", margin: "0 0 14px", letterSpacing: "-0.025em", position: "relative" }}>{demoContext ? "Réservez votre démo." : "Parlons-en."}</h1>
-          <p style={{ fontSize: 15.5, color: "rgba(255,255,255,0.6)", margin: "0 auto", maxWidth: 440, lineHeight: 1.7, position: "relative" }}>
-            {demoContext
-              ? "Laissez-nous vos coordonnées et le contexte de votre projet : nous vous recontactons pour organiser une démonstration de BuyMonth."
-              : "Une question, un projet ou une demande de partenariat ? Notre équipe vous répond rapidement."}
+          <p style={{ fontSize: 11, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.1em", margin: "0 0 14px", position: "relative" }}>CONTACT</p>
+          <h1 style={{ fontSize: 42, fontWeight: 700, color: "#fff", margin: "0 0 14px", letterSpacing: "-0.025em", position: "relative" }}>Parlons-en.</h1>
+          <p style={{ fontSize: 15.5, color: "rgba(255,255,255,0.6)", margin: "0 auto", maxWidth: 420, lineHeight: 1.7, position: "relative" }}>
+            Une question, un projet ou une demande de partenariat ? Notre équipe vous répond rapidement.
           </p>
         </div>
 
@@ -92,7 +70,7 @@ function ContactInner() {
 
           {/* Formulaire */}
           <div style={{ background: "#fff", border: "1px solid #EEF2F7", borderRadius: 18, padding: 32 }}>
-            <h2 style={{ fontSize: 19, fontWeight: 700, color: "#193B5E", margin: "0 0 24px" }}>{demoContext ? "Demander une démo" : "Envoyer un message"}</h2>
+            <h2 style={{ fontSize: 19, fontWeight: 700, color: "#193B5E", margin: "0 0 24px" }}>Envoyer un message</h2>
 
             {sent ? (
               <div style={{ background: "rgba(36,158,124,0.08)", borderRadius: 16, border: "1px solid rgba(36,158,124,0.22)", padding: "44px 32px", textAlign: "center" }}>
@@ -125,7 +103,7 @@ function ContactInner() {
 
                 <div>
                   <label style={labelStyle}>Message *</label>
-                  <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} rows={6} placeholder={demoContext ? "Parlez-nous de votre activité, du nombre de biens, de vos disponibilités..." : "Décrivez votre demande..."} style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6 }} />
+                  <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} rows={6} placeholder="Décrivez votre demande..." style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6 }} />
                 </div>
 
                 {error && (
@@ -145,7 +123,7 @@ function ContactInner() {
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /></svg>
                       Envoi en cours...
                     </>
-                  ) : (demoContext ? "Demander ma démo →" : "Envoyer le message →")}
+                  ) : "Envoyer le message →"}
                 </button>
               </form>
             )}
@@ -188,13 +166,5 @@ function ContactInner() {
         <PublicFooter />
       </div>
     </div>
-  );
-}
-
-export default function ContactPage() {
-  return (
-    <Suspense fallback={null}>
-      <ContactInner />
-    </Suspense>
   );
 }

@@ -12,7 +12,7 @@ export default function Cta() {
           </p>
           <Link
             className="btn btn-primary"
-            href="/contact?sujet=demo"
+            href="/pro/contact"
             style={{ padding: "14px 30px", fontSize: "1rem" }}
           >
             Réserver ma démo

@@ -36,7 +36,7 @@ export default function Nav() {
               <Link className="nav-login" href="/login">
                 Connexion
               </Link>
-              <Link className="btn btn-primary" href="/contact">
+              <Link className="btn btn-primary" href="/pro/contact">
                 Réserver une démo
               </Link>
             </>
