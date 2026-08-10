@@ -71,6 +71,11 @@ export function Simulateur({ bien, onStepChange }) {
 
   return (
     <div>
+      <style>{`
+        .sim-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 560px){ .sim-row { grid-template-columns: 1fr; } }
+      `}</style>
+
       {/* Stepper */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 0, marginBottom: 26 }}>
         {[{ n: 1, t: 'Vos informations' }, { n: 2, t: 'Votre capacité' }].map((s, i) => (
@@ -87,16 +92,18 @@ export function Simulateur({ bien, onStepChange }) {
       {/* ÉTAPE 1 : informations + coordonnées + consentement */}
       {step === 1 && (
         <form onSubmit={soumettre}>
-          {/* Capacité */}
-          <div style={{ marginBottom: 18 }}>
-            <label style={labelStyle}>Revenus nets mensuels du ménage</label>
-            <Euro><input type="number" value={sim.revenus} onChange={setS('revenus')} placeholder="3500" style={{ ...inputStyle, paddingRight: 36 }} /></Euro>
+          {/* Capacité — Revenus + Apport côte à côte, Crédits pleine largeur */}
+          <div className="sim-row" style={{ marginBottom: 14 }}>
+            <div>
+              <label style={labelStyle}>Revenus nets mensuels</label>
+              <Euro><input type="number" value={sim.revenus} onChange={setS('revenus')} placeholder="3500" style={{ ...inputStyle, paddingRight: 36 }} /></Euro>
+            </div>
+            <div>
+              <label style={labelStyle}>Apport disponible</label>
+              <Euro><input type="number" value={sim.apport} onChange={setS('apport')} placeholder="30000" style={{ ...inputStyle, paddingRight: 36 }} /></Euro>
+            </div>
           </div>
-          <div style={{ marginBottom: 18 }}>
-            <label style={labelStyle}>Apport disponible</label>
-            <Euro><input type="number" value={sim.apport} onChange={setS('apport')} placeholder="30000" style={{ ...inputStyle, paddingRight: 36 }} /></Euro>
-          </div>
-          <div style={{ marginBottom: 22 }}>
+          <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>Crédits en cours (mensualités)</label>
             <Euro><input type="number" value={sim.creditsEnCours} onChange={setS('creditsEnCours')} placeholder="0" style={{ ...inputStyle, paddingRight: 36 }} /></Euro>
           </div>
@@ -106,21 +113,25 @@ export function Simulateur({ bien, onStepChange }) {
             <p style={{ fontSize: 13.5, color: '#5A6275', margin: '0 0 16px', lineHeight: 1.55 }}>
               Vos coordonnées permettent à <strong style={{ color: '#193B5E' }}>BuyMonth Finance</strong> (intermédiaire agréé FSMA) de vous préparer une offre personnalisée.
             </p>
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>Nom complet</label>
-              <input value={contact.nom} onChange={setC('nom')} placeholder="Votre nom" style={inputStyle} />
+            <div className="sim-row" style={{ marginBottom: 14 }}>
+              <div>
+                <label style={labelStyle}>Nom complet</label>
+                <input value={contact.nom} onChange={setC('nom')} placeholder="Votre nom" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Entreprise <span style={{ textTransform: 'none', fontWeight: 500, color: '#A9B0BE' }}>(optionnel)</span></label>
+                <input value={contact.societe} onChange={setC('societe')} placeholder="Via une société" style={inputStyle} />
+              </div>
             </div>
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>Entreprise <span style={{ textTransform: 'none', fontWeight: 500, color: '#A9B0BE' }}>(optionnel)</span></label>
-              <input value={contact.societe} onChange={setC('societe')} placeholder="Si achat via une société" style={inputStyle} />
-            </div>
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>Email</label>
-              <input type="email" value={contact.email} onChange={setC('email')} placeholder="vous@email.com" style={inputStyle} />
-            </div>
-            <div style={{ marginBottom: 18 }}>
-              <label style={labelStyle}>Téléphone</label>
-              <input value={contact.telephone} onChange={setC('telephone')} placeholder="+32 ..." style={inputStyle} />
+            <div className="sim-row" style={{ marginBottom: 18 }}>
+              <div>
+                <label style={labelStyle}>Email</label>
+                <input type="email" value={contact.email} onChange={setC('email')} placeholder="vous@email.com" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Téléphone</label>
+                <input value={contact.telephone} onChange={setC('telephone')} placeholder="+32 ..." style={inputStyle} />
+              </div>
             </div>
           </div>
 

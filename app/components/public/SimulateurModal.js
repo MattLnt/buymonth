@@ -19,8 +19,8 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalis�
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // largeur modale : large en étape 2 (2 colonnes), normale en étape 1
-  const maxW = step === 2 ? 760 : 460
+  // largeur modale : large en étape 1 (formulaire 2 colonnes) et en étape 2 (résultat)
+  const maxW = step === 1 ? 640 : 620
 
   return (
     <>
