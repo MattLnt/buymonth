@@ -3,13 +3,14 @@ import { notFound } from 'next/navigation'
 import { BienPublicCard } from '@/app/components/public/BienPublicCard'
 import PublicNav from '@/app/components/PublicNav'
 import PublicFooter from '@/app/components/PublicFooter'
+import { estPromoteurActif } from '@/lib/facturation'
 
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }) {
   const { slug } = await params
-  const client = await prisma.client.findUnique({ where: { slug }, select: { societe: true } })
-  if (!client) return { title: 'Agence introuvable — BuyMonth' }
+  const client = await prisma.client.findUnique({ where: { slug }, select: { societe: true, subStatus: true } })
+  if (!client || !estPromoteurActif(client)) return { title: 'Agence introuvable — BuyMonth' }
   return {
     title: `${client.societe} — Biens en mensualités | BuyMonth`,
     description: `Découvrez les biens proposés par ${client.societe}, affichés en budget mensuel clair.`,
@@ -28,6 +29,7 @@ export default async function AgencePage({ params }) {
       logoUrl: true,
       telephone: true,
       adresse: true,
+      subStatus: true,
       biens: {
         where: { statut: { in: ['ACTIF', 'OPTION'] } },
         orderBy: { createdAt: 'desc' },
@@ -40,7 +42,8 @@ export default async function AgencePage({ params }) {
     },
   })
 
-  if (!client) notFound()
+  // 404 si l'agence n'existe pas ou si le promoteur n'est pas abonné
+  if (!client || !estPromoteurActif(client)) notFound()
 
   const WRAP = { maxWidth: 1240, margin: '0 auto', padding: '0 24px' }
   const nbBiens = client.biens.length
