@@ -76,11 +76,10 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }))
   const handle = (k) => (e) => setField(k, e.target.value)
 
-  // Valeur affichée dans le <select> : soit le projet courant, soit l'option "nouveau"
+  // Valeur affichée dans le select : soit le projet courant, soit l'option "nouveau"
   const selectValue = nouveauProjet ? NOUVEAU : form.projet
 
-  function onSelectProjet(e) {
-    const v = e.target.value
+  function onSelectProjet(v) {
     if (v === NOUVEAU) {
       setNouveauProjet(true)
       setField('projet', '') // on vide pour laisser saisir
@@ -102,7 +101,7 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
       return
     }
     // Si "nouveau projet" activé mais champ vide, on retombe sur "Hors projet"
-    const projetFinal = nouveauProjet && !form.projet.trim() ? 'Hors projet' : form.projet.trim() || 'Hors projet'
+    const projetFinal = nouveauProjet && !form.projet.trim() ? 'Hors projet' : (form.projet.trim() || 'Hors projet')
 
     setLoading(true); setError('')
 
@@ -157,12 +156,16 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
             <FormSection icon={ic.layers} title="Projet & unité" subtitle="Rattachez ce bien à un programme (facultatif)">
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
-                  <label style={labelStyle}>Projet</label>
-                  <select value={selectValue} onChange={onSelectProjet} style={{ ...inputStyle, cursor: 'pointer', appearance: 'auto' }}>
-                    <option value="Hors projet">Hors projet</option>
-                    {projetsExistants.map((p) => <option key={p} value={p}>{p}</option>)}
-                    <option value={NOUVEAU}>+ Nouveau projet…</option>
-                  </select>
+                  <FormSelect
+                    label="Projet"
+                    value={selectValue}
+                    onChange={onSelectProjet}
+                    options={[
+                      { value: 'Hors projet', label: 'Hors projet' },
+                      ...projetsExistants.map((p) => ({ value: p, label: p })),
+                      { value: NOUVEAU, label: '+ Nouveau projet…' },
+                    ]}
+                  />
                   {nouveauProjet && (
                     <input
                       value={form.projet}
