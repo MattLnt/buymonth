@@ -8,6 +8,7 @@ import { FormSelect } from './FormSelect'
 import { AddressInput } from './AddressInput'
 import { PhotoUploader } from './PhotoUploader'
 import { FormRecap } from './FormRecap'
+import { ConfirmModal } from './ConfirmModal'
 
 const TYPES = ['Appartement', 'Maison', 'Studio', 'Villa', 'Terrain', 'Bureau', 'Commerce']
 const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', 'Flandre-Occidentale', 'Flandre-Orientale', 'Hainaut', 'Liège', 'Limbourg', 'Luxembourg', 'Namur']
@@ -64,6 +65,7 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   // Liste des projets existants (hors "Hors projet"), sans doublon
   const projetsExistants = [...new Set(projets.filter((p) => p && p !== 'Hors projet'))]
@@ -120,8 +122,7 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
     }
   }
 
-  async function handleDelete() {
-    if (!confirm('Supprimer ce bien définitivement ?')) return
+  async function confirmerSuppression() {
     setDeleting(true)
     try {
       const res = await fetch(`/api/biens?id=${initial.id}`, { method: 'DELETE' })
@@ -273,9 +274,25 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
           </div>
 
           {/* RÉCAP STICKY */}
-          <FormRecap form={form} photos={photos} loading={loading} isFormValid={isFormValid} mode={mode} onDelete={handleDelete} deleting={deleting} />
+          <FormRecap form={form} photos={photos} loading={loading} isFormValid={isFormValid} mode={mode} onDelete={() => setConfirmOpen(true)} deleting={deleting} />
         </div>
       </form>
+
+      {/* Modale de confirmation premium (remplace le confirm() natif) */}
+      <ConfirmModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={confirmerSuppression}
+        loading={deleting}
+        title="Supprimer ce bien ?"
+        confirmLabel="Supprimer le bien"
+        message={
+          <>
+            {initial?.titre ? <>Le bien <strong style={{ color: '#193B5E' }}>{initial.titre}</strong> sera définitivement supprimé. </> : 'Ce bien sera définitivement supprimé. '}
+            Cette action est irréversible.
+          </>
+        }
+      />
     </div>
   )
 }
