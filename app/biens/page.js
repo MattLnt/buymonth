@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { BiensExplorer } from '@/app/components/public/BiensExplorer'
 import PublicNav from '@/app/components/PublicNav'
 import PublicFooter from '@/app/components/PublicFooter'
+import { STATUTS_ABONNEMENT_ACTIFS } from '@/lib/facturation'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,9 +13,13 @@ export const metadata = {
 }
 
 export default async function BiensPublicPage() {
-  // On charge TOUS les biens publiés (le filtrage se fait côté client, instantané)
+  // On charge les biens publiés DONT le promoteur a un abonnement actif.
+  // Sans abonnement (subStatus hors active/trialing), les biens ne sont pas diffusés.
   const biens = await prisma.bien.findMany({
-    where: { published: true },
+    where: {
+      published: true,
+      client: { subStatus: { in: STATUTS_ABONNEMENT_ACTIFS } },
+    },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true, titre: true, mensualite: true, prixTotal: true, type: true,
