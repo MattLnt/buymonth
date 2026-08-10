@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { FormSelect } from './FormSelect'
 import { Icon } from './Icon'
+import { ConfirmModal } from './ConfirmModal'
 
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
@@ -54,6 +55,7 @@ export function AdminLeadsExplorer({ leads }) {
   )
   const [saving, setSaving] = useState('')
   const [deleting, setDeleting] = useState('')
+  const [aSupprimer, setASupprimer] = useState(null) // lead ciblé par la modale de confirmation
 
   const sources = useMemo(() => {
     const set = new Set()
@@ -104,13 +106,18 @@ export function AdminLeadsExplorer({ leads }) {
     }
   }
 
-  async function supprimer(leadId) {
-    if (!confirm('Supprimer ce lead ? (suppression logique, la trace du consentement est conservée)')) return
+  async function confirmerSuppression() {
+    if (!aSupprimer) return
+    const leadId = aSupprimer.id
     setDeleting(leadId)
     try {
       const res = await fetch(`/api/admin/leads?id=${leadId}`, { method: 'DELETE' })
-      if (res.ok) router.refresh()
-      else setDeleting('')
+      if (res.ok) {
+        setASupprimer(null)
+        router.refresh()
+      } else {
+        setDeleting('')
+      }
     } catch {
       setDeleting('')
     }
@@ -236,7 +243,7 @@ export function AdminLeadsExplorer({ leads }) {
                         {formatDateHeure(lead.createdAt)}
                       </td>
                       <td style={{ padding: '14px 18px' }}>
-                        <button onClick={() => supprimer(lead.id)} disabled={deleting === lead.id} title="Supprimer (soft delete)"
+                        <button onClick={() => setASupprimer(lead)} disabled={deleting === lead.id} title="Supprimer (soft delete)"
                           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '8px', borderRadius: 8, background: '#FDF0F0', color: '#E5484D', border: 'none', cursor: 'pointer' }}>
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
                         </button>
@@ -249,6 +256,22 @@ export function AdminLeadsExplorer({ leads }) {
           </div>
         )}
       </div>
+
+      {/* Modale de confirmation premium */}
+      <ConfirmModal
+        open={!!aSupprimer}
+        onClose={() => setASupprimer(null)}
+        onConfirm={confirmerSuppression}
+        loading={!!deleting}
+        title="Supprimer ce lead ?"
+        confirmLabel="Supprimer le lead"
+        message={
+          <>
+            {aSupprimer?.nom ? <>Le lead <strong style={{ color: '#193B5E' }}>{aSupprimer.nom}</strong> sera retiré des listes. </> : 'Ce lead sera retiré des listes. '}
+            Il s'agit d'une suppression logique : la trace du consentement est conservée en base (conformité RGPD).
+          </>
+        }
+      />
     </div>
   )
 }
