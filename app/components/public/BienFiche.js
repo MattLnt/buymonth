@@ -38,6 +38,9 @@ export function BienFiche({ bien, apercu = false }) {
   // La carte agence est cliquable vers /agences/[slug] uniquement en public (pas en aperçu) et si un slug existe
   const agenceHref = !apercu && bien.client?.slug ? `/agences/${bien.client.slug}` : null
 
+  const estVisible = bien.published
+  const statutLabel = STATUT_LABEL[bien.statut] || bien.statut
+
   const agenceInner = bien.client?.societe ? (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: bien.client.telephone ? 16 : 0 }}>
@@ -69,23 +72,39 @@ export function BienFiche({ bien, apercu = false }) {
     <div style={{ minHeight: '100vh', background: '#EEF1F6' }}>
       <PublicNav />
 
-      {/* Bandeau aperçu privé (page preview uniquement) */}
+      {/* Bandeau aperçu privé premium (page preview uniquement) */}
       {apercu && (
-        <div style={{ background: '#FFF7ED', borderBottom: '1px solid #FED7AA', padding: '10px 0' }}>
-          <div style={{ ...WRAP, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 600, color: '#C2620C' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
-              Aperçu privé — ce bien ({STATUT_LABEL[bien.statut] || bien.statut}) {bien.published ? 'est visible publiquement.' : "n'est pas visible publiquement."}
-            </span>
-            <Link href="/dashboard/client/biens" style={{ fontSize: 13, fontWeight: 700, color: '#C2620C', textDecoration: 'underline' }}>
-              Retour à Mes biens
-            </Link>
+        <div style={{ background: 'linear-gradient(120deg, #16324F 0%, #1D4267 55%, #234E79 100%)', padding: '96px 0 0' }}>
+          <div style={{ ...WRAP }}>
+            <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, border: '1px solid rgba(124,184,168,0.3)', background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(4px)', padding: '18px 22px' }}>
+              <div style={{ position: 'absolute', top: -30, right: -20, width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.22) 0%, transparent 65%)', pointerEvents: 'none' }} />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                <span style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(124,184,168,0.16)', border: '1px solid rgba(124,184,168,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+                </span>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 15.5, fontWeight: 700, color: '#fff' }}>Aperçu privé</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', color: estVisible ? '#7CB8A8' : '#F4B063', background: estVisible ? 'rgba(124,184,168,0.16)' : 'rgba(244,176,99,0.14)', border: `1px solid ${estVisible ? 'rgba(124,184,168,0.35)' : 'rgba(244,176,99,0.35)'}`, padding: '3px 10px', borderRadius: 20 }}>{statutLabel}</span>
+                  </div>
+                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+                    {estVisible
+                      ? 'Voici le rendu public de ce bien, tel que le verront les acheteurs.'
+                      : "Voici le rendu tel qu'il apparaîtra en public. Ce bien n'est pas diffusé actuellement."}
+                  </div>
+                </div>
+                <Link href="/dashboard/client/biens" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13.5, fontWeight: 700, color: '#16324F', background: '#fff', padding: '11px 18px', borderRadius: 10, textDecoration: 'none', flexShrink: 0 }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+                  Retour à Mes biens
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {/* Bandeau navy pour lisibilité de la nav + breadcrumb */}
-      <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', padding: apercu ? '40px 0 28px' : '96px 0 28px' }}>
+      <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', padding: apercu ? '22px 0 28px' : '96px 0 28px' }}>
         <div style={{ ...WRAP }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>
             <Link href="/biens" style={{ color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }}>Catalogue</Link>
