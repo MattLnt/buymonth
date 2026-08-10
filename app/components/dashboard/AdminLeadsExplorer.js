@@ -213,6 +213,7 @@ export function AdminLeadsExplorer({ leads }) {
       const res = await fetch(`/api/admin/leads?id=${leadId}`, { method: 'DELETE' })
       if (res.ok) {
         setASupprimer(null)
+        setDeleting('')
         router.refresh()
       } else {
         setDeleting('')
