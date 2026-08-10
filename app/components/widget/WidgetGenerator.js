@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { FormSection } from '@/app/components/dashboard/FormSection'
 import { FormSelect } from '@/app/components/dashboard/FormSelect'
+import { ColorPicker } from '@/app/components/dashboard/ColorPicker'
 import { Badge } from './Badge'
 import { MENSUALITE_CONFIG } from '@/lib/mensualiteConfig'
 
@@ -221,27 +222,9 @@ export function WidgetGenerator({ biens, plan }) {
 
               {couleurMode === 'perso' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <div>
-                    <label style={labelStyle}>Couleur principale</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1.5px solid #E8EDF2', borderRadius: 10, padding: '6px 10px' }}>
-                      <input type="color" value={primaire} onChange={(e) => setPrimaire(e.target.value)} style={{ width: 30, height: 30, border: 'none', borderRadius: 6, cursor: 'pointer', background: 'none', flexShrink: 0 }} />
-                      <span style={{ fontSize: 12.5, color: '#5A6B7D' }}>{primaire}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Couleur mensualité</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1.5px solid #E8EDF2', borderRadius: 10, padding: '6px 10px' }}>
-                      <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} style={{ width: 30, height: 30, border: 'none', borderRadius: 6, cursor: 'pointer', background: 'none', flexShrink: 0 }} />
-                      <span style={{ fontSize: 12.5, color: '#5A6B7D' }}>{accent}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Couleur de fond</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1.5px solid #E8EDF2', borderRadius: 10, padding: '6px 10px' }}>
-                      <input type="color" value={fond} onChange={(e) => setFond(e.target.value)} style={{ width: 30, height: 30, border: 'none', borderRadius: 6, cursor: 'pointer', background: 'none', flexShrink: 0 }} />
-                      <span style={{ fontSize: 12.5, color: '#5A6B7D' }}>{fond}</span>
-                    </div>
-                  </div>
+                  <ColorPicker label="Couleur principale" value={primaire} onChange={setPrimaire} />
+                  <ColorPicker label="Couleur mensualité" value={accent} onChange={setAccent} />
+                  <ColorPicker label="Couleur de fond" value={fond} onChange={setFond} />
                 </div>
               )}
             </div>
