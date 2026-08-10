@@ -241,10 +241,25 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
                   onChange={(v) => setField('statut', v)}
                   options={STATUTS}
                 />
-                <p style={{ fontSize: 12.5, color: '#8A92A6', margin: '2px 0 0', lineHeight: 1.5 }}>
-                  Les biens <strong style={{ color: '#193B5E' }}>Actifs</strong> et <strong style={{ color: '#193B5E' }}>Sous option</strong> sont comptés dans votre abonnement.
-                  Un bien hors-ligne ou vendu en sort automatiquement (ajustement au prorata).
-                </p>
+                {estVisible ? (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: 'rgba(124,184,168,0.12)', border: '1.5px solid rgba(124,184,168,0.4)', borderRadius: 10, padding: '12px 14px' }}>
+                    <span style={{ flexShrink: 0, display: 'flex', color: '#249E7C', marginTop: 1 }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
+                    </span>
+                    <p style={{ fontSize: 13, color: '#1C6B52', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
+                      Ce bien sera <strong>compté dans votre abonnement</strong> — facturé au tarif de votre formule, par bien actif et au prorata. Un bien mis hors-ligne ou vendu en sort automatiquement.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: '#F5F7FA', border: '1.5px solid #E8EDF2', borderRadius: 10, padding: '12px 14px' }}>
+                    <span style={{ flexShrink: 0, display: 'flex', color: '#8A92A6', marginTop: 1 }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+                    </span>
+                    <p style={{ fontSize: 13, color: '#5A6B7D', margin: 0, lineHeight: 1.5 }}>
+                      Ce bien <strong style={{ color: '#193B5E' }}>n'est pas compté</strong> dans votre abonnement. Il n'apparaît pas au public tant qu'il reste dans ce statut.
+                    </p>
+                  </div>
+                )}
               </div>
             </FormSection>
 
