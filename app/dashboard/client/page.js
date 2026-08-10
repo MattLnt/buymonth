@@ -142,7 +142,7 @@ export default async function ClientDashboard() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13.5, fontWeight: 600, color: '#193B5E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.nom || l.email || 'Prospect'}</div>
                     {l.bien?.id ? (
-                      <Link href={`/dashboard/client/biens/${l.bien.id}`} title={l.bien.titre} style={{ fontSize: 12, color: '#7CB8A8', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+                      <Link href={`/biens/${l.bien.id}`} target="_blank" rel="noopener noreferrer" title={l.bien.titre} style={{ fontSize: 12, color: '#7CB8A8', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
                         {l.bien.titre}
                       </Link>
                     ) : (
