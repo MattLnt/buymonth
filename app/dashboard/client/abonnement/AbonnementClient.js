@@ -44,7 +44,7 @@ function euro(n) {
   return (n || 0).toLocaleString('fr-BE') + ' €'
 }
 
-export function AbonnementClient({ subStatus, formule = 'PRO', details, createdAt, facturation }) {
+export function AbonnementClient({ subStatus, formule = 'PRO', details, createdAt, facturation, changementProgramme = null }) {
   const router = useRouter()
   const [loading, setLoading] = useState('')
   const [error, setError] = useState('')
@@ -169,6 +169,18 @@ export function AbonnementClient({ subStatus, formule = 'PRO', details, createdA
 
   return (
     <div>
+      {/* Bandeau changement de formule programmé (downgrade) */}
+      {changementProgramme && (
+        <div style={{ background: 'rgba(78,125,212,0.08)', border: '1px solid rgba(78,125,212,0.3)', borderRadius: 12, padding: '14px 18px', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4E7DD4" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+          <span style={{ fontSize: 13.5, fontWeight: 600, color: '#2E5AA8' }}>
+            Changement programmé : vous passerez en {changementProgramme.formuleCibleLabel}
+            {changementProgramme.dateEffet ? ` le ${formatDate(changementProgramme.dateEffet)}` : ' à la fin de votre période en cours'}.
+            D'ici là, vous conservez votre formule actuelle.
+          </span>
+        </div>
+      )}
+
       {/* Bandeau résiliation programmée */}
       {resiliationProgrammee && (
         <div style={{ background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 12, padding: '14px 18px', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 10 }}>

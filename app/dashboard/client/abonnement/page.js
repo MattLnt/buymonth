@@ -3,8 +3,18 @@ import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/app/components/dashboard/Ui'
 import { AbonnementClient } from './AbonnementClient'
 import { decompteFacturation } from '@/lib/facturation'
+import { stripe, PRICE_PRO, PRICE_PRO_PLUS } from '@/lib/stripe'
 
 export const dynamic = 'force-dynamic'
+
+// Déduit la formule à partir d'un price ID Stripe
+function formuleDepuisPrice(priceId) {
+  if (priceId === PRICE_PRO_PLUS) return 'PRO_PLUS'
+  if (priceId === PRICE_PRO) return 'PRO'
+  return null
+}
+
+const FORMULE_LABEL = { PRO: 'BuyMonth Pro', PRO_PLUS: 'BuyMonth Pro+' }
 
 export default async function AbonnementPage({ searchParams }) {
   const client = await getCurrentClient()
@@ -26,6 +36,31 @@ export default async function AbonnementPage({ searchParams }) {
     montant: facturation.montantMensuel, // nb biens actifs × tarif formule
     devise: 'eur',
   } : null
+
+  // Changement de formule programmé (downgrade) : on interroge Stripe pour savoir
+  // si un subscription schedule prévoit une bascule vers une autre formule en fin de période.
+  let changementProgramme = null
+  if (stripe && client.stripeSubId) {
+    try {
+      const sub = await stripe.subscriptions.retrieve(client.stripeSubId, { expand: ['schedule'] })
+      const schedule = sub.schedule && typeof sub.schedule === 'object' ? sub.schedule : null
+      if (schedule && Array.isArray(schedule.phases) && schedule.phases.length > 1) {
+        // La phase courante = phases[0], la suivante = phases[1]
+        const prochainePhase = schedule.phases[1]
+        const priceId = prochainePhase?.items?.[0]?.price
+        const formuleCible = formuleDepuisPrice(typeof priceId === 'string' ? priceId : priceId?.id)
+        if (formuleCible && formuleCible !== client.formule) {
+          changementProgramme = {
+            formuleCible,
+            formuleCibleLabel: FORMULE_LABEL[formuleCible],
+            dateEffet: prochainePhase.start_date ? prochainePhase.start_date * 1000 : (client.subEndsAt ? new Date(client.subEndsAt).getTime() : null),
+          }
+        }
+      }
+    } catch {
+      // silencieux : si Stripe est indisponible, on n'affiche juste pas le bandeau
+    }
+  }
 
   return (
     <>
@@ -49,6 +84,7 @@ export default async function AbonnementPage({ searchParams }) {
         details={details}
         createdAt={client.createdAt}
         facturation={facturation}
+        changementProgramme={changementProgramme}
       />
     </>
   )
