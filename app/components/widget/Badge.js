@@ -11,14 +11,18 @@ export function Badge({
   couleurPrimaire = '#16324F',
   couleurAccent = '#7CB8A8',
   couleurFond = null,
+  couleurTitre = null,
+  couleurMentions = null,
+  couleurCredit = null,
   logoUrl = null,
   width = 320,
 }) {
   const dark = theme === 'dark'
   const bg = couleurFond || (dark ? '#16324F' : '#FFFFFF')
   const headerBg = couleurPrimaire
-  const textMain = dark ? '#FFFFFF' : '#16324F'
-  const textMuted = dark ? 'rgba(255,255,255,0.6)' : '#8A92A6'
+  const textMain = couleurTitre || (dark ? '#FFFFFF' : '#16324F')
+  const textMuted = couleurMentions || (dark ? 'rgba(255,255,255,0.6)' : '#8A92A6')
+  const textCredit = couleurCredit || (dark ? 'rgba(255,255,255,0.6)' : '#8A92A6')
   const border = dark ? 'rgba(255,255,255,0.1)' : '#EEF2F7'
 
   const cfg = MENSUALITE_CONFIG
@@ -52,7 +56,7 @@ export function Badge({
           * Attention, emprunter de l'argent coûte aussi de l'argent. Estimation indicative hors frais,
           sur base d'un exemple représentatif (apport {Math.round(cfg.apportPct * 100)} %, durée {Math.round(cfg.dureeMois / 12)} ans,
           taux débiteur {pct(cfg.tauxAnnuel)}, TAEG {pct(cfg.taegAnnuel)}). Sous réserve d'acceptation du crédit.
-          <div style={{ marginTop: 6, fontWeight: 600 }}>Crédit : BuyMonth Finance — FSMA 1021.366.349</div>
+          <div style={{ marginTop: 6, fontWeight: 600, color: textCredit }}>Crédit : BuyMonth Finance — FSMA 1021.366.349</div>
         </div>
       </div>
     </div>

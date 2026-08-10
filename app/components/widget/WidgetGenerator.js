@@ -17,11 +17,12 @@ const ic = {
   code: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>,
 }
 
-function buildSVG({ mensualite, premium, style, primaire, accent, fond }) {
+function buildSVG({ mensualite, premium, style, primaire, accent, fond, cTitre, cMentions, cCredit }) {
   const dark = style === 'dark'
   const bg = fond || (dark ? '#16324F' : '#FFFFFF')
-  const textMain = dark ? '#FFFFFF' : '#16324F'
-  const textMuted = dark ? '#9FB0C4' : '#8A92A6'
+  const textMain = cTitre || (dark ? '#FFFFFF' : '#16324F')
+  const textMuted = cMentions || (dark ? '#9FB0C4' : '#8A92A6')
+  const textCredit = cCredit || (dark ? '#9FB0C4' : '#8A92A6')
   const w = 320, h = 288
   const header = premium
     ? `<rect x="137" y="20" width="46" height="46" rx="10" fill="${accent}"/>`
@@ -37,7 +38,7 @@ function buildSVG({ mensualite, premium, style, primaire, accent, fond }) {
   <text x="160" y="220" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">* Emprunter de l'argent coûte aussi de l'argent. Estimation indicative hors frais</text>
   <text x="160" y="233" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">(apport ${Math.round(MENSUALITE_CONFIG.apportPct * 100)} %, ${Math.round(MENSUALITE_CONFIG.dureeMois / 12)} ans, taux ${pct(MENSUALITE_CONFIG.tauxAnnuel)}, TAEG ${pct(MENSUALITE_CONFIG.taegAnnuel)}).</text>
   <text x="160" y="246" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">Sous réserve d'acceptation du crédit.</text>
-  <text x="160" y="264" font-family="system-ui,Arial,sans-serif" font-size="9" font-weight="600" fill="${textMuted}" text-anchor="middle">Crédit : BuyMonth Finance — FSMA 1021.366.349</text>
+  <text x="160" y="264" font-family="system-ui,Arial,sans-serif" font-size="9" font-weight="600" fill="${textCredit}" text-anchor="middle">Crédit : BuyMonth Finance — FSMA 1021.366.349</text>
 </svg>`
 }
 
@@ -50,6 +51,9 @@ export function WidgetGenerator({ biens, plan }) {
   const [primaire, setPrimaire] = useState('#16324F')
   const [accent, setAccent] = useState('#7CB8A8')
   const [fond, setFond] = useState('#FFFFFF')
+  const [cTitre, setCTitre] = useState('#16324F')
+  const [cMentions, setCMentions] = useState('#8A92A6')
+  const [cCredit, setCCredit] = useState('#8A92A6')
   const [logoUrl, setLogoUrl] = useState('')
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [copied, setCopied] = useState('')
@@ -62,6 +66,9 @@ export function WidgetGenerator({ biens, plan }) {
   const effPrimaire = perso ? primaire : '#16324F'
   const effAccent = perso ? accent : '#7CB8A8'
   const effFond = perso ? fond : (style === 'dark' ? '#16324F' : '#FFFFFF')
+  const effTitre = perso ? cTitre : (style === 'dark' ? '#FFFFFF' : '#16324F')
+  const effMentions = perso ? cMentions : (style === 'dark' ? '#9FB0C4' : '#8A92A6')
+  const effCredit = perso ? cCredit : (style === 'dark' ? '#9FB0C4' : '#8A92A6')
 
   const params = new URLSearchParams()
   if (bienId) params.set('bien', bienId)
@@ -71,6 +78,9 @@ export function WidgetGenerator({ biens, plan }) {
     params.set('primaire', primaire.replace('#', ''))
     params.set('accent', accent.replace('#', ''))
     params.set('fond', fond.replace('#', ''))
+    params.set('ctitre', cTitre.replace('#', ''))
+    params.set('cmentions', cMentions.replace('#', ''))
+    params.set('ccredit', cCredit.replace('#', ''))
   }
   if (premium && logoUrl) params.set('logo', encodeURIComponent(logoUrl))
   const embedUrl = `${BASE_URL}/embed/badge?${params.toString()}`
@@ -105,7 +115,7 @@ export function WidgetGenerator({ biens, plan }) {
   }
 
   function downloadSVG() {
-    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond })
+    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond, cTitre: effTitre, cMentions: effMentions, cCredit: effCredit })
     const blob = new Blob([svg], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -116,7 +126,7 @@ export function WidgetGenerator({ biens, plan }) {
   }
 
   function downloadPNG() {
-    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond })
+    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond, cTitre: effTitre, cMentions: effMentions, cCredit: effCredit })
     const img = new Image()
     const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
     const url = URL.createObjectURL(svgBlob)
@@ -142,6 +152,7 @@ export function WidgetGenerator({ biens, plan }) {
   }
 
   const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
+  const sousTitre = { fontSize: 11.5, fontWeight: 700, color: '#8A92A6', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '4px 0 12px' }
   const toggleBtn = (active, disabled) => ({
     flex: 1, padding: '10px', borderRadius: 10,
     border: `1.5px solid ${active ? '#7CB8A8' : '#E8EDF2'}`,
@@ -215,17 +226,29 @@ export function WidgetGenerator({ biens, plan }) {
               </div>
 
               <label style={labelStyle}>Couleurs</label>
-              <div style={{ display: 'flex', gap: 10, marginBottom: couleurMode === 'perso' ? 16 : 0 }}>
+              <div style={{ display: 'flex', gap: 10, marginBottom: couleurMode === 'perso' ? 18 : 0 }}>
                 <button type="button" onClick={() => setCouleurMode('buymonth')} style={toggleBtn(couleurMode === 'buymonth')}>Couleurs BuyMonth</button>
                 <button type="button" onClick={() => setCouleurMode('perso')} style={toggleBtn(couleurMode === 'perso')}>Personnalisées</button>
               </div>
 
               {couleurMode === 'perso' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <ColorPicker label="Couleur principale" value={primaire} onChange={setPrimaire} />
-                  <ColorPicker label="Couleur mensualité" value={accent} onChange={setAccent} />
-                  <ColorPicker label="Couleur de fond" value={fond} onChange={setFond} />
-                </div>
+                <>
+                  {/* Couleurs du badge */}
+                  <p style={sousTitre}>Couleurs du badge</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 18 }}>
+                    <ColorPicker label="Couleur principale" value={primaire} onChange={setPrimaire} />
+                    <ColorPicker label="Couleur mensualité" value={accent} onChange={setAccent} />
+                    <ColorPicker label="Couleur de fond" value={fond} onChange={setFond} />
+                  </div>
+
+                  {/* Couleurs des textes */}
+                  <p style={sousTitre}>Couleurs des textes</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <ColorPicker label="Titre" value={cTitre} onChange={setCTitre} />
+                    <ColorPicker label="Mentions légales" value={cMentions} onChange={setCMentions} />
+                    <ColorPicker label="Ligne crédit" value={cCredit} onChange={setCCredit} />
+                  </div>
+                </>
               )}
             </div>
           )}
@@ -249,7 +272,7 @@ export function WidgetGenerator({ biens, plan }) {
       {/* COLONNE PREVIEW */}
       <div style={{ position: 'sticky', top: 24, minWidth: 0 }}>
         <div style={{ background: checker, border: '1px solid #EEF2F7', borderRadius: 16, padding: 28, display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <Badge mensualite={mensualite} premium={premium} theme={style} couleurPrimaire={effPrimaire} couleurAccent={effAccent} couleurFond={effFond} logoUrl={premium ? logoUrl : null} width={280} />
+          <Badge mensualite={mensualite} premium={premium} theme={style} couleurPrimaire={effPrimaire} couleurAccent={effAccent} couleurFond={effFond} couleurTitre={effTitre} couleurMentions={effMentions} couleurCredit={effCredit} logoUrl={premium ? logoUrl : null} width={280} />
         </div>
 
         {/* Bouton « Simuler ma mensualité » → simulateur du bien */}

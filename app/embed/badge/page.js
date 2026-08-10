@@ -12,6 +12,9 @@ export default async function EmbedBadgePage({ searchParams }) {
   const couleurPrimaire = sp.primaire ? `#${sp.primaire.replace('#', '')}` : '#16324F'
   const couleurAccent = sp.accent ? `#${sp.accent.replace('#', '')}` : '#7CB8A8'
   const couleurFond = sp.fond ? `#${sp.fond.replace('#', '')}` : null
+  const couleurTitre = sp.ctitre ? `#${sp.ctitre.replace('#', '')}` : null
+  const couleurMentions = sp.cmentions ? `#${sp.cmentions.replace('#', '')}` : null
+  const couleurCredit = sp.ccredit ? `#${sp.ccredit.replace('#', '')}` : null
   const logoUrl = premium && sp.logo ? decodeURIComponent(sp.logo) : null
 
   let mensualite = null
@@ -35,6 +38,9 @@ export default async function EmbedBadgePage({ searchParams }) {
       couleurPrimaire={couleurPrimaire}
       couleurAccent={couleurAccent}
       couleurFond={couleurFond}
+      couleurTitre={couleurTitre}
+      couleurMentions={couleurMentions}
+      couleurCredit={couleurCredit}
       logoUrl={logoUrl}
       width={320}
     />
