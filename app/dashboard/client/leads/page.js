@@ -19,7 +19,7 @@ export default async function ClientLeadsPage() {
       telephone: true,
       statutPromoteur: true,
       createdAt: true,
-      bien: { select: { titre: true, ville: true, projet: true, unite: true } },
+      bien: { select: { id: true, titre: true, ville: true, projet: true, unite: true } },
     },
   })
 

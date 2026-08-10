@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 
 const STATUTS = [
   'À contacter',
@@ -33,6 +34,106 @@ function formatDateHeure(d) {
   const date = new Date(d)
   return date.toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit', year: '2-digit' })
     + ' · ' + date.toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit' })
+}
+
+// Dropdown custom avec pastilles colorées — menu en position fixe, s'ouvre vers le haut si pas de place en bas
+function StatutDropdown({ value, onChange, disabled }) {
+  const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState(null)
+  const btnRef = useRef(null)
+  const menuRef = useRef(null)
+  const col = STATUT_COLOR[value] || STATUT_COLOR['À contacter']
+
+  function toggle() {
+    if (disabled) return
+    if (!open && btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect()
+      // hauteur estimée du menu ; on l'ouvre vers le haut s'il n'y a pas la place en bas
+      const MENU_H = 380
+      const placeEnBas = window.innerHeight - r.bottom
+      const versLeHaut = placeEnBas < MENU_H && r.top > placeEnBas
+      setPos({
+        top: versLeHaut ? undefined : r.bottom + 4,
+        bottom: versLeHaut ? (window.innerHeight - r.top + 4) : undefined,
+        left: r.left,
+        minWidth: Math.max(r.width, 210),
+      })
+    }
+    setOpen((o) => !o)
+  }
+
+  useEffect(() => {
+    if (!open) return
+    function onClick(e) {
+      if (btnRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return
+      setOpen(false)
+    }
+    function onScrollResize() { setOpen(false) }
+    document.addEventListener('mousedown', onClick)
+    window.addEventListener('scroll', onScrollResize, true)
+    window.addEventListener('resize', onScrollResize)
+    return () => {
+      document.removeEventListener('mousedown', onClick)
+      window.removeEventListener('scroll', onScrollResize, true)
+      window.removeEventListener('resize', onScrollResize)
+    }
+  }, [open])
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={toggle}
+        disabled={disabled}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          padding: '6px 10px 6px 12px', borderRadius: 20, border: 'none',
+          cursor: disabled ? 'wait' : 'pointer', fontSize: 12.5, fontWeight: 700,
+          color: col.c, background: col.bg, outline: 'none', whiteSpace: 'nowrap',
+        }}
+      >
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: col.c, flexShrink: 0 }} />
+        {value}
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={col.c} strokeWidth="2.5" style={{ transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : 'none' }}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {open && pos && (
+        <div
+          ref={menuRef}
+          style={{ position: 'fixed', top: pos.top, bottom: pos.bottom, left: pos.left, minWidth: pos.minWidth, zIndex: 1000, background: '#fff', border: '1px solid #EEF2F7', borderRadius: 12, boxShadow: '0 12px 32px rgba(25,59,94,0.16)', padding: 5, maxHeight: '70vh', overflowY: 'auto' }}
+        >
+          {STATUTS.map((s) => {
+            const sc = STATUT_COLOR[s] || STATUT_COLOR['À contacter']
+            const actif = s === value
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => { onChange(s); setOpen(false) }}
+                style={{
+                  width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 8,
+                  border: 'none', background: actif ? '#F5F8FB' : 'transparent', cursor: 'pointer',
+                  fontSize: 13, fontWeight: actif ? 700 : 500, color: '#3D4759',
+                  display: 'flex', alignItems: 'center', gap: 9,
+                }}
+                onMouseEnter={(e) => { if (!actif) e.currentTarget.style.background = '#FAFBFE' }}
+                onMouseLeave={(e) => { if (!actif) e.currentTarget.style.background = 'transparent' }}
+              >
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: sc.c, flexShrink: 0 }} />
+                {s}
+                {actif && (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="3" style={{ marginLeft: 'auto' }}><polyline points="20 6 9 17 4 12" /></svg>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </>
+  )
 }
 
 export function MesLeadsClient({ leads }) {
@@ -74,7 +175,6 @@ export function MesLeadsClient({ leads }) {
           <tbody>
             {leads.map((lead) => {
               const cur = statuts[lead.id]
-              const col = STATUT_COLOR[cur] || STATUT_COLOR['À contacter']
               return (
                 <tr key={lead.id} style={{ borderBottom: '1px solid #F4F7FB' }}>
                   <td style={{ padding: '14px 18px' }}>
@@ -84,10 +184,13 @@ export function MesLeadsClient({ leads }) {
                   </td>
                   <td style={{ padding: '14px 18px', fontSize: 13, color: '#3D4759' }}>
                     {lead.bien ? (
-                      <>
-                        <div style={{ fontWeight: 600 }}>{lead.bien.titre}</div>
+                      <Link href={`/biens/${lead.bien.id}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                        <div style={{ fontWeight: 600, color: '#193B5E', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                          {lead.bien.titre}
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.2" style={{ flexShrink: 0 }}><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                        </div>
                         {lead.bien.ville && <div style={{ fontSize: 12, color: '#A9B0BE' }}>{lead.bien.ville}</div>}
-                      </>
+                      </Link>
                     ) : <span style={{ color: '#C2C8D4' }}>—</span>}
                   </td>
                   <td style={{ padding: '14px 18px', fontSize: 13, color: '#3D4759' }}>
@@ -97,26 +200,7 @@ export function MesLeadsClient({ leads }) {
                     {lead.bien?.unite || <span style={{ color: '#C2C8D4' }}>—</span>}
                   </td>
                   <td style={{ padding: '14px 18px' }}>
-                    <div style={{ position: 'relative', display: 'inline-block' }}>
-                      <select
-                        value={cur}
-                        onChange={(e) => changerStatut(lead.id, e.target.value)}
-                        disabled={saving === lead.id}
-                        style={{
-                          appearance: 'none', WebkitAppearance: 'none',
-                          padding: '6px 30px 6px 12px', borderRadius: 20,
-                          border: 'none', cursor: 'pointer',
-                          fontSize: 12.5, fontWeight: 700,
-                          color: col.c, background: col.bg,
-                          outline: 'none',
-                        }}
-                      >
-                        {STATUTS.map((s) => <option key={s} value={s} style={{ color: '#193B5E', background: '#fff', fontWeight: 500 }}>{s}</option>)}
-                      </select>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={col.c} strokeWidth="2.5" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    </div>
+                    <StatutDropdown value={cur} onChange={(s) => changerStatut(lead.id, s)} disabled={saving === lead.id} />
                   </td>
                   <td style={{ padding: '14px 18px', fontSize: 12.5, color: '#A9B0BE', whiteSpace: 'nowrap' }}>
                     {formatDateHeure(lead.createdAt)}
