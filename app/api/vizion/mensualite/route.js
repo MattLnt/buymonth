@@ -99,7 +99,7 @@ export async function POST(req) {
       dureeMois: s.dureeMois,
       tauxAnnuel: s.tauxAnnuel,
       devise: 'EUR',
-      mention: `Simulation indicative (apport ${Math.round(s.apportPct * 100)} %, ${dureeAns} ans, TAEG ${tauxPct} % hors assurances). Sous réserve d'acceptation du crédit par l'organisme prêteur. JG Management — FSMA 1021.366.349`,
+      mention: `Estimation indicative hors frais (apport ${Math.round(s.apportPct * 100)} %, ${dureeAns} ans, taux ${tauxPct} %, hors assurances). Le TAEG et les conditions définitives sont communiqués par BuyMonth Finance. Sous réserve d'acceptation du crédit par l'organisme prêteur. Crédit : BuyMonth Finance (JG Management SRL, FSMA 1021.366.349).`,
     }, { headers })
   } catch (e) {
     console.error('[VIZION] Erreur serveur :', e?.message)

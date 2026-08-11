@@ -149,7 +149,7 @@ export default function RegisterPage() {
 
           {/* footer confiance */}
           <div style={{ marginTop: 48, fontSize: 11, color: "rgba(255,255,255,0.4)", lineHeight: 1.6 }}>
-            JG Management — Intermédiaire en crédit agréé FSMA 1021.366.349
+            Crédit : BuyMonth Finance (JG Management SRL, FSMA 1021.366.349)
           </div>
         </div>
       </div>

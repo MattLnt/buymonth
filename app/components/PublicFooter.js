@@ -101,7 +101,7 @@ export default function PublicFooter() {
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="footer-bottom" style={{ maxWidth: 1100, margin: "0 auto", padding: "20px 48px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", margin: 0 }}>
-              © 2026 BuyMonth · JG Management SRL · Agréé FSMA n°1021.366.349
+              © 2026 BuyMonth · BuyMonth Finance (JG Management SRL, FSMA 1021.366.349)
             </p>
             <div className="footer-bottom-links" style={{ display: "flex", gap: 20 }}>
               <Link href="/cgv" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>CGV</Link>
