@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { FormSection } from './FormSection'
 import { FormInput } from './FormInput'
@@ -21,6 +21,14 @@ const STATUTS = [
   { value: 'VENDU', label: 'Vendu (hors décompte)' },
 ]
 
+// Couleur + libellé court par statut de bien
+const STATUT_STYLE = {
+  ACTIF: { c: '#1C6B52', bg: 'rgba(36,158,124,0.14)', dot: '#249E7C', court: 'Actif' },
+  OPTION: { c: '#8A6D1B', bg: 'rgba(232,153,35,0.16)', dot: '#E89923', court: 'Sous option' },
+  HORS_LIGNE: { c: '#5A6B7D', bg: '#EEF1F5', dot: '#8A92A6', court: 'Hors-ligne' },
+  VENDU: { c: '#193B5E', bg: 'rgba(25,59,94,0.10)', dot: '#193B5E', court: 'Vendu' },
+}
+
 // Valeur spéciale du select pour déclencher la saisie d'un nouveau projet
 const NOUVEAU = '__nouveau__'
 
@@ -34,6 +42,68 @@ const ic = {
   tag: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>,
   layers: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></svg>,
   zap: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
+}
+
+// Dropdown custom du statut avec pastilles colorées — menu absolu sous le bouton
+function StatutSelect({ value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  const cur = STATUT_STYLE[value] || STATUT_STYLE.ACTIF
+
+  useEffect(() => {
+    if (!open) return
+    function onClick(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [open])
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Statut du bien</label>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+          padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2',
+          background: '#FAFDFD', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: cur.c, outline: 'none',
+        }}
+      >
+        <span style={{ width: 9, height: 9, borderRadius: '50%', background: cur.dot, flexShrink: 0 }} />
+        <span style={{ flex: 1, textAlign: 'left' }}>{STATUTS.find((s) => s.value === value)?.label || cur.court}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A92A6" strokeWidth="2.5" style={{ transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : 'none', flexShrink: 0 }}><polyline points="6 9 12 15 18 9" /></svg>
+      </button>
+
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 50, background: '#fff', border: '1px solid #EEF2F7', borderRadius: 12, boxShadow: '0 12px 32px rgba(25,59,94,0.16)', padding: 5, overflow: 'hidden' }}>
+          {STATUTS.map((s) => {
+            const st = STATUT_STYLE[s.value]
+            const actif = s.value === value
+            return (
+              <button
+                key={s.value}
+                type="button"
+                onClick={() => { onChange(s.value); setOpen(false) }}
+                style={{
+                  width: '100%', textAlign: 'left', padding: '10px 12px', borderRadius: 8, border: 'none',
+                  background: actif ? '#F5F8FB' : 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, fontWeight: actif ? 700 : 500, color: '#3D4759',
+                }}
+                onMouseEnter={(e) => { if (!actif) e.currentTarget.style.background = '#FAFBFE' }}
+                onMouseLeave={(e) => { if (!actif) e.currentTarget.style.background = 'transparent' }}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '3px 10px', borderRadius: 20, background: st.bg, color: st.c, fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: st.dot }} />
+                  {st.court}
+                </span>
+                {actif && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="3" style={{ marginLeft: 'auto', flexShrink: 0 }}><polyline points="20 6 9 17 4 12" /></svg>}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function BienForm({ initial = null, mode = 'create', projets = [] }) {
@@ -236,31 +306,26 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
 
             <FormSection icon={ic.tag} title="Statut & visibilité" subtitle="Le statut détermine si le bien est facturé">
               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
-                <FormSelect
-                  label="Statut du bien"
-                  value={form.statut}
-                  onChange={(v) => setField('statut', v)}
-                  options={STATUTS}
-                />
-                {estVisible ? (
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: 'rgba(124,184,168,0.12)', border: '1.5px solid rgba(124,184,168,0.4)', borderRadius: 10, padding: '12px 14px' }}>
-                    <span style={{ flexShrink: 0, display: 'flex', color: '#249E7C', marginTop: 1 }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
-                    </span>
-                    <p style={{ fontSize: 13, color: '#1C6B52', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
-                      Ce bien sera <strong>compté dans votre abonnement</strong> — facturé au tarif de votre formule, par bien actif et au prorata. Un bien mis hors-ligne ou vendu en sort automatiquement.
-                    </p>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: '#F5F7FA', border: '1.5px solid #E8EDF2', borderRadius: 10, padding: '12px 14px' }}>
-                    <span style={{ flexShrink: 0, display: 'flex', color: '#8A92A6', marginTop: 1 }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
-                    </span>
-                    <p style={{ fontSize: 13, color: '#5A6B7D', margin: 0, lineHeight: 1.5 }}>
-                      Ce bien <strong style={{ color: '#193B5E' }}>n'est pas compté</strong> dans votre abonnement. Il n'apparaît pas au public tant qu'il reste dans ce statut.
-                    </p>
-                  </div>
-                )}
+                <StatutSelect value={form.statut} onChange={(v) => setField('statut', v)} />
+                {(() => {
+                  const st = STATUT_STYLE[form.statut] || STATUT_STYLE.ACTIF
+                  const messages = {
+                    ACTIF: <>Ce bien sera <strong>compté dans votre abonnement</strong> — facturé au tarif de votre formule, par bien actif et au prorata. Un bien mis hors-ligne ou vendu en sort automatiquement.</>,
+                    OPTION: <>Ce bien reste <strong>visible en ligne et compté</strong> dans votre abonnement. Un bandeau « Sous option » s'affiche sur la fiche et le catalogue.</>,
+                    HORS_LIGNE: <>Ce bien <strong>n'est pas compté</strong> dans votre abonnement et n'apparaît pas au public tant qu'il reste hors-ligne.</>,
+                    VENDU: <>Ce bien est marqué <strong>vendu</strong> : il sort du décompte de facturation et n'est plus visible au public.</>,
+                  }
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: st.bg, border: `1.5px solid ${st.c}33`, borderRadius: 10, padding: '12px 14px' }}>
+                      <span style={{ flexShrink: 0, display: 'flex', color: st.dot, marginTop: 1 }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+                      </span>
+                      <p style={{ fontSize: 13, color: st.c, margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
+                        {messages[form.statut]}
+                      </p>
+                    </div>
+                  )
+                })()}
               </div>
             </FormSection>
 
