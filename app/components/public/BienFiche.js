@@ -19,6 +19,14 @@ const specIcon = {
 
 const STATUT_LABEL = { HORS_LIGNE: 'Hors-ligne', VENDU: 'Vendu', OPTION: 'Sous option', ACTIF: 'Actif' }
 
+// Pastille de statut affichée sur la fiche (près du titre)
+const STATUT_PASTILLE = {
+  ACTIF: { label: 'En vente', c: '#1C6B52', bg: 'rgba(36,158,124,0.14)', dot: '#249E7C' },
+  OPTION: { label: 'Sous option', c: '#8A6D1B', bg: 'rgba(232,153,35,0.16)', dot: '#E89923' },
+  HORS_LIGNE: { label: 'Hors-ligne', c: '#5A6B7D', bg: '#EEF1F5', dot: '#8A92A6' },
+  VENDU: { label: 'Vendu', c: '#193B5E', bg: 'rgba(25,59,94,0.10)', dot: '#193B5E' },
+}
+
 /*
  * Rendu complet d'une fiche bien. Réutilisé par :
  *   - la page publique /biens/[id] (apercu = false)
@@ -48,6 +56,10 @@ export function BienFiche({ bien, apercu = false }) {
 
   const estVisible = bien.published
   const statutLabel = STATUT_LABEL[bien.statut] || bien.statut
+
+  // Pastille de statut : en public on ne montre que ACTIF/OPTION ; en aperçu on montre les 4 statuts
+  const stPastille = STATUT_PASTILLE[bien.statut]
+  const montrePastille = stPastille && (apercu || bien.statut === 'ACTIF' || bien.statut === 'OPTION')
 
   const agenceInner = bien.client?.societe ? (
     <>
@@ -136,6 +148,12 @@ export function BienFiche({ bien, apercu = false }) {
           {/* COLONNE PRINCIPALE */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
             <div style={card}>
+              {montrePastille && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 12px', borderRadius: 20, background: stPastille.bg, color: stPastille.c, fontSize: 12.5, fontWeight: 700, marginBottom: 12 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: stPastille.dot }} />
+                  {stPastille.label}
+                </span>
+              )}
               <h1 style={{ fontSize: 28, fontWeight: 700, color: '#193B5E', margin: '0 0 6px', letterSpacing: '-0.02em' }}>{bien.titre}</h1>
               <div style={{ fontSize: 15, color: '#8A92A6', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
