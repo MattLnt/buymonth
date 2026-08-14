@@ -3,7 +3,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import CalMark from "../../components/public/CalMark";
+import CalMark from "../components/vitrine/CalMark";
 
 export default function LoginPage() {
   const router = useRouter();
