@@ -85,8 +85,14 @@ export default function RegisterPage() {
           box-sizing: border-box;
         }
 
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
+
         .register-page {
-          min-height: 100vh;
+          min-height: 0;
           width: 100%;
           display: flex;
           align-items: flex-start;
@@ -137,6 +143,7 @@ export default function RegisterPage() {
           pointer-events: none;
         }
 
+        /* Grille */
         .register-grid {
           position: absolute;
           inset: 0;
@@ -189,6 +196,7 @@ export default function RegisterPage() {
         .register-footer {
           text-align: center;
           margin-top: 20px;
+          margin-bottom: 0;
           color: rgba(255,255,255,0.45);
           font-size: 11px;
           line-height: 1.6;
@@ -196,7 +204,7 @@ export default function RegisterPage() {
 
         @media (max-width: 600px) {
           .register-page {
-            min-height: 100vh;
+            min-height: 0;
             padding: 24px 12px 20px;
             align-items: flex-start;
           }
@@ -225,6 +233,7 @@ export default function RegisterPage() {
 
           .register-footer {
             margin-top: 18px;
+            margin-bottom: 0;
           }
         }
 
