@@ -70,7 +70,13 @@ export function Simulateur({ bien, onStepChange }) {
   // ---- ÉTAPE 2 : résultat (centré, un seul panneau) ----
   if (step === 2 && result) {
     return (
-      <div style={{ padding: 32, maxHeight: 'calc(100vh - 40px)', overflowY: 'auto' }}>
+      <div className="sim-step2-padding" style={{ maxHeight: 'calc(100vh - 40px)', overflowY: 'auto' }}>
+        <style>{`
+          .sim-step2-padding { padding: 32px; }
+          @media (max-width: 600px){
+            .sim-step2-padding { padding: 20px 16px; }
+          }
+        `}</style>
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <span style={{ display: 'inline-flex', width: 54, height: 54, borderRadius: '50%', background: 'rgba(36,158,124,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#249E7C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
@@ -81,16 +87,16 @@ export function Simulateur({ bien, onStepChange }) {
           </p>
         </div>
 
-        <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 16, padding: 24 }}>
+        <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 16, padding: '20px 18px' }}>
           {[
             { label: 'Mensualité maximale', value: euro(result.mensualiteMax) },
             { label: 'Capital empruntable maximum', value: euro(result.capitalEmpruntable) },
             { label: 'Apport pris en compte', value: euro(apportPrisEnCompte) },
             { label: 'Budget total maximum', value: euro(budgetTotalMax), strong: true },
           ].map((row, i, arr) => (
-            <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
-              <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.7)' }}>{row.label}</span>
-              <span style={{ fontSize: row.strong ? 24 : 16, fontWeight: 700, color: row.strong ? '#7CB8A8' : '#fff', whiteSpace: 'nowrap' }}>{row.value}</span>
+            <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>{row.label}</span>
+              <span style={{ fontSize: row.strong ? 20 : 15, fontWeight: 700, color: row.strong ? '#7CB8A8' : '#fff', whiteSpace: 'nowrap' }}>{row.value}</span>
             </div>
           ))}
         </div>
@@ -115,9 +121,12 @@ export function Simulateur({ bien, onStepChange }) {
     <div className="sim-wrap" style={{ display: 'grid', gridTemplateColumns: '300px 1fr' }}>
       <style>{`
         .sim-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .sim-right-panel { padding: 30px; max-height: calc(100vh - 40px); overflow-y: auto; }
         @media (max-width: 720px){
           .sim-wrap { grid-template-columns: 1fr !important; }
           .sim-left { display: none !important; }
+          .sim-row { grid-template-columns: 1fr !important; gap: 12px; }
+          .sim-right-panel { padding: 20px 16px; max-height: calc(100vh - 20px); }
         }
       `}</style>
 
@@ -149,7 +158,7 @@ export function Simulateur({ bien, onStepChange }) {
       </div>
 
       {/* PANNEAU DROIT (formulaire) */}
-      <div style={{ padding: 30, maxHeight: 'calc(100vh - 40px)', overflowY: 'auto' }}>
+      <div className="sim-right-panel">
         <form onSubmit={soumettre}>
           {/* Capacité */}
           <div className="sim-row" style={{ marginBottom: 12 }}>
