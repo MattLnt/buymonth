@@ -1,3 +1,4 @@
+// app/register/page.js
 "use client";
 
 import { useState } from "react";
@@ -88,9 +89,9 @@ export default function RegisterPage() {
           min-height: 100vh;
           width: 100%;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
-          padding: 40px 24px;
+          padding: 40px 24px 20px;
           position: relative;
           overflow-x: hidden;
           background:
@@ -387,7 +388,6 @@ export default function RegisterPage() {
 
           {/* Formulaire */}
           <form onSubmit={handleSubmit}>
-
             <Field
               label="Société"
               value={form.societe}
