@@ -1,23 +1,40 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Field } from "@/app/components/ui/Field";
 import { Button } from "@/app/components/ui/Button";
-import { PasswordField, validatePassword } from "@/app/components/ui/PasswordField";
+import {
+  PasswordField,
+  validatePassword,
+} from "@/app/components/ui/PasswordField";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ societe: "", contactNom: "", email: "", telephone: "", password: "" });
+
+  const [form, setForm] = useState({
+    societe: "",
+    contactNom: "",
+    email: "",
+    telephone: "",
+    password: "",
+  });
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+  const set = (k) => (e) =>
+    setForm({
+      ...form,
+      [k]: e.target.value,
+    });
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError(""); setLoading(true);
+    setError("");
+    setLoading(true);
 
     if (!validatePassword(form.password)) {
       setError("Le mot de passe ne respecte pas tous les critères.");
@@ -28,131 +45,460 @@ export default function RegisterPage() {
     try {
       const res = await fetch("/api/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error || "Erreur."); setLoading(false); return; }
 
-      const login = await signIn("credentials", { email: form.email, password: form.password, redirect: false });
-      if (login?.error) { router.push("/login"); return; }
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Erreur.");
+        setLoading(false);
+        return;
+      }
+
+      const login = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: false,
+      });
+
+      if (login?.error) {
+        router.push("/login");
+        return;
+      }
+
       router.push("/dashboard");
     } catch {
-      setError("Erreur réseau."); setLoading(false);
+      setError("Erreur réseau.");
+      setLoading(false);
     }
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", background: "#F4F6FB" }}>
+    <main className="register-page">
       <style>{`
-        @media (max-width: 880px) {
-          .reg-aside { display: none !important; }
-          .reg-form-col { padding: 32px 24px !important; }
+        * {
+          box-sizing: border-box;
         }
-        .reg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 520px) {
-          .reg-row { grid-template-columns: 1fr; gap: 0; }
+
+        .register-page {
+          min-height: 100vh;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 24px;
+          position: relative;
+          overflow-x: hidden;
+          background:
+            linear-gradient(
+              150deg,
+              #16324F 0%,
+              #1D4267 55%,
+              #245479 100%
+            );
+        }
+
+        /* Halo supérieur */
+        .register-page::before {
+          content: "";
+          position: absolute;
+          width: 620px;
+          height: 620px;
+          top: -300px;
+          right: -180px;
+          border-radius: 50%;
+          background: radial-gradient(
+            circle,
+            rgba(124,184,168,0.20) 0%,
+            rgba(124,184,168,0) 68%
+          );
+          pointer-events: none;
+        }
+
+        /* Halo inférieur */
+        .register-page::after {
+          content: "";
+          position: absolute;
+          width: 520px;
+          height: 520px;
+          bottom: -280px;
+          left: -180px;
+          border-radius: 50%;
+          background: radial-gradient(
+            circle,
+            rgba(124,184,168,0.10) 0%,
+            rgba(124,184,168,0) 68%
+          );
+          pointer-events: none;
+        }
+
+        .register-grid {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background-image:
+            linear-gradient(
+              rgba(255,255,255,0.018) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(255,255,255,0.018) 1px,
+              transparent 1px
+            );
+          background-size: 44px 44px;
+        }
+
+        .register-wrapper {
+          position: relative;
+          z-index: 2;
+          width: 100%;
+          max-width: 500px;
+        }
+
+        .register-brand {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 22px;
+        }
+
+        .register-card {
+          width: 100%;
+          background: #fff;
+          border: 1px solid rgba(255,255,255,0.65);
+          border-radius: 20px;
+          padding: 38px 34px;
+          box-shadow:
+            0 24px 70px rgba(5, 25, 45, 0.24),
+            0 4px 18px rgba(5, 25, 45, 0.08);
+        }
+
+        .register-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+
+        .register-footer {
+          text-align: center;
+          margin-top: 20px;
+          color: rgba(255,255,255,0.45);
+          font-size: 11px;
+          line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+          .register-page {
+            min-height: 100vh;
+            padding: 24px 12px 20px;
+            align-items: flex-start;
+          }
+
+          .register-wrapper {
+            width: 100%;
+            max-width: 440px;
+            margin: 0 auto;
+          }
+
+          .register-brand {
+            margin-top: 4px;
+            margin-bottom: 18px;
+          }
+
+          .register-card {
+            width: 100%;
+            padding: 28px 18px;
+            border-radius: 17px;
+          }
+
+          .register-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+          }
+
+          .register-footer {
+            margin-top: 18px;
+          }
+        }
+
+        @media (max-width: 380px) {
+          .register-page {
+            padding-left: 10px;
+            padding-right: 10px;
+          }
+
+          .register-card {
+            padding: 24px 16px;
+          }
         }
       `}</style>
 
-      {/* ===== COLONNE GAUCHE : formulaire ===== */}
-      <div className="reg-form-col" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 40px" }}>
-        <div style={{ width: "100%", maxWidth: 480 }}>
-          <Link href="/" style={{ fontSize: 24, fontWeight: 700, color: "#193B5E", textDecoration: "none", letterSpacing: "-0.02em", display: "inline-block", marginBottom: 32 }}>
-            Buy<span style={{ color: "#7CB8A8" }}>Month</span>
+      <div className="register-grid" />
+
+      <div className="register-wrapper">
+
+        {/* =========================
+            LOGO + BADGE
+            ========================= */}
+        <div className="register-brand">
+          <Link
+            href="/"
+            style={{
+              textDecoration: "none",
+              display: "inline-block",
+              marginBottom: 10,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 30,
+                fontWeight: 700,
+                color: "#fff",
+                letterSpacing: "-0.025em",
+              }}
+            >
+              Buy<span style={{ color: "#7CB8A8" }}>Month</span>
+            </span>
           </Link>
 
-          <h1 style={{ fontSize: 28, fontWeight: 700, color: "#193B5E", margin: "0 0 6px", letterSpacing: "-0.02em" }}>Créer un compte</h1>
-          <p style={{ fontSize: 14, color: "#5A6275", margin: "0 0 28px" }}>Rejoignez l'espace promoteur BuyMonth</p>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: "rgba(124,184,168,0.15)",
+              border: "1px solid rgba(124,184,168,0.30)",
+              borderRadius: 20,
+              padding: "5px 12px",
+            }}
+          >
+            <div
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "#7CB8A8",
+              }}
+            />
 
-          <form onSubmit={handleSubmit}>
-            <Field label="Société" value={form.societe} onChange={set("societe")} placeholder="Nom de votre société" required />
-            <div className="reg-row">
-              <Field label="Nom du contact" value={form.contactNom} onChange={set("contactNom")} placeholder="Votre nom" />
-              <Field label="Téléphone" value={form.telephone} onChange={set("telephone")} placeholder="+32 ..." />
+            <span
+              style={{
+                fontSize: 11,
+                color: "#7CB8A8",
+                fontWeight: 600,
+              }}
+            >
+              Espace promoteur
+            </span>
+          </div>
+        </div>
+
+        {/* =========================
+            CARTE INSCRIPTION
+            ========================= */}
+        <div className="register-card">
+
+          {/* Header */}
+          <div style={{ marginBottom: 26 }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                background: "rgba(124,184,168,0.12)",
+                border: "1px solid rgba(124,184,168,0.25)",
+                borderRadius: 20,
+                padding: "5px 12px",
+                marginBottom: 14,
+              }}
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#7CB8A8"
+                strokeWidth="2.5"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" y1="8" x2="19" y2="14" />
+                <line x1="22" y1="11" x2="16" y2="11" />
+              </svg>
+
+              <span
+                style={{
+                  fontSize: 11,
+                  color: "#5FA894",
+                  fontWeight: 700,
+                }}
+              >
+                Inscription sécurisée
+              </span>
             </div>
-            <Field label="Email" type="email" value={form.email} onChange={set("email")} placeholder="vous@societe.be" required />
-            <PasswordField value={form.password} onChange={set("password")} />
 
-            {error && <p style={{ color: "#E5484D", fontSize: 13, margin: "0 0 16px" }}>{error}</p>}
+            <h1
+              style={{
+                fontSize: 25,
+                fontWeight: 700,
+                color: "#193B5E",
+                margin: "0 0 5px",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Créer un compte
+            </h1>
 
-            <Button type="submit" variant="primary" full disabled={loading}>
+            <p
+              style={{
+                fontSize: 13.5,
+                color: "#8A92A6",
+                margin: 0,
+                lineHeight: 1.5,
+              }}
+            >
+              Rejoignez l'espace promoteur BuyMonth
+            </p>
+          </div>
+
+          {/* Erreur */}
+          {error && (
+            <div
+              style={{
+                background: "#FEF2F2",
+                border: "1px solid #FECACA",
+                color: "#E5484D",
+                fontSize: 13,
+                borderRadius: 11,
+                padding: "11px 14px",
+                marginBottom: 18,
+                lineHeight: 1.45,
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          {/* Formulaire */}
+          <form onSubmit={handleSubmit}>
+
+            <Field
+              label="Société"
+              value={form.societe}
+              onChange={set("societe")}
+              placeholder="Nom de votre société"
+              required
+            />
+
+            <div className="register-row">
+              <Field
+                label="Nom du contact"
+                value={form.contactNom}
+                onChange={set("contactNom")}
+                placeholder="Votre nom"
+              />
+
+              <Field
+                label="Téléphone"
+                value={form.telephone}
+                onChange={set("telephone")}
+                placeholder="+32 ..."
+              />
+            </div>
+
+            <Field
+              label="Email"
+              type="email"
+              value={form.email}
+              onChange={set("email")}
+              placeholder="vous@societe.be"
+              required
+            />
+
+            <PasswordField
+              value={form.password}
+              onChange={set("password")}
+            />
+
+            <Button
+              type="submit"
+              variant="primary"
+              full
+              disabled={loading}
+            >
               {loading ? "Création..." : "Créer mon compte"}
             </Button>
           </form>
 
-          <p style={{ fontSize: 13, color: "#5A6275", textAlign: "center", marginTop: 20 }}>
-            Déjà inscrit ? <Link href="/login" style={{ color: "#193B5E", fontWeight: 600 }}>Se connecter</Link>
-          </p>
-        </div>
-      </div>
+          {/* Séparateur */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              margin: "23px 0 18px",
+            }}
+          >
+            <div
+              style={{
+                flex: 1,
+                height: 1,
+                background: "#EEF1F4",
+              }}
+            />
 
-      {/* ===== COLONNE DROITE : panneau premium ===== */}
-      <div className="reg-aside" style={{
-        flex: 1, position: "relative", overflow: "hidden",
-        display: "flex", flexDirection: "column", justifyContent: "center",
-        padding: "48px 56px", color: "#fff",
-        background: "linear-gradient(150deg, #16324F 0%, #1D4267 55%, #245479 100%)",
-      }}>
-        {/* washes */}
-        <div style={{ position: "absolute", top: "-15%", right: "-10%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,184,168,0.20) 0%, transparent 65%)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: "-20%", left: "-15%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,184,168,0.08) 0%, transparent 65%)", pointerEvents: "none" }} />
-        {/* grille discrète */}
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)", backgroundSize: "44px 44px", pointerEvents: "none" }} />
-
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 440 }}>
-          <span style={{ display: "inline-block", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", color: "#7CB8A8", textTransform: "uppercase", marginBottom: 18 }}>
-            Espace promoteur
-          </span>
-
-          <h2 style={{ fontSize: 34, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1.3, margin: "0 0 18px", color: "#fff" }}>
-            Transformez chaque visite en <span style={{ color: "#7CB8A8" }}>opportunité</span>.
-          </h2>
-          <p style={{ fontSize: 15, color: "rgba(255,255,255,0.65)", lineHeight: 1.7, margin: "0 0 44px" }}>
-            Affichez vos biens en budget mensuel, générez vos badges conformes FSMA et qualifiez vos leads — le tout depuis un seul espace.
-          </p>
-
-          {/* Carte mockup flottante, discrète */}
-          <div style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 16, padding: "22px 24px", backdropFilter: "blur(8px)",
-            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20,
-          }}>
-            <div>
-              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", fontWeight: 500, marginBottom: 4 }}>Propriétaire de ce bien dès</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: "#7CB8A8", letterSpacing: "-0.02em", lineHeight: 1 }}>965 €<span style={{ fontSize: 16, color: "rgba(124,184,168,0.8)" }}> /mois</span></div>
-            </div>
-            <span style={{ width: 46, height: 46, borderRadius: 12, background: "rgba(124,184,168,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2">
-                <path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1V9.5z" />
-              </svg>
+            <span
+              style={{
+                fontSize: 11.5,
+                color: "#C2C8D4",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Déjà inscrit ?
             </span>
+
+            <div
+              style={{
+                flex: 1,
+                height: 1,
+                background: "#EEF1F4",
+              }}
+            />
           </div>
 
-          {/* séparateur */}
-          <div style={{ height: 1, background: "rgba(255,255,255,0.08)", margin: "36px 0 28px" }} />
-
-          {/* points clés */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {[
-              "Génération de badges en quelques clics",
-              "Qualification des leads instantanée",
-              "Tous vos biens sur la plateforme BuyMonth",
-            ].map((t, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12" /></svg>
-                <span style={{ fontSize: 14, color: "rgba(255,255,255,0.8)" }}>{t}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* footer confiance */}
-          <div style={{ marginTop: 48, fontSize: 11, color: "rgba(255,255,255,0.4)", lineHeight: 1.6 }}>
-            Crédit : BuyMonth Finance (JG Management SRL, FSMA 1021.366.349)
-          </div>
+          {/* Connexion */}
+          <Link
+            href="/login"
+            style={{
+              display: "block",
+              textAlign: "center",
+              background: "#FAFBFE",
+              border: "1px solid #E8EDF2",
+              color: "#193B5E",
+              padding: 12,
+              borderRadius: 10,
+              fontSize: 13.5,
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
+          >
+            Se connecter
+          </Link>
         </div>
+
+        {/* =========================
+            FOOTER
+            ========================= */}
+        <p className="register-footer">
+          © 2026 BuyMonth · Belgique
+        </p>
       </div>
-    </div>
+    </main>
   );
 }
