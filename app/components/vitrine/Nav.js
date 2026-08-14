@@ -243,8 +243,7 @@ export default function Nav() {
             .bm-sheet-close:active { background: #EEF1F6; }
 
             /* Liens de section — leur propre classe, plus de collision avec le CTA */
-            .bm-sheet-link,
-            .bm-sheet-login {
+            .bm-sheet-link {
               font-size: 1.05rem;
               font-weight: 600;
               color: #16324F;
@@ -256,13 +255,23 @@ export default function Nav() {
 
             .bm-sheet-sep { height: 1px; background: #E3E8F0; margin: 12px 0; }
 
+            /* Connexion / Déconnexion : bouton contour navy (secondaire) */
             .bm-sheet-login {
-              background: none;
-              border: 0;
+              margin-top: 4px;
+              display: block;
+              width: 100%;
+              text-align: center;
+              font-size: 1.02rem;
+              font-weight: 700;
+              color: #16324F;
+              text-decoration: none;
+              background: #fff;
+              border: 1.5px solid #16324F;
+              border-radius: 12px;
+              padding: 13px 18px;
               cursor: pointer;
-              font: inherit;
-              text-align: left;
             }
+            .bm-sheet-login:active { background: #EEF1F6; }
 
             /* CTA — blanc sur navy, aucune autre règle ne le cible */
             .bm-sheet-cta {
