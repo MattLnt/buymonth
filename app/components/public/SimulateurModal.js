@@ -19,7 +19,7 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalis�
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Ouverture auto si l'URL contient #simuler (ex. bouton « Simuler ma mensualité » du widget)
+  // Ouverture auto si l'URL contient #simuler
   useEffect(() => {
     function ouvrirSiHash() {
       if (window.location.hash === '#simuler') {
@@ -32,7 +32,6 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalis�
     return () => window.removeEventListener('hashchange', ouvrirSiHash)
   }, [])
 
-  // Étape 1 = layout 2 panneaux (large). Étape 2 = résultat (plus étroit, centré).
   const maxW = step === 1 ? 880 : 560
 
   return (
@@ -69,17 +68,20 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalis�
         <div
           onClick={() => setOpen(false)}
           className="sim-modal-overlay"
-          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(15,36,56,0.6)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 999999, background: 'rgba(15,36,56,0.6)', backdropFilter: 'blur(3px)', display: 'flex', justifyContent: 'center' }}
         >
           <style>{`
-            .sim-modal-overlay { padding: 20px; }
+            .sim-modal-overlay { padding: 20px; alignItems: center; }
+            .sim-modal-card { maxHeight: calc(100vh - 40px); }
             @media (max-width: 640px){
-              .sim-modal-overlay { padding: 12px 10px; }
+              .sim-modal-overlay { padding: 100px 10px 20px 10px; alignItems: flex-start; }
+              .sim-modal-card { maxHeight: calc(100vh - 120px) !important; }
             }
           `}</style>
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: maxW, maxHeight: 'calc(100vh - 24px)', position: 'relative', boxShadow: '0 24px 70px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease', overflow: 'hidden' }}
+            className="sim-modal-card"
+            style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: maxW, position: 'relative', boxShadow: '0 24px 70px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease', overflow: 'hidden' }}
           >
             <button
               onClick={() => setOpen(false)}
