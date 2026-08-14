@@ -81,6 +81,42 @@ export default function Showcase() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        /* Lignes de la carte vitrine : restructuration sur petit écran.
+           Scopé sous #vitrine, ne touche pas le reste du site. */
+        @media (max-width: 560px) {
+          #vitrine .vrow {
+            flex-wrap: wrap;
+            align-items: flex-start;
+            row-gap: 8px;
+            padding: 12px;
+          }
+          #vitrine .vrow .vt {
+            flex: 1 1 auto;
+          }
+          /* Titre entier, plus d'ellipse écrasée */
+          #vitrine .vrow .vt b {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+            line-height: 1.25;
+          }
+          /* Le prix passe sur sa propre ligne, aligné après la photo */
+          #vitrine .vrow .vm {
+            flex: 1 0 100%;
+            margin-left: 58px;
+            text-align: left;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 6px;
+            padding: 5px 10px;
+          }
+          #vitrine .vrow .vm small {
+            display: inline;
+          }
+        }
+      `}</style>
     </section>
   );
 }
