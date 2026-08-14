@@ -34,6 +34,30 @@ export function BiensExplorer({ biens }) {
   const [showSug, setShowSug] = useState(false)
   const sugRef = useRef(null)
 
+  // Bascule mobile + panneau de filtres repliable (style Airbnb)
+  const [isMobile, setIsMobile] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 900px)')
+    const sync = () => setIsMobile(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  // Verrouille le scroll du body + ferme à Échap quand le sheet est ouvert
+  useEffect(() => {
+    if (!sheetOpen) return
+    document.body.style.overflow = 'hidden'
+    const onKey = (e) => { if (e.key === 'Escape') setSheetOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = ''
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [sheetOpen])
+
   // Villes disponibles, dépendantes de la province sélectionnée
   const villesDispo = useMemo(() => {
     const set = new Set()
@@ -98,6 +122,7 @@ export function BiensExplorer({ biens }) {
   }, [biens, q, type, province, ville, minM, maxM, chambres, sdb, surfaceMin, terrasse, jardin, neuf])
 
   const hasFilters = q || type || province || ville || minM || maxM || chambres || sdb || surfaceMin || terrasse || jardin || neuf
+  const activeCount = [q, type, province, ville, minM, maxM, surfaceMin, chambres > 0, sdb > 0, terrasse, jardin, neuf].filter(Boolean).length
 
   function reset() {
     setQ(''); setType(''); setProvince(''); setVille(''); setMinM(''); setMaxM('')
@@ -112,131 +137,158 @@ export function BiensExplorer({ biens }) {
     </div>
   )
 
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 28, alignItems: 'start' }} className="biens-layout">
-      <style>{`@media (max-width: 900px){ .biens-layout { grid-template-columns: 1fr !important; } }`}</style>
-
-      {/* FILTRES */}
-      <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 22, position: 'sticky', top: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: 0 }}>Filtres</h3>
-          {hasFilters && (
-            <button onClick={reset} style={{ fontSize: 12.5, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Réinitialiser</button>
-          )}
-        </div>
-
-        {/* Recherche libre avec autocomplete */}
-        <div style={{ marginBottom: 20, position: 'relative' }} ref={sugRef}>
-          <label style={labelStyle}>Recherche</label>
-          <input
-            value={q}
-            onChange={(e) => { setQ(e.target.value); setShowSug(true) }}
-            onFocus={() => setShowSug(true)}
-            placeholder="Titre, mot-clé..."
-            style={inputStyle}
-          />
-          {showSug && suggestions.length > 0 && (
-            <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 40, background: '#fff', border: '1px solid #EEF2F7', borderRadius: 10, boxShadow: '0 12px 32px rgba(25,59,94,0.12)', overflow: 'hidden', padding: 4 }}>
-              {suggestions.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => { setQ(s); setShowSug(false) }}
-                  style={{ width: '100%', textAlign: 'left', padding: '9px 12px', borderRadius: 7, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13.5, color: '#3D4759', display: 'flex', alignItems: 'center', gap: 8 }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#F5F8FB'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Province */}
-        <div style={{ marginBottom: 16 }}>
-          <FormSelect label="Province" value={province} onChange={setProvince} options={['', ...PROVINCES].map((p) => ({ value: p, label: p || 'Toutes' }))} placeholder="Toutes" />
-        </div>
-
-        {/* Ville (dépend de la province) */}
-        <div style={{ marginBottom: 20 }}>
-          <FormSelect
-            label="Ville"
-            value={ville}
-            onChange={setVille}
-            options={['', ...villesDispo].map((v) => ({ value: v, label: v || (province ? 'Toutes les villes' : 'Toutes') }))}
-            placeholder="Toutes"
-          />
-        </div>
-
-        {/* Budget mensuel */}
-        <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Budget mensuel</label>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <div style={{ position: 'relative', flex: 1 }}>
-              <input type="number" value={minM} onChange={(e) => setMinM(e.target.value)} placeholder="Min" style={{ ...inputStyle, paddingRight: 30 }} />
-              <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: '#9AA2B4' }}>€</span>
-            </div>
-            <div style={{ position: 'relative', flex: 1 }}>
-              <input type="number" value={maxM} onChange={(e) => setMaxM(e.target.value)} placeholder="Max" style={{ ...inputStyle, paddingRight: 30 }} />
-              <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: '#9AA2B4' }}>€</span>
-            </div>
+  // ————— Champs de filtre, réutilisés dans la sidebar desktop ET dans le sheet mobile —————
+  const filterFields = (
+    <>
+      {/* Recherche libre avec autocomplete */}
+      <div style={{ marginBottom: 20, position: 'relative' }} ref={sugRef}>
+        <label style={labelStyle}>Recherche</label>
+        <input
+          value={q}
+          onChange={(e) => { setQ(e.target.value); setShowSug(true) }}
+          onFocus={() => setShowSug(true)}
+          placeholder="Titre, mot-clé..."
+          style={inputStyle}
+        />
+        {showSug && suggestions.length > 0 && (
+          <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 40, background: '#fff', border: '1px solid #EEF2F7', borderRadius: 10, boxShadow: '0 12px 32px rgba(25,59,94,0.12)', overflow: 'hidden', padding: 4 }}>
+            {suggestions.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => { setQ(s); setShowSug(false) }}
+                style={{ width: '100%', textAlign: 'left', padding: '9px 12px', borderRadius: 7, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13.5, color: '#3D4759', display: 'flex', alignItems: 'center', gap: 8 }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#F5F8FB'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                {s}
+              </button>
+            ))}
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* Type */}
-        <div style={{ marginBottom: 16 }}>
-          <FormSelect label="Type de bien" value={type} onChange={setType} options={['', ...TYPES].map((t) => ({ value: t, label: t || 'Tous les types' }))} placeholder="Tous les types" />
-        </div>
+      {/* Province */}
+      <div style={{ marginBottom: 16 }}>
+        <FormSelect label="Province" value={province} onChange={setProvince} options={['', ...PROVINCES].map((p) => ({ value: p, label: p || 'Toutes' }))} placeholder="Toutes" />
+      </div>
 
-        {/* Neuf / Existant */}
-        <div style={{ marginBottom: 20 }}>
-          <FormSelect
-            label="Neuf ou existant"
-            value={neuf}
-            onChange={setNeuf}
-            options={[{ value: '', label: 'Indifférent' }, { value: 'neuf', label: 'Neuf' }, { value: 'existant', label: 'Existant' }]}
-            placeholder="Indifférent"
-          />
-        </div>
+      {/* Ville (dépend de la province) */}
+      <div style={{ marginBottom: 20 }}>
+        <FormSelect
+          label="Ville"
+          value={ville}
+          onChange={setVille}
+          options={['', ...villesDispo].map((v) => ({ value: v, label: v || (province ? 'Toutes les villes' : 'Toutes') }))}
+          placeholder="Toutes"
+        />
+      </div>
 
-        {/* Surface minimum */}
-        <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Surface minimum (m²)</label>
-          <input type="number" value={surfaceMin} onChange={(e) => setSurfaceMin(e.target.value)} placeholder="Ex. 80" style={inputStyle} />
-        </div>
-
-        {/* Chambres minimum */}
-        <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Chambres minimum</label>
-          {compteur(chambres, () => setChambres((n) => Math.max(0, n - 1)), () => setChambres((n) => n + 1))}
-        </div>
-
-        {/* Salles de bain minimum */}
-        <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Salles de bain minimum</label>
-          {compteur(sdb, () => setSdb((n) => Math.max(0, n - 1)), () => setSdb((n) => n + 1))}
-        </div>
-
-        {/* Extérieur */}
-        <div>
-          <label style={labelStyle}>Extérieur</label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', fontSize: 13.5, color: '#3D4759', fontWeight: 500 }}>
-              <input type="checkbox" checked={terrasse} onChange={(e) => setTerrasse(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#7CB8A8', cursor: 'pointer' }} />
-              Terrasse
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', fontSize: 13.5, color: '#3D4759', fontWeight: 500 }}>
-              <input type="checkbox" checked={jardin} onChange={(e) => setJardin(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#7CB8A8', cursor: 'pointer' }} />
-              Jardin
-            </label>
+      {/* Budget mensuel */}
+      <div style={{ marginBottom: 20 }}>
+        <label style={labelStyle}>Budget mensuel</label>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ position: 'relative', flex: 1 }}>
+            <input type="number" value={minM} onChange={(e) => setMinM(e.target.value)} placeholder="Min" style={{ ...inputStyle, paddingRight: 30 }} />
+            <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: '#9AA2B4' }}>€</span>
+          </div>
+          <div style={{ position: 'relative', flex: 1 }}>
+            <input type="number" value={maxM} onChange={(e) => setMaxM(e.target.value)} placeholder="Max" style={{ ...inputStyle, paddingRight: 30 }} />
+            <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: '#9AA2B4' }}>€</span>
           </div>
         </div>
       </div>
 
-      {/* GRILLE */}
+      {/* Type */}
+      <div style={{ marginBottom: 16 }}>
+        <FormSelect label="Type de bien" value={type} onChange={setType} options={['', ...TYPES].map((t) => ({ value: t, label: t || 'Tous les types' }))} placeholder="Tous les types" />
+      </div>
+
+      {/* Neuf / Existant */}
+      <div style={{ marginBottom: 20 }}>
+        <FormSelect
+          label="Neuf ou existant"
+          value={neuf}
+          onChange={setNeuf}
+          options={[{ value: '', label: 'Indifférent' }, { value: 'neuf', label: 'Neuf' }, { value: 'existant', label: 'Existant' }]}
+          placeholder="Indifférent"
+        />
+      </div>
+
+      {/* Surface minimum */}
+      <div style={{ marginBottom: 20 }}>
+        <label style={labelStyle}>Surface minimum (m²)</label>
+        <input type="number" value={surfaceMin} onChange={(e) => setSurfaceMin(e.target.value)} placeholder="Ex. 80" style={inputStyle} />
+      </div>
+
+      {/* Chambres minimum */}
+      <div style={{ marginBottom: 20 }}>
+        <label style={labelStyle}>Chambres minimum</label>
+        {compteur(chambres, () => setChambres((n) => Math.max(0, n - 1)), () => setChambres((n) => n + 1))}
+      </div>
+
+      {/* Salles de bain minimum */}
+      <div style={{ marginBottom: 20 }}>
+        <label style={labelStyle}>Salles de bain minimum</label>
+        {compteur(sdb, () => setSdb((n) => Math.max(0, n - 1)), () => setSdb((n) => n + 1))}
+      </div>
+
+      {/* Extérieur */}
+      <div>
+        <label style={labelStyle}>Extérieur</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', fontSize: 13.5, color: '#3D4759', fontWeight: 500 }}>
+            <input type="checkbox" checked={terrasse} onChange={(e) => setTerrasse(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#7CB8A8', cursor: 'pointer' }} />
+            Terrasse
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', fontSize: 13.5, color: '#3D4759', fontWeight: 500 }}>
+            <input type="checkbox" checked={jardin} onChange={(e) => setJardin(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#7CB8A8', cursor: 'pointer' }} />
+            Jardin
+          </label>
+        </div>
+      </div>
+    </>
+  )
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '280px 1fr', gap: 28, alignItems: 'start' }}>
+
+      {/* SIDEBAR DESKTOP (≥ 901px) */}
+      {!isMobile && (
+        <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 22, position: 'sticky', top: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: 0 }}>Filtres</h3>
+            {hasFilters && (
+              <button onClick={reset} style={{ fontSize: 12.5, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Réinitialiser</button>
+            )}
+          </div>
+          {filterFields}
+        </div>
+      )}
+
+      {/* GRILLE DE RÉSULTATS */}
       <div style={{ minWidth: 0 }}>
+
+        {/* Barre de filtres mobile (déclencheur du sheet) */}
+        {isMobile && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <button
+              onClick={() => setSheetOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', borderRadius: 12, border: '1.5px solid #193B5E', background: '#fff', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+              Filtres
+              {activeCount > 0 && (
+                <span style={{ background: '#193B5E', color: '#fff', borderRadius: 999, minWidth: 20, height: 20, padding: '0 6px', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{activeCount}</span>
+              )}
+            </button>
+            {hasFilters && (
+              <button onClick={reset} style={{ fontSize: 13, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Réinitialiser</button>
+            )}
+          </div>
+        )}
+
         <div style={{ fontSize: 14, color: '#5A6275', marginBottom: 18, fontWeight: 500 }}>
           {filtered.length} bien{filtered.length > 1 ? 's' : ''} {hasFilters ? 'correspondant' + (filtered.length > 1 ? 's' : '') : 'disponible' + (filtered.length > 1 ? 's' : '')}
         </div>
@@ -254,6 +306,49 @@ export function BiensExplorer({ biens }) {
           </div>
         )}
       </div>
+
+      {/* BOTTOM SHEET MOBILE */}
+      {isMobile && (
+        <>
+          <div
+            onClick={() => setSheetOpen(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 1200, background: 'rgba(11,26,42,0.45)', opacity: sheetOpen ? 1 : 0, pointerEvents: sheetOpen ? 'auto' : 'none', transition: 'opacity .25s ease' }}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            style={{
+              position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 1201,
+              background: '#fff', borderRadius: '20px 20px 0 0', maxHeight: '88dvh',
+              display: 'flex', flexDirection: 'column',
+              boxShadow: '0 -10px 40px rgba(11,26,42,0.2)',
+              transform: sheetOpen ? 'translateY(0)' : 'translateY(100%)',
+              transition: 'transform .3s cubic-bezier(.4,0,.2,1)',
+            }}
+          >
+            {/* En-tête */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 20px', borderBottom: '1px solid #EEF2F7', flex: 'none' }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#193B5E' }}>Filtres</h3>
+              <button onClick={() => setSheetOpen(false)} aria-label="Fermer" style={{ width: 36, height: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'none', cursor: 'pointer', color: '#193B5E' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
+              </button>
+            </div>
+
+            {/* Corps scrollable */}
+            <div style={{ padding: '16px 20px 8px', overflowY: 'auto', flex: 1 }}>
+              {filterFields}
+            </div>
+
+            {/* Pied : Réinitialiser + Voir X biens */}
+            <div style={{ display: 'flex', gap: 12, padding: '14px 20px', borderTop: '1px solid #EEF2F7', flex: 'none' }}>
+              <button onClick={reset} style={{ flex: '0 0 auto', padding: '13px 18px', borderRadius: 12, border: '1.5px solid #E8EDF2', background: '#fff', color: '#193B5E', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Réinitialiser</button>
+              <button onClick={() => setSheetOpen(false)} style={{ flex: 1, padding: '13px 18px', borderRadius: 12, border: 'none', background: '#193B5E', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+                Voir {filtered.length} bien{filtered.length > 1 ? 's' : ''}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
