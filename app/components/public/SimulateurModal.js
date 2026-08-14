@@ -69,17 +69,17 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalis√
         <div
           onClick={() => setOpen(false)}
           className="sim-modal-overlay"
-          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(15,36,56,0.6)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(15,36,56,0.6)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           <style>{`
             .sim-modal-overlay { padding: 20px; }
             @media (max-width: 640px){
-              .sim-modal-overlay { padding: 10px; }
+              .sim-modal-overlay { padding: 12px 10px; }
             }
           `}</style>
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: maxW, maxHeight: 'calc(100vh - 20px)', position: 'relative', boxShadow: '0 24px 70px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease', overflow: 'hidden' }}
+            style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: maxW, maxHeight: 'calc(100vh - 24px)', position: 'relative', boxShadow: '0 24px 70px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease', overflow: 'hidden' }}
           >
             <button
               onClick={() => setOpen(false)}
