@@ -66,22 +66,15 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalis√
       {open && (
         <div
           onClick={() => setOpen(false)}
-          className="sim-modal-overlay"
-          style={{ position: 'fixed', inset: 0, zIndex: 999999, background: 'rgba(15,36,56,0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 99999, background: 'rgba(15,36,56,0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
         >
-          <style>{`
-            .sim-modal-overlay { padding: 16px; }
-            @media (max-width: 640px){
-              .sim-modal-overlay { padding: 12px; }
-            }
-          `}</style>
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: maxW, maxHeight: 'calc(100vh - 32px)', position: 'relative', boxShadow: '0 20px 50px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+            style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: maxW, maxHeight: '100%', overflowY: 'auto', position: 'relative', boxShadow: '0 20px 50px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease' }}
           >
             <button
               onClick={() => setOpen(false)}
-              style={{ position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderRadius: '50%', background: '#F2F5FA', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5A6275', zIndex: 20 }}
+              style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', background: '#F2F5FA', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5A6275', zIndex: 20 }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
             </button>
