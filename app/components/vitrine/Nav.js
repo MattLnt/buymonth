@@ -86,6 +86,13 @@ export default function Nav() {
       {/* Overlay + panneau mobile */}
       <div className={`bm-overlay${open ? " is-open" : ""}`} onClick={close} />
       <aside className={`bm-sheet${open ? " is-open" : ""}`} role="dialog" aria-modal="true">
+        <button type="button" className="bm-sheet-close" aria-label="Fermer le menu" onClick={close}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <line x1="6" y1="6" x2="18" y2="18" />
+            <line x1="18" y1="6" x2="6" y2="18" />
+          </svg>
+        </button>
+
         <a className="bm-sheet-link" href="/pro#solution" onClick={close}>Solution</a>
         <a className="bm-sheet-link" href="/pro#vitrine" onClick={close}>Les biens</a>
         <a className="bm-sheet-link" href="/pro#process" onClick={close}>Process</a>
@@ -185,7 +192,7 @@ export default function Nav() {
             right: 0;
             height: 100dvh;
             width: min(84vw, 340px);
-            padding: 88px 22px 28px;
+            padding: 72px 22px 28px;
             background: #fff;
             box-shadow: -8px 0 30px rgba(11, 26, 42, .18);
             transform: translateX(100%);
@@ -194,6 +201,24 @@ export default function Nav() {
             z-index: 999;
           }
           .bm-sheet.is-open { transform: translateX(0); }
+
+          /* Croix de fermeture, en haut du panneau */
+          .bm-sheet-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #16324F;
+            background: none;
+            border: 0;
+            border-radius: 10px;
+            cursor: pointer;
+          }
+          .bm-sheet-close:active { background: #EEF1F6; }
 
           /* Liens de section — leur propre classe, plus de collision avec le CTA */
           .bm-sheet-link,
