@@ -86,11 +86,11 @@ export default function Nav() {
       {/* Overlay + panneau mobile */}
       <div className={`bm-overlay${open ? " is-open" : ""}`} onClick={close} />
       <aside className={`bm-sheet${open ? " is-open" : ""}`} role="dialog" aria-modal="true">
-        <a href="/pro#solution" onClick={close}>Solution</a>
-        <a href="/pro#vitrine" onClick={close}>Les biens</a>
-        <a href="/pro#process" onClick={close}>Process</a>
-        <a href="/pro#tarif" onClick={close}>Tarifs</a>
-        <a href="/pro#contact" onClick={close}>Contact</a>
+        <a className="bm-sheet-link" href="/pro#solution" onClick={close}>Solution</a>
+        <a className="bm-sheet-link" href="/pro#vitrine" onClick={close}>Les biens</a>
+        <a className="bm-sheet-link" href="/pro#process" onClick={close}>Process</a>
+        <a className="bm-sheet-link" href="/pro#tarif" onClick={close}>Tarifs</a>
+        <a className="bm-sheet-link" href="/pro#contact" onClick={close}>Contact</a>
 
         <div className="bm-sheet-sep" />
 
@@ -127,6 +127,15 @@ export default function Nav() {
         .bm-overlay, .bm-sheet { display: none; }
 
         @media (max-width: 860px) {
+          /* Nav toujours visible au scroll */
+          nav {
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            background: #fff;
+            box-shadow: 0 2px 14px rgba(11, 26, 42, .08);
+          }
+
           nav .nav-links,
           nav .nav-actions { display: none !important; }
 
@@ -186,8 +195,9 @@ export default function Nav() {
           }
           .bm-sheet.is-open { transform: translateX(0); }
 
-          .bm-sheet a,
-          .bm-sheet .bm-sheet-login {
+          /* Liens de section — leur propre classe, plus de collision avec le CTA */
+          .bm-sheet-link,
+          .bm-sheet-login {
             font-size: 1.05rem;
             font-weight: 600;
             color: #16324F;
@@ -195,7 +205,7 @@ export default function Nav() {
             padding: 14px 6px;
             border-radius: 10px;
           }
-          .bm-sheet a:active { background: #EEF1F6; }
+          .bm-sheet-link:active { background: #EEF1F6; }
 
           .bm-sheet-sep { height: 1px; background: #E3E8F0; margin: 12px 0; }
 
@@ -207,6 +217,7 @@ export default function Nav() {
             text-align: left;
           }
 
+          /* CTA — blanc sur navy, aucune autre règle ne le cible */
           .bm-sheet-cta {
             margin-top: 10px;
             display: block;
