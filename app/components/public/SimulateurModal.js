@@ -72,16 +72,19 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalisÃ
         >
           <style>{`
             .sim-modal-overlay { padding: 20px; alignItems: center; }
-            .sim-modal-card { maxHeight: calc(100vh - 40px); }
+            .sim-modal-card { border-radius: 20px; max-height: calc(100vh - 40px); }
             @media (max-width: 640px){
-              .sim-modal-overlay { padding: 100px 10px 20px 10px; alignItems: flex-start; }
-              .sim-modal-card { maxHeight: calc(100vh - 120px) !important; }
+              .sim-modal-overlay { padding: 0; alignItems: flex-end; }
+              .sim-modal-card { 
+                border-radius: 20px 20px 0 0 !important; 
+                max-height: 85vh !important; 
+              }
             }
           `}</style>
           <div
             onClick={(e) => e.stopPropagation()}
             className="sim-modal-card"
-            style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: maxW, position: 'relative', boxShadow: '0 24px 70px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease', overflow: 'hidden' }}
+            style={{ background: '#fff', width: '100%', maxWidth: maxW, position: 'relative', boxShadow: '0 24px 70px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease', overflow: 'hidden' }}
           >
             <button
               onClick={() => setOpen(false)}
