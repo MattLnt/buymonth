@@ -19,7 +19,6 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalis√
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Ouverture auto si l'URL contient #simuler
   useEffect(() => {
     function ouvrirSiHash() {
       if (window.location.hash === '#simuler') {
@@ -68,29 +67,23 @@ export function SimulateurModal({ bien, label = 'Recevoir une offre personnalis√
         <div
           onClick={() => setOpen(false)}
           className="sim-modal-overlay"
-          style={{ position: 'fixed', inset: 0, zIndex: 999999, background: 'rgba(15,36,56,0.6)', backdropFilter: 'blur(3px)', display: 'flex', justifyContent: 'center' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 999999, background: 'rgba(15,36,56,0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           <style>{`
-            .sim-modal-overlay { padding: 20px; alignItems: center; }
-            .sim-modal-card { border-radius: 20px; max-height: calc(100vh - 40px); }
+            .sim-modal-overlay { padding: 16px; }
             @media (max-width: 640px){
-              .sim-modal-overlay { padding: 0; alignItems: flex-end; }
-              .sim-modal-card { 
-                border-radius: 20px 20px 0 0 !important; 
-                max-height: 85vh !important; 
-              }
+              .sim-modal-overlay { padding: 12px; }
             }
           `}</style>
           <div
             onClick={(e) => e.stopPropagation()}
-            className="sim-modal-card"
-            style={{ background: '#fff', width: '100%', maxWidth: maxW, position: 'relative', boxShadow: '0 24px 70px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease', overflow: 'hidden' }}
+            style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: maxW, maxHeight: 'calc(100vh - 32px)', position: 'relative', boxShadow: '0 20px 50px rgba(0,0,0,0.3)', transition: 'max-width 0.25s ease', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
           >
             <button
               onClick={() => setOpen(false)}
-              style={{ position: 'absolute', top: 12, right: 12, width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.95)', border: '1px solid #E8EDF2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5A6275', zIndex: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+              style={{ position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderRadius: '50%', background: '#F2F5FA', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5A6275', zIndex: 20 }}
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
             </button>
 
             <Simulateur bien={bien} onStepChange={setStep} />
