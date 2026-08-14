@@ -7,292 +7,192 @@ import CalMark from "./CalMark";
 export default function Nav() {
   const { status } = useSession();
   const isLoggedIn = status === "authenticated";
+  
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [navH, setNavH] = useState(0);
+  
+  const navH = 64; // Hauteur fixe commune
   const navRef = useRef(null);
 
   const close = () => setOpen(false);
 
-  // Détecte le mobile + mesure la hauteur du header (pour le spacer sous le header fixe)
+  // Détecte le mobile pour la logique responsive pure
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 860px)");
-    const sync = () => {
-      setIsMobile(mq.matches);
-      if (navRef.current) setNavH(navRef.current.offsetHeight);
-    };
+    const mq = window.matchMedia("(max-width: 1024px)");
+    const sync = () => setIsMobile(mq.matches);
     sync();
     mq.addEventListener("change", sync);
-    window.addEventListener("resize", sync);
-    return () => {
-      mq.removeEventListener("change", sync);
-      window.removeEventListener("resize", sync);
-    };
+    return () => mq.removeEventListener("change", sync);
   }, []);
 
-  // Ferme à Échap + verrouille le scroll du body quand le menu est ouvert
+  // Détection du scroll pour assombrir la nav
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Verrouille le scroll du body quand le menu plein écran est ouvert
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
   }, [open]);
+
+  // Liens spécifiques à la page Pro
+  const navLinks = [
+    { href: "/pro#solution", label: "Solution", desc: "Comment ça marche" },
+    { href: "/pro#vitrine", label: "Les biens", desc: "Découvrir la vitrine" },
+    { href: "/pro#process", label: "Process", desc: "Les étapes de vente" },
+    { href: "/pro#tarif", label: "Tarifs", desc: "Nos offres" },
+    { href: "/pro#contact", label: "Contact", desc: "Nous parler" },
+  ];
+
+  // Gestion des couleurs pour coller à l'effet de publicnav.js (toujours sur fond clair ou transparent, puis assombri au scroll)
+  const navBackground = open ? "#193B5E" : scrolled ? "rgba(25,59,94,0.95)" : "rgba(255,255,255,0.95)";
+  const logoColor = (scrolled || open) ? "#fff" : "#193B5E";
+  const burgerColor = (scrolled || open) ? "#7CB8A8" : "#193B5E";
 
   return (
     <>
-      <nav ref={navRef} className={isMobile ? "bm-nav-fixed" : ""}>
-        <div className="wrap nav-in">
-          <Link className="brand" href="/pro" onClick={close}>
-            <CalMark size={34} />
-            BuyMonth
-          </Link>
+      <style>{`
+        @keyframes menuIn { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes itemIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .nav-pro-desktop { display: flex; gap: 24px; align-items: center; }
+        .nav-pro-mobile { display: none !important; }
+        
+        @media (max-width: 1024px) { 
+          .nav-pro-desktop { display: none !important; } 
+          .nav-pro-mobile { display: flex !important; }
+        }
 
-          {/* Liens desktop */}
-          <div className="nav-links">
-            <a href="/pro#solution">Solution</a>
-            <a href="/pro#vitrine">Les biens</a>
-            <a href="/pro#process">Process</a>
-            <a href="/pro#tarif">Tarifs</a>
-            <a href="/pro#contact">Contact</a>
-          </div>
+        .btn-mon-espace { display: inline-flex; align-items: center; gap: 7px; background: #7CB8A8; color: #193B5E; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 700; text-decoration: none; }
+        .nav-pro-link { color: #193B5E; font-size: 14px; text-decoration: none; font-weight: 500; transition: color 0.3s ease; }
+        .nav-pro-link:hover { color: #7CB8A8; }
+      `}</style>
 
-          {/* Actions desktop */}
-          <div className="nav-actions">
-            {isLoggedIn ? (
-              <>
-                <button
-                  className="nav-login"
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  style={{ background: "none", border: "none", cursor: "pointer", font: "inherit" }}
-                >
-                  Déconnexion
-                </button>
-                <Link className="btn btn-primary" href="/dashboard">
-                  Mon espace →
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link className="nav-login" href="/login">
-                  Connexion
-                </Link>
-                <Link className="btn btn-primary" href="/pro/contact">
-                  Réserver une démo
-                </Link>
-              </>
-            )}
-          </div>
+      <nav ref={navRef} style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 900,
+        height: navH, padding: "0 24px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: navBackground,
+        backdropFilter: (!open) ? "blur(20px) saturate(180%)" : "none",
+        WebkitBackdropFilter: (!open) ? "blur(20px) saturate(180%)" : "none",
+        borderBottom: open ? "1px solid rgba(255,255,255,0.07)" : `1px solid ${scrolled ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)"}`,
+        transition: "background 0.4s ease, border-color 0.3s ease",
+      }}>
+        {/* LOGO */}
+        <Link href="/pro" onClick={close} style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", zIndex: 901, fontSize: 20, fontWeight: 700, color: logoColor, letterSpacing: "-0.02em", transition: "color 0.3s ease" }}>
+          <CalMark size={30} color={scrolled || open ? "#fff" : "#193B5E"} />
+          Buy<span style={{ color: "#7CB8A8" }}>Month</span> <span style={{ fontSize: 13, background: "rgba(124,184,168,0.2)", color: "#7CB8A8", padding: "2px 6px", borderRadius: 6, marginLeft: 4 }}>PRO</span>
+        </Link>
 
-          {/* Hamburger mobile */}
-          <button
-            type="button"
-            className={`bm-burger${open ? " is-open" : ""}`}
-            aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-        </div>
+        {/* DESKTOP LINKS */}
+        <div className="nav-pro-desktop">
+          {navLinks.map(l => (
+            <a key={l.href} href={l.href} className="nav-pro-link" style={{ color: scrolled ? "rgba(255,255,255,0.8)" : "#193B5E" }}>
+              {l.label}
+            </a>
+          ))}
 
-        {/* Overlay + panneau mobile */}
-        <div className={`bm-overlay${open ? " is-open" : ""}`} onClick={close} />
-        <aside className={`bm-sheet${open ? " is-open" : ""}`} role="dialog" aria-modal="true">
-          <button type="button" className="bm-sheet-close" aria-label="Fermer le menu" onClick={close}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-              <line x1="6" y1="6" x2="18" y2="18" />
-              <line x1="18" y1="6" x2="6" y2="18" />
-            </svg>
-          </button>
-
-          <a className="bm-sheet-link" href="/pro#solution" onClick={close}>Solution</a>
-          <a className="bm-sheet-link" href="/pro#vitrine" onClick={close}>Les biens</a>
-          <a className="bm-sheet-link" href="/pro#process" onClick={close}>Process</a>
-          <a className="bm-sheet-link" href="/pro#tarif" onClick={close}>Tarifs</a>
-          <a className="bm-sheet-link" href="/pro#contact" onClick={close}>Contact</a>
-
-          <div className="bm-sheet-sep" />
+          <div style={{ width: 1, height: 20, background: scrolled ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)", margin: "0 8px" }} />
 
           {isLoggedIn ? (
             <>
-              <button
-                type="button"
-                className="bm-sheet-login"
-                onClick={() => {
-                  close();
-                  signOut({ callbackUrl: "/" });
-                }}
-              >
+              <button onClick={() => signOut({ callbackUrl: "/" })} style={{ background: "none", border: "none", cursor: "pointer", color: scrolled ? "rgba(255,255,255,0.7)" : "#193B5E", fontSize: 14, fontWeight: 600, padding: 0 }}>
                 Déconnexion
               </button>
-              <Link className="bm-sheet-cta" href="/dashboard" onClick={close}>
-                Mon espace →
-              </Link>
+              <Link href="/dashboard" className="btn-mon-espace">Mon espace →</Link>
             </>
           ) : (
             <>
-              <Link className="bm-sheet-login" href="/login" onClick={close}>
-                Connexion
-              </Link>
-              <Link className="bm-sheet-cta" href="/pro/contact" onClick={close}>
-                Réserver une démo
-              </Link>
+              <Link href="/login" style={{ color: scrolled ? "#fff" : "#193B5E", fontSize: 14, textDecoration: "none", fontWeight: 600 }}>Connexion</Link>
+              <Link href="/pro/contact" className="btn-mon-espace">Réserver une démo</Link>
             </>
           )}
-        </aside>
+        </div>
 
-        <style>{`
-          .bm-burger { display: none; }
-          .bm-overlay, .bm-sheet { display: none; }
-
-          @media (max-width: 860px) {
-            /* Header réellement fixe au scroll (fixed + spacer JS pour compenser) */
-            nav.bm-nav-fixed {
-              position: fixed;
-              top: 0;
-              left: 0;
-              right: 0;
-              z-index: 900;
-              background: #fff;
-              box-shadow: 0 2px 14px rgba(11, 26, 42, .08);
-            }
-
-            nav .nav-links,
-            nav .nav-actions { display: none !important; }
-
-            .bm-burger {
-              display: inline-flex;
-              flex-direction: column;
-              justify-content: center;
-              gap: 5px;
-              width: 44px;
-              height: 44px;
-              padding: 0 10px;
-              margin-left: auto;
-              background: transparent;
-              border: 0;
-              cursor: pointer;
-            }
-            .bm-burger span {
-              display: block;
-              width: 100%;
-              height: 2px;
-              border-radius: 2px;
-              background: #16324F;
-              transition: transform .25s ease, opacity .2s ease;
-            }
-            .bm-burger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-            .bm-burger.is-open span:nth-child(2) { opacity: 0; }
-            .bm-burger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-            .bm-overlay {
-              display: block;
-              position: fixed;
-              inset: 0;
-              background: rgba(11, 26, 42, .45);
-              opacity: 0;
-              pointer-events: none;
-              transition: opacity .25s ease;
-              z-index: 998;
-            }
-            .bm-overlay.is-open { opacity: 1; pointer-events: auto; }
-
-            .bm-sheet {
-              display: flex;
-              flex-direction: column;
-              gap: 4px;
-              position: fixed;
-              top: 0;
-              right: 0;
-              height: 100dvh;
-              width: min(84vw, 340px);
-              padding: 72px 22px 28px;
-              background: #fff;
-              box-shadow: -8px 0 30px rgba(11, 26, 42, .18);
-              transform: translateX(100%);
-              transition: transform .28s cubic-bezier(.4, 0, .2, 1);
-              overflow-y: auto;
-              z-index: 999;
-            }
-            .bm-sheet.is-open { transform: translateX(0); }
-
-            /* Croix de fermeture, en haut du panneau */
-            .bm-sheet-close {
-              position: absolute;
-              top: 16px;
-              right: 16px;
-              width: 40px;
-              height: 40px;
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              color: #16324F;
-              background: none;
-              border: 0;
-              border-radius: 10px;
-              cursor: pointer;
-            }
-            .bm-sheet-close:active { background: #EEF1F6; }
-
-            /* Liens de section — leur propre classe, plus de collision avec le CTA */
-            .bm-sheet-link {
-              font-size: 1.05rem;
-              font-weight: 600;
-              color: #16324F;
-              text-decoration: none;
-              padding: 14px 6px;
-              border-radius: 10px;
-            }
-            .bm-sheet-link:active { background: #EEF1F6; }
-
-            .bm-sheet-sep { height: 1px; background: #E3E8F0; margin: 12px 0; }
-
-            /* Connexion / Déconnexion : bouton contour navy (secondaire) */
-            .bm-sheet-login {
-              margin-top: 4px;
-              display: block;
-              width: 100%;
-              text-align: center;
-              font-size: 1.02rem;
-              font-weight: 700;
-              color: #16324F;
-              text-decoration: none;
-              background: #fff;
-              border: 1.5px solid #16324F;
-              border-radius: 12px;
-              padding: 13px 18px;
-              cursor: pointer;
-            }
-            .bm-sheet-login:active { background: #EEF1F6; }
-
-            /* CTA — blanc sur navy, aucune autre règle ne le cible */
-            .bm-sheet-cta {
-              margin-top: 10px;
-              display: block;
-              text-align: center;
-              text-decoration: none;
-              background: #16324F;
-              color: #fff;
-              font-weight: 700;
-              font-size: 1.02rem;
-              padding: 15px 18px;
-              border-radius: 12px;
-            }
-            .bm-sheet-cta:active { background: #1D4267; }
-          }
-        `}</style>
+        {/* MOBILE BURGER */}
+        <button className="nav-pro-mobile" aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+          onClick={() => setOpen(!open)}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 8, zIndex: 901, width: 40, height: 40, flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5 }}>
+          {[0, 1, 2].map(i => (
+            <span key={i} style={{
+              display: "block", height: 2, borderRadius: 2, background: burgerColor,
+              width: i === 1 ? (open ? 22 : 14) : 22,
+              transform: open ? (i === 0 ? "rotate(45deg) translate(5px, 5px)" : i === 2 ? "rotate(-45deg) translate(5px, -5px)" : "none") : "none",
+              opacity: open && i === 1 ? 0 : 1,
+              transition: "all 0.3s ease",
+            }} />
+          ))}
+        </button>
       </nav>
 
-      {/* Spacer : compense la hauteur du header fixe en mobile */}
-      {isMobile && <div aria-hidden="true" style={{ height: navH }} />}
+      {/* FULL SCREEN MOBILE MENU (Identique à publicnav.js) */}
+      {open && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 899, background: "#193B5E",
+          animation: "menuIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)", display: "flex", flexDirection: "column",
+        }}>
+          <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(124,184,168,0.1) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "88px 24px 32px", position: "relative", zIndex: 1, overflowY: "auto" }}>
+            
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(124,184,168,0.1)", border: "1px solid rgba(124,184,168,0.2)", borderRadius: 20, padding: "5px 12px", marginBottom: 32, alignSelf: "flex-start", animation: "itemIn 0.4s ease 0.05s both" }}>
+              <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#7CB8A8" }} />
+              <span style={{ fontSize: 10, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.08em" }}>ESPACE PROMOTEURS</span>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 28 }}>
+              {navLinks.map((l, i) => (
+                <a key={l.href} href={l.href} onClick={close}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 0", borderBottom: "1px solid rgba(255,255,255,0.06)", textDecoration: "none", animation: `itemIn 0.4s ease ${0.1 + i * 0.06}s both` }}>
+                  <div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em", marginBottom: 3 }}>{l.label}</div>
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", fontWeight: 400 }}>{l.desc}</div>
+                  </div>
+                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(124,184,168,0.1)", border: "1px solid rgba(124,184,168,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </div>
+                </a>
+              ))}
+            </div>
+
+            {isLoggedIn ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <Link href="/dashboard" onClick={close}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "16px", background: "#7CB8A8", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#193B5E", textDecoration: "none", animation: "itemIn 0.4s ease 0.4s both" }}>
+                  Mon espace →
+                </Link>
+                <button onClick={() => { close(); signOut({ callbackUrl: "/" }); }}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "15px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#fff", cursor: "pointer", animation: "itemIn 0.4s ease 0.45s both" }}>
+                  Déconnexion
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <Link href="/login" onClick={close}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "15px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#fff", textDecoration: "none", animation: "itemIn 0.4s ease 0.4s both" }}>
+                  Connexion
+                </Link>
+                <Link href="/pro/contact" onClick={close}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "16px", background: "#7CB8A8", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#193B5E", textDecoration: "none", animation: "itemIn 0.4s ease 0.45s both" }}>
+                  Réserver une démo
+                </Link>
+              </div>
+            )}
+          </div>
+
+          <div style={{ padding: "20px 24px 40px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", zIndex: 1 }}>
+            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", margin: 0 }}>© 2026 BuyMonth</p>
+            <a href="mailto:info@buymonth.be" style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>info@buymonth.be</a>
+          </div>
+        </div>
+      )}
+
+      {/* Spacer pour compenser la nav fixed */}
+      <div style={{ height: navH }} aria-hidden="true" />
     </>
   );
 }
