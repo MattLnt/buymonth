@@ -47,26 +47,32 @@ export default function LoginPage() {
         @media (max-width: 1024px) {
           .login-container { 
             flex-direction: column; 
-            background: linear-gradient(160deg, #16324F 0%, #1D4267 55%, #245479 100%);
+            background: linear-gradient(160deg, #16324F 0%, #1D4267 55%, #245479 100%) !important;
+            min-height: 100vh;
+            justify-content: flex-start;
           }
           .login-left { display: none !important; }
           .login-right { 
-            padding: 24px 16px !important; 
+            width: 100% !important;
+            padding: 32px 16px !important; 
             background: transparent !important; 
             align-items: center !important; 
+            justify-content: flex-start !important;
           }
           .login-mobile-header { 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             width: 100%; 
-            margin-bottom: 32px; 
-            margin-top: 20px;
+            margin-bottom: 24px; 
+            margin-top: 10px;
           }
           .login-form-card { 
-            padding: 32px 24px !important; 
+            padding: 28px 20px !important; 
             box-shadow: 0 16px 40px rgba(0,0,0,0.2) !important;
             border: none !important;
+            width: 100% !important;
+            max-width: 100% !important;
           }
         }
       `}</style>
@@ -123,8 +129,8 @@ export default function LoginPage() {
         
         {/* En-tête mobile (Logo) */}
         <div className="login-mobile-header">
-           <Link href="/" style={{ textDecoration: "none", display: "inline-block", marginBottom: 16 }}>
-            <span style={{ fontSize: 32, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em" }}>Buy<span style={{ color: "#7CB8A8" }}>Month</span></span>
+           <Link href="/" style={{ textDecoration: "none", display: "inline-block", marginBottom: 12 }}>
+            <span style={{ fontSize: 28, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em" }}>Buy<span style={{ color: "#7CB8A8" }}>Month</span></span>
           </Link>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(124,184,168,0.15)", border: "1px solid rgba(124,184,168,0.3)", borderRadius: 20, padding: "5px 12px" }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#7CB8A8" }} />
@@ -133,7 +139,7 @@ export default function LoginPage() {
         </div>
 
         <div style={{ width: "100%", maxWidth: 440 }}>
-          <div className="login-form-card" style={{ background: "#fff", padding: "40px 32px", borderRadius: 18, boxShadow: "0 4px 24px rgba(22,50,79,0.06)", border: "1px solid #EEF2F7" }}>
+          <div className="login-form-card" style={{ background: "#fff", padding: "40px 32px", borderRadius: 18, boxShadow: "0 4px 24px rgba(22,50,79,0.06)", border: "1px solid #EEF2F7", boxSizing: "border-box" }}>
             <div style={{ marginBottom: 28 }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(124,184,168,0.12)", border: "1px solid rgba(124,184,168,0.25)", borderRadius: 20, padding: "5px 12px", marginBottom: 14 }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
