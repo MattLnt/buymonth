@@ -3,6 +3,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import CalMark from "@/components/public/CalMark"; // Assurez-vous que le chemin est bon ou ajustez-le
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,28 +31,54 @@ export default function LoginPage() {
   }
 
   return (
-    <main style={{ minHeight: "100vh", display: "flex", background: "#EEF1F6" }}>
+    <main className="login-container">
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        .login-container { min-height: 100vh; display: flex; background: #EEF1F6; }
+        .login-left {
+          width: 52%; background: linear-gradient(160deg, #16324F 0%, #1D4267 55%, #245479 100%);
+          display: flex; flex-direction: column; justify-content: space-between;
+          padding: 48px; position: relative; overflow: hidden;
+        }
+        .login-right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 24px; background: #EEF1F6; overflow-y: auto; }
+        .login-mobile-header { display: none; }
+        
         @media (max-width: 1024px) {
+          .login-container { 
+            flex-direction: column; 
+            background: linear-gradient(160deg, #16324F 0%, #1D4267 55%, #245479 100%);
+          }
           .login-left { display: none !important; }
-          .login-right { padding: 0 !important; align-items: flex-start !important; }
-          .login-form-card { min-height: 100vh !important; }
+          .login-right { 
+            padding: 24px 16px !important; 
+            background: transparent !important; 
+            align-items: center !important; 
+          }
+          .login-mobile-header { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 100%; 
+            margin-bottom: 32px; 
+            margin-top: 20px;
+          }
+          .login-form-card { 
+            padding: 32px 24px !important; 
+            box-shadow: 0 16px 40px rgba(0,0,0,0.2) !important;
+            border: none !important;
+          }
         }
       `}</style>
 
       {/* Panneau gauche desktop */}
-      <div className="login-left" style={{
-        width: "52%", background: "linear-gradient(160deg, #16324F 0%, #1D4267 55%, #245479 100%)",
-        display: "flex", flexDirection: "column", justifyContent: "space-between",
-        padding: "48px", position: "relative", overflow: "hidden",
-      }}>
+      <div className="login-left">
         <div style={{ position: "absolute", top: "-80px", right: "-80px", width: 400, height: 400, borderRadius: "50%", background: "rgba(124,184,168,0.12)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: "-120px", left: "-60px", width: 500, height: 500, borderRadius: "50%", background: "rgba(124,184,168,0.07)", pointerEvents: "none" }} />
 
         {/* Logo */}
         <div style={{ position: "relative", zIndex: 1 }}>
-          <Link href="/" style={{ textDecoration: "none", display: "inline-block" }}>
+          <Link href="/" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 24, fontWeight: 700, color: "#fff" }}>Buy<span style={{ color: "#7CB8A8" }}>Month</span></span>
           </Link>
         </div>
@@ -91,8 +118,20 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Panneau droit */}
-      <div className="login-right" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 24px", background: "#EEF1F6", overflowY: "auto" }}>
+      {/* Panneau droit (Formulaire) */}
+      <div className="login-right">
+        
+        {/* En-tête mobile (Logo) */}
+        <div className="login-mobile-header">
+           <Link href="/" style={{ textDecoration: "none", display: "inline-block", marginBottom: 16 }}>
+            <span style={{ fontSize: 32, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em" }}>Buy<span style={{ color: "#7CB8A8" }}>Month</span></span>
+          </Link>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(124,184,168,0.15)", border: "1px solid rgba(124,184,168,0.3)", borderRadius: 20, padding: "5px 12px" }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#7CB8A8" }} />
+            <span style={{ fontSize: 11, color: "#7CB8A8", fontWeight: 600 }}>Espace promoteur</span>
+          </div>
+        </div>
+
         <div style={{ width: "100%", maxWidth: 440 }}>
           <div className="login-form-card" style={{ background: "#fff", padding: "40px 32px", borderRadius: 18, boxShadow: "0 4px 24px rgba(22,50,79,0.06)", border: "1px solid #EEF2F7" }}>
             <div style={{ marginBottom: 28 }}>
@@ -168,9 +207,10 @@ export default function LoginPage() {
             <Link href="/register" style={{ display: "block", textAlign: "center", background: "#FAFBFE", border: "1px solid #E8EDF2", color: "#193B5E", padding: 12, borderRadius: 10, fontSize: 13.5, fontWeight: 600, textDecoration: "none" }}>
               Créer un compte promoteur
             </Link>
-
-            <p style={{ fontSize: 11, color: "#C2C8D4", margin: "20px 0 0", textAlign: "center" }}>© 2026 BuyMonth · Belgique</p>
           </div>
+          
+          {/* Footer mobile */}
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", margin: "24px 0 0", textAlign: "center" }}>© 2026 BuyMonth · Belgique</p>
         </div>
       </div>
     </main>
