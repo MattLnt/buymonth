@@ -89,11 +89,13 @@ export default function Showcase() {
           #vitrine .vrow {
             flex-wrap: wrap;
             align-items: flex-start;
-            row-gap: 8px;
+            column-gap: 12px;
+            row-gap: 10px;
             padding: 12px;
           }
           #vitrine .vrow .vt {
-            flex: 1 1 auto;
+            flex: 1 1 0;
+            min-width: 0;
           }
           /* Titre entier, plus d'ellipse écrasée */
           #vitrine .vrow .vt b {
@@ -102,15 +104,17 @@ export default function Showcase() {
             text-overflow: clip;
             line-height: 1.25;
           }
-          /* Le prix passe sur sa propre ligne, aligné après la photo */
+          /* Prix : barre pleine largeur sur sa propre ligne, aucun débordement */
           #vitrine .vrow .vm {
-            flex: 1 0 100%;
-            margin-left: 58px;
+            flex: 0 0 100%;
+            width: 100%;
+            box-sizing: border-box;
+            margin-left: 0;
             text-align: left;
-            display: inline-flex;
+            display: flex;
             align-items: baseline;
             gap: 6px;
-            padding: 5px 10px;
+            padding: 6px 12px;
           }
           #vitrine .vrow .vm small {
             display: inline;
