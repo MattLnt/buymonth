@@ -147,7 +147,7 @@ function StatutDropdown({ value, onChange, disabled }) {
 export function AdminLeadsExplorer({ leads }) {
   const router = useRouter()
   const [q, setQ] = useState('')
-  const [source, setSource] = useState('')
+  const [statutFiltre, setStatutFiltre] = useState('')
   const [tri, setTri] = useState('recent')
   const [statuts, setStatuts] = useState(
     Object.fromEntries(leads.map((l) => [l.id, l.statutAdmin || 'À contacter']))
@@ -156,16 +156,10 @@ export function AdminLeadsExplorer({ leads }) {
   const [deleting, setDeleting] = useState('')
   const [aSupprimer, setASupprimer] = useState(null) // lead ciblé par la modale de confirmation
 
-  const sources = useMemo(() => {
-    const set = new Set()
-    leads.forEach((l) => { if (l.source) set.add(l.source) })
-    return [...set]
-  }, [leads])
-
   const filtered = useMemo(() => {
     const qLow = q.trim().toLowerCase()
     let res = leads.filter((l) => {
-      if (source && l.source !== source) return false
+      if (statutFiltre && (statuts[l.id] || l.statutAdmin || 'À contacter') !== statutFiltre) return false
       if (qLow) {
         const hay = `${l.nom || ''} ${l.societe || ''} ${l.email || ''} ${l.telephone || ''} ${l.bienTitre || ''} ${l.promoteur || ''} ${l.projet || ''} ${l.unite || ''}`.toLowerCase()
         if (!hay.includes(qLow)) return false
@@ -179,12 +173,12 @@ export function AdminLeadsExplorer({ leads }) {
       return 0
     })
     return res
-  }, [leads, q, source, tri])
+  }, [leads, q, statutFiltre, tri, statuts])
 
-  const hasFilters = q || source
+  const hasFilters = q || statutFiltre
 
   function reset() {
-    setQ(''); setSource(''); setTri('recent')
+    setQ(''); setStatutFiltre(''); setTri('recent')
   }
 
   async function changerStatut(leadId, statut) {
@@ -240,8 +234,8 @@ export function AdminLeadsExplorer({ leads }) {
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher nom, entreprise, email, bien, promoteur..." style={{ ...inputStyle, paddingLeft: 36 }} />
           </div>
 
-          <FormSelect value={source} onChange={setSource} placeholder="Toutes les sources"
-            options={[{ value: '', label: 'Toutes les sources' }, ...sources.map((s) => ({ value: s, label: sourceLabel[s]?.label || s }))]} />
+          <FormSelect value={statutFiltre} onChange={setStatutFiltre} placeholder="Tous les statuts"
+            options={[{ value: '', label: 'Tous les statuts' }, ...STATUTS_ADMIN.map((s) => ({ value: s, label: s }))]} />
 
           <FormSelect value={tri} onChange={setTri} placeholder="Trier"
             options={[
