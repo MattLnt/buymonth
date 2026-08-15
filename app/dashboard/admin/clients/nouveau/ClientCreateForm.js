@@ -102,7 +102,13 @@ export function ClientCreateForm() {
   return (
     <form onSubmit={handleSubmit}>
       <style>{`
-        @media (max-width: 980px){ .nouveau-promo-grid { grid-template-columns: 1fr !important; } .nouveau-promo-recap { position: static !important; } }
+        @media (max-width: 980px){
+          .nouveau-promo-grid { grid-template-columns: 1fr !important; }
+          .nouveau-promo-recap { position: static !important; }
+        }
+        @media (max-width: 600px){
+          .champ-grid { grid-template-columns: 1fr !important; }
+        }
       `}</style>
 
       {error && (
@@ -116,7 +122,7 @@ export function ClientCreateForm() {
         {/* Colonne formulaire */}
         <div>
           <SectionCard num="1" titre="Identité & accès" sousTitre="Société et identifiants de connexion.">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div className="champ-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
               <Champ label="Société *" k="societe" placeholder="Nom de l'agence / promoteur" full value={form.societe} onChange={setField} />
               <Champ label="Email de connexion *" k="email" type="email" placeholder="contact@promoteur.be" full value={form.email} onChange={setField} />
               <div style={{ gridColumn: '1 / -1' }}>
@@ -133,7 +139,7 @@ export function ClientCreateForm() {
           </SectionCard>
 
           <SectionCard num="2" titre="Contacts" sousTitre="Interlocuteurs opérationnels et facturation.">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div className="champ-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
               <Champ label="Contact opérationnel / marketing" k="contactOpe" placeholder="Nom du contact" value={form.contactOpe} onChange={setField} />
               <Champ label="Contact facturation" k="contactFacturation" placeholder="Nom du contact" value={form.contactFacturation} onChange={setField} />
               <Champ label="Contact principal (affiché)" k="contactNom" placeholder="Nom du contact" full value={form.contactNom} onChange={setField} />
@@ -143,7 +149,7 @@ export function ClientCreateForm() {
           </SectionCard>
 
           <SectionCard num="3" titre="Adresses" sousTitre="Adresse affichée et adresse administrative.">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div className="champ-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
               <Champ label="Adresse" k="adresse" placeholder="Rue, n°, ville" value={form.adresse} onChange={setField} />
               <Champ label="Adresse administrative" k="adresseAdmin" placeholder="Siège / facturation" value={form.adresseAdmin} onChange={setField} />
             </div>
