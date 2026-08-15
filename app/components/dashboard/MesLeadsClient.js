@@ -196,7 +196,11 @@ export function MesLeadsClient({ leads }) {
   }
 
   const totalLeads = leads.length
-  const aContacter = Object.values(statuts).filter((s) => s === 'À contacter').length
+  const now = new Date()
+  const ceMois = leads.filter((l) => {
+    const d = new Date(l.createdAt)
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+  }).length
 
   const qLow = q.trim().toLowerCase()
   const filtered = leads.filter((lead) => {
@@ -222,8 +226,8 @@ export function MesLeadsClient({ leads }) {
 
       {/* 2 KPI côte à côte */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
-        <Kpi label="Total des leads" value={totalLeads} />
-        <Kpi label="À contacter" value={aContacter} accent="#3B62A8" />
+        <Kpi label="Total leads" value={totalLeads} />
+        <Kpi label="Ce mois-ci" value={ceMois} accent="#3B62A8" />
       </div>
 
       {/* Recherche + filtre statut sur la même ligne */}

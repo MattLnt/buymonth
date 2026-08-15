@@ -1,6 +1,6 @@
 import { getCurrentClient } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
-import { PageHeader, Card, StatCard } from '@/app/components/dashboard/Ui'
+import { PageHeader, Card } from '@/app/components/dashboard/Ui'
 import { MesLeadsClient } from '@/app/components/dashboard/MesLeadsClient'
 
 export const dynamic = 'force-dynamic'
@@ -23,20 +23,9 @@ export default async function ClientLeadsPage() {
     },
   })
 
-  // leads ce mois-ci
-  const debutMois = new Date()
-  debutMois.setDate(1)
-  debutMois.setHours(0, 0, 0, 0)
-  const ceMois = leads.filter((l) => new Date(l.createdAt) >= debutMois).length
-
   return (
     <>
       <PageHeader title="Mes leads" subtitle="Les demandes reçues sur vos biens via le simulateur." />
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 16, marginBottom: 28 }}>
-        <StatCard label="Total leads" value={leads.length} icon="inbox" />
-        <StatCard label="Ce mois-ci" value={ceMois} icon="users" />
-      </div>
 
       {leads.length === 0 ? (
         <Card>
