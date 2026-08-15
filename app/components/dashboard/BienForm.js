@@ -210,6 +210,9 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
         @media (max-width: 1024px) {
           .bien-grid { grid-template-columns: 1fr !important; }
         }
+        @media (max-width: 600px) {
+          .bf-grid { grid-template-columns: 1fr !important; }
+        }
       `}</style>
 
       {error && (
@@ -225,7 +228,7 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
           {/* COLONNE PRINCIPALE */}
           <div>
             <FormSection icon={ic.layers} title="Projet & unité" subtitle="Rattachez ce bien à un programme (facultatif)">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="bf-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <FormSelect
                     label="Projet"
@@ -284,11 +287,11 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
             </FormSection>
 
             <FormSection icon={ic.grid} title="Caractéristiques" subtitle="Surface et aménagements">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <div className="bf-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <FormInput label="Chambres" name="chambres" type="number" value={form.chambres} onChange={handle('chambres')} placeholder="2" min="0" />
                 <FormInput label="Salles de bain" name="sallesDeBain" type="number" value={form.sallesDeBain} onChange={handle('sallesDeBain')} placeholder="1" min="0" />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              <div className="bf-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 <FormInput label="Surface (m²)" name="surface" type="number" value={form.surface} onChange={handle('surface')} placeholder="85" min="0" />
                 <FormInput label="Terrasse (m²)" name="terrasse" type="number" value={form.terrasse} onChange={handle('terrasse')} placeholder="12" min="0" />
                 <FormInput label="Jardin (m²)" name="jardin" type="number" value={form.jardin} onChange={handle('jardin')} placeholder="0" min="0" />
@@ -296,7 +299,7 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
             </FormSection>
 
             <FormSection icon={ic.zap} title="Performance énergétique (PEB)" subtitle="Facultatif">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              <div className="bf-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 <FormInput label="N° de PEB" name="pebNumero" value={form.pebNumero} onChange={handle('pebNumero')} placeholder="20230000123456" />
                 <FormSelect label="Classe PEB" value={form.pebClasse} onChange={(v) => setField('pebClasse', v)}
                   options={[{ value: '', label: 'Non renseigné' }, ...PEB_CLASSES.map((c) => ({ value: c, label: c }))]} />
