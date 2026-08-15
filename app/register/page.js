@@ -99,7 +99,7 @@ export default function RegisterPage() {
           justify-content: center;
           padding: 40px 24px 20px;
           position: relative;
-          overflow-x: hidden;
+          overflow: hidden;
           background:
             linear-gradient(
               150deg,
