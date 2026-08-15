@@ -17,6 +17,7 @@ export function AdminBiensExplorer({ biens }) {
   const [statut, setStatut] = useState('')
   const [tri, setTri] = useState('recent')
   const [isMobile, setIsMobile] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 820px)')
@@ -50,6 +51,7 @@ export function AdminBiensExplorer({ biens }) {
   }, [biens, q, type, province, statut, tri])
 
   const hasFilters = q || type || province || statut
+  const activeCount = [q, type, province, statut].filter(Boolean).length
 
   function reset() {
     setQ(''); setType(''); setProvince(''); setStatut(''); setTri('recent')
@@ -59,12 +61,34 @@ export function AdminBiensExplorer({ biens }) {
     <div>
       {/* Barre de filtres */}
       <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 18, marginBottom: 18 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr 1fr', gap: 12, alignItems: 'end' }} className="adm-filters-grid">
-          <style>{`
-            @media (max-width: 1100px){ .adm-filters-grid { grid-template-columns: 1fr 1fr !important; } }
-            @media (max-width: 600px){ .adm-filters-grid { grid-template-columns: 1fr !important; } }
-          `}</style>
+        <style>{`
+          @media (max-width: 1100px){ .adm-filters-grid { grid-template-columns: 1fr 1fr !important; } }
+          @media (max-width: 600px){ .adm-filters-grid { grid-template-columns: 1fr !important; } }
+        `}</style>
 
+        {/* Bouton déplier/replier (mobile) */}
+        {isMobile && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: filtersOpen ? 16 : 0 }}>
+            <button
+              onClick={() => setFiltersOpen((o) => !o)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 11, border: '1.5px solid #193B5E', background: '#fff', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+              Filtres
+              {activeCount > 0 && (
+                <span style={{ background: '#193B5E', color: '#fff', borderRadius: 999, minWidth: 20, height: 20, padding: '0 6px', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{activeCount}</span>
+              )}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 2, transition: 'transform 0.18s', transform: filtersOpen ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9" /></svg>
+            </button>
+            {hasFilters && (
+              <button onClick={reset} style={{ background: 'none', border: 'none', color: '#7CB8A8', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Réinitialiser</button>
+            )}
+          </div>
+        )}
+
+        {/* Grille de filtres : toujours visible en desktop, dépliable en mobile */}
+        {(!isMobile || filtersOpen) && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr 1fr', gap: 12, alignItems: 'end' }} className="adm-filters-grid">
           <div style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#A9B0BE', display: 'flex' }}>
               <Icon name="search" size={16} />
@@ -89,8 +113,9 @@ export function AdminBiensExplorer({ biens }) {
               { value: 'leads', label: 'Leads ↓' },
             ]} />
         </div>
+        )}
 
-        {hasFilters && (
+        {!isMobile && hasFilters && (
           <div style={{ marginTop: 12 }}>
             <button onClick={reset} style={{ background: 'none', border: 'none', color: '#7CB8A8', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Réinitialiser les filtres</button>
           </div>
