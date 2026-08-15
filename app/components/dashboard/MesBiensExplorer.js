@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import { BienCard } from './BienCard'
 import { FormSelect } from './FormSelect'
 
@@ -30,7 +31,7 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
   const [showSug, setShowSug] = useState(false)
   const sugRef = useRef(null)
 
-  // Bascule mobile + panneau de filtres repliable (style Airbnb)
+  // Bascule mobile + panneau de filtres repliable (bottom sheet)
   const [isMobile, setIsMobile] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
 
@@ -167,62 +168,73 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
     </>
   )
 
+  const ajouterBtn = (
+    <Link href="/dashboard/client/biens/nouveau" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#193B5E', color: '#fff', padding: '11px 20px', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+      Ajouter un bien
+    </Link>
+  )
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '260px 1fr', gap: 24, alignItems: 'start' }}>
-
-      {/* SIDEBAR DESKTOP (≥ 901px) */}
-      {!isMobile && (
-        <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 20, position: 'sticky', top: 92 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', margin: 0 }}>Filtres</h3>
-            {hasFilters && (
-              <button onClick={reset} style={{ fontSize: 12, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Réinitialiser</button>
-            )}
-          </div>
-          {filterFields}
-        </div>
-      )}
-
-      {/* GRILLE DE RÉSULTATS */}
-      <div style={{ minWidth: 0 }}>
-
-        {/* Barre de filtres mobile (déclencheur du sheet) */}
-        {isMobile && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+    <div>
+      {/* En-tête : compteur portefeuille + Ajouter + Filtres (Filtres en mobile) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
+        <p style={{ fontSize: 14.5, color: '#5A6275', margin: 0 }}>
+          <strong style={{ color: '#193B5E' }}>{biens.length} bien{biens.length > 1 ? 's' : ''}</strong> dans votre portefeuille.
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {ajouterBtn}
+          {isMobile && (
             <button
               onClick={() => setSheetOpen(true)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', borderRadius: 12, border: '1.5px solid #193B5E', background: '#fff', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+              style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', borderRadius: 10, border: '1.5px solid #193B5E', background: '#fff', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
               Filtres
               {activeCount > 0 && (
-                <span style={{ background: '#193B5E', color: '#fff', borderRadius: 999, minWidth: 20, height: 20, padding: '0 6px', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{activeCount}</span>
+                <span style={{ position: 'absolute', top: -8, right: -8, minWidth: 21, height: 21, padding: '0 5px', borderRadius: 999, background: '#193B5E', color: '#fff', fontSize: 11.5, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff', boxShadow: '0 2px 6px rgba(25,59,94,0.28)' }}>{activeCount}</span>
               )}
             </button>
-            {hasFilters && (
-              <button onClick={reset} style={{ fontSize: 13, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Réinitialiser</button>
-            )}
-          </div>
-        )}
-
-        <div style={{ fontSize: 13.5, color: '#5A6275', marginBottom: 16, fontWeight: 500 }}>
-          {hasFilters
-            ? `${filtered.length} résultat${filtered.length > 1 ? 's' : ''}`
-            : `${filtered.length} bien${filtered.length > 1 ? 's' : ''} au total`}
+          )}
         </div>
+      </div>
 
-        {filtered.length === 0 ? (
-          <div style={{ background: '#fff', border: '1px dashed #D8DFE9', borderRadius: 16, padding: '56px 24px', textAlign: 'center' }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>Aucun bien trouvé</h3>
-            <p style={{ fontSize: 14, color: '#5A6275', margin: 0 }}>Essayez d'ajuster vos filtres.</p>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
-            {filtered.map((bien) => (
-              <BienCard key={bien.id} bien={bien} />
-            ))}
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '260px 1fr', gap: 24, alignItems: 'start' }}>
+
+        {/* SIDEBAR DESKTOP (≥ 901px) */}
+        {!isMobile && (
+          <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 20, position: 'sticky', top: 92 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', margin: 0 }}>Filtres</h3>
+              {hasFilters && (
+                <button onClick={reset} style={{ fontSize: 12, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Réinitialiser</button>
+              )}
+            </div>
+            {filterFields}
           </div>
         )}
+
+        {/* GRILLE DE RÉSULTATS */}
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 13.5, color: '#5A6275', marginBottom: 16, fontWeight: 500 }}>
+            {hasFilters
+              ? `${filtered.length} résultat${filtered.length > 1 ? 's' : ''}`
+              : `${filtered.length} bien${filtered.length > 1 ? 's' : ''} au total`}
+          </div>
+
+          {filtered.length === 0 ? (
+            <div style={{ background: '#fff', border: '1px dashed #D8DFE9', borderRadius: 16, padding: '56px 24px', textAlign: 'center' }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>Aucun bien trouvé</h3>
+              <p style={{ fontSize: 14, color: '#5A6275', margin: 0 }}>Essayez d'ajuster vos filtres.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
+              {filtered.map((bien) => (
+                <BienCard key={bien.id} bien={bien} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* BOTTOM SHEET MOBILE */}
@@ -244,7 +256,6 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
               transition: 'transform .3s cubic-bezier(.4,0,.2,1)',
             }}
           >
-            {/* En-tête */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 20px', borderBottom: '1px solid #EEF2F7', flex: 'none' }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#193B5E' }}>Filtres</h3>
               <button onClick={() => setSheetOpen(false)} aria-label="Fermer" style={{ width: 36, height: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'none', cursor: 'pointer', color: '#193B5E' }}>
@@ -252,12 +263,10 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
               </button>
             </div>
 
-            {/* Corps scrollable */}
             <div style={{ padding: '16px 20px 8px', overflowY: 'auto', flex: 1 }}>
               {filterFields}
             </div>
 
-            {/* Pied : Réinitialiser + Voir X biens */}
             <div style={{ display: 'flex', gap: 12, padding: '14px 20px', borderTop: '1px solid #EEF2F7', flex: 'none' }}>
               <button onClick={reset} style={{ flex: '0 0 auto', padding: '13px 18px', borderRadius: 12, border: '1.5px solid #E8EDF2', background: '#fff', color: '#193B5E', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Réinitialiser</button>
               <button onClick={() => setSheetOpen(false)} style={{ flex: 1, padding: '13px 18px', borderRadius: 12, border: 'none', background: '#193B5E', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
