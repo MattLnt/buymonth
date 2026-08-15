@@ -1,55 +1,41 @@
-import { getCurrentClient } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
-import { EmptyState } from '@/app/components/dashboard/Ui'
-import { MesBiensExplorer } from '@/app/components/dashboard/MesBiensExplorer'
-import { Icon } from '@/app/components/dashboard/Icon'
-import Link from 'next/link'
+import { AdminBiensExplorer } from '@/app/components/dashboard/AdminBiensExplorer'
 
 export const dynamic = 'force-dynamic'
 
-const STATUTS_VALIDES = ['ACTIF', 'OPTION', 'HORS_LIGNE', 'VENDU']
-
-export default async function BiensPage({ searchParams }) {
-  const client = await getCurrentClient()
-  const sp = await searchParams
-
-  // Filtre statut pré-appliqué depuis l'URL (?statut=ACTIF / OPTION...) — venant des cartes KPI
-  const statutInitial = STATUTS_VALIDES.includes(sp?.statut) ? sp.statut : ''
-
+export default async function AdminBiensPage() {
   const biensRaw = await prisma.bien.findMany({
-    where: { clientId: client.id },
     orderBy: { createdAt: 'desc' },
-    include: { _count: { select: { leads: true } } },
+    include: {
+      client: { select: { societe: true } },
+      _count: { select: { leads: true } },
+    },
   })
 
-  // On aplatit le _count en nbLeads pour la card
-  const biens = biensRaw.map((b) => ({ ...b, nbLeads: b._count?.leads || 0 }))
+  // On aplatit pour l'explorer (client component)
+  const biens = biensRaw.map((b) => ({
+    id: b.id,
+    titre: b.titre,
+    ville: b.ville,
+    province: b.province,
+    type: b.type,
+    mensualite: b.mensualite,
+    prixTotal: b.prixTotal,
+    published: b.published,
+    images: b.images,
+    societe: b.client?.societe || null,
+    nbLeads: b._count?.leads || 0,
+  }))
 
-  // État vide : en-tête simple + EmptyState (l'explorer, avec son en-tête et ses filtres, n'apparaît que s'il y a des biens)
-  if (biens.length === 0) {
-    return (
-      <>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
-          <p style={{ fontSize: 14.5, color: '#5A6275', margin: 0 }}>
-            <strong style={{ color: '#193B5E' }}>0 bien</strong> dans votre portefeuille.
-          </p>
-          <Link href="/dashboard/client/biens/nouveau" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#193B5E', color: '#fff', padding: '11px 20px', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
-            <Icon name="plus" size={16} /> Ajouter un bien
-          </Link>
-        </div>
-        <EmptyState
-          icon="building"
-          title="Aucun bien pour l'instant"
-          text="Ajoutez votre premier bien pour générer son badge mensualité et commencer à recevoir des leads."
-          action={
-            <Link href="/dashboard/client/biens/nouveau" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#193B5E', color: '#fff', padding: '11px 22px', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
-              <Icon name="plus" size={16} /> Ajouter un bien
-            </Link>
-          }
-        />
-      </>
-    )
-  }
+  return (
+    <>
+      <div style={{ marginBottom: 20 }}>
+        <p style={{ fontSize: 14.5, color: '#5A6275', margin: 0 }}>
+          <strong style={{ color: '#193B5E' }}>{biens.length} bien{biens.length > 1 ? 's' : ''}</strong> sur la plateforme.
+        </p>
+      </div>
 
-  return <MesBiensExplorer biens={biens} statutInitial={statutInitial} />
+      <AdminBiensExplorer biens={biens} />
+    </>
+  )
 }

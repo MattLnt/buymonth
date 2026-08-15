@@ -25,21 +25,18 @@ export default async function BiensPage({ searchParams }) {
   // On aplatit le _count en nbLeads pour la card
   const biens = biensRaw.map((b) => ({ ...b, nbLeads: b._count?.leads || 0 }))
 
-  return (
-    <>
-      {/* En-tête + bouton ajouter */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
-        <div>
+  // État vide : en-tête simple + EmptyState (l'explorer, avec son en-tête et ses filtres, n'apparaît que s'il y a des biens)
+  if (biens.length === 0) {
+    return (
+      <>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
           <p style={{ fontSize: 14.5, color: '#5A6275', margin: 0 }}>
-            <strong style={{ color: '#193B5E' }}>{biens.length} bien{biens.length > 1 ? 's' : ''}</strong> dans votre portefeuille.
+            <strong style={{ color: '#193B5E' }}>0 bien</strong> dans votre portefeuille.
           </p>
+          <Link href="/dashboard/client/biens/nouveau" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#193B5E', color: '#fff', padding: '11px 20px', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
+            <Icon name="plus" size={16} /> Ajouter un bien
+          </Link>
         </div>
-        <Link href="/dashboard/client/biens/nouveau" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#193B5E', color: '#fff', padding: '11px 20px', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
-          <Icon name="plus" size={16} /> Ajouter un bien
-        </Link>
-      </div>
-
-      {biens.length === 0 ? (
         <EmptyState
           icon="building"
           title="Aucun bien pour l'instant"
@@ -50,9 +47,9 @@ export default async function BiensPage({ searchParams }) {
             </Link>
           }
         />
-      ) : (
-        <MesBiensExplorer biens={biens} statutInitial={statutInitial} />
-      )}
-    </>
-  )
+      </>
+    )
+  }
+
+  return <MesBiensExplorer biens={biens} statutInitial={statutInitial} />
 }
