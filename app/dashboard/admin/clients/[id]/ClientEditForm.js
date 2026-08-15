@@ -12,6 +12,16 @@ const FORMULES = [
 const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
+// Champ défini AU NIVEAU MODULE (pas dans le composant) — sinon il est recréé à chaque frappe et l'input perd le focus
+function Champ({ label, k, type = 'text', placeholder, full, value, onChange }) {
+  return (
+    <div style={{ gridColumn: full ? '1 / -1' : 'auto' }}>
+      <label style={labelStyle}>{label}</label>
+      <input type={type} value={value} onChange={(e) => onChange(k, e.target.value)} placeholder={placeholder} style={inputStyle} />
+    </div>
+  )
+}
+
 export function ClientEditForm({ client }) {
   const router = useRouter()
   const [form, setForm] = useState({
@@ -30,7 +40,6 @@ export function ClientEditForm({ client }) {
   const [msg, setMsg] = useState(null)
 
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }))
-  const handle = (k) => (e) => setField(k, e.target.value)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -52,41 +61,40 @@ export function ClientEditForm({ client }) {
     }
   }
 
-  const Champ = ({ label, k, type = 'text', placeholder, full }) => (
-    <div style={{ gridColumn: full ? '1 / -1' : 'auto' }}>
-      <label style={labelStyle}>{label}</label>
-      <input type={type} value={form[k]} onChange={handle(k)} placeholder={placeholder} style={inputStyle} />
-    </div>
-  )
-
   return (
     <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 24, marginBottom: 22 }}>
+      <style>{`
+        @media (max-width: 600px){
+          .champ-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+
       <h3 style={{ fontSize: 15.5, fontWeight: 700, color: '#193B5E', margin: '0 0 18px' }}>Informations du promoteur</h3>
 
       {/* Identité */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
-        <Champ label="Société" k="societe" placeholder="Nom de l'agence / promoteur" />
-        <Champ label="Email de connexion" k="email" type="email" placeholder="contact@promoteur.be" />
-        <Champ label="N° TVA" k="numeroTva" placeholder="BE0123456789" />
-        <Champ label="Téléphone" k="telephone" placeholder="+32 ..." />
+      <div className="champ-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+        <Champ label="Société" k="societe" placeholder="Nom de l'agence / promoteur" value={form.societe} onChange={setField} />
+        <Champ label="Email de connexion" k="email" type="email" placeholder="contact@promoteur.be" value={form.email} onChange={setField} />
+        <Champ label="N° TVA" k="numeroTva" placeholder="BE0123456789" value={form.numeroTva} onChange={setField} />
+        <Champ label="Téléphone" k="telephone" placeholder="+32 ..." value={form.telephone} onChange={setField} />
       </div>
 
       {/* Contacts */}
       <div style={{ borderTop: '1px solid #F2F5FA', paddingTop: 18, marginBottom: 20 }}>
         <p style={{ fontSize: 12, fontWeight: 700, color: '#8A92A6', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 14px' }}>Contacts</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-          <Champ label="Contact opérationnel / marketing" k="contactOpe" placeholder="Nom du contact" />
-          <Champ label="Contact facturation" k="contactFacturation" placeholder="Nom du contact" />
-          <Champ label="Contact principal (affiché)" k="contactNom" placeholder="Nom du contact" full />
+        <div className="champ-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <Champ label="Contact opérationnel / marketing" k="contactOpe" placeholder="Nom du contact" value={form.contactOpe} onChange={setField} />
+          <Champ label="Contact facturation" k="contactFacturation" placeholder="Nom du contact" value={form.contactFacturation} onChange={setField} />
+          <Champ label="Contact principal (affiché)" k="contactNom" placeholder="Nom du contact" full value={form.contactNom} onChange={setField} />
         </div>
       </div>
 
       {/* Adresses */}
       <div style={{ borderTop: '1px solid #F2F5FA', paddingTop: 18, marginBottom: 20 }}>
         <p style={{ fontSize: 12, fontWeight: 700, color: '#8A92A6', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 14px' }}>Adresses</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-          <Champ label="Adresse" k="adresse" placeholder="Rue, n°, ville" />
-          <Champ label="Adresse administrative" k="adresseAdmin" placeholder="Siège / facturation" />
+        <div className="champ-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <Champ label="Adresse" k="adresse" placeholder="Rue, n°, ville" value={form.adresse} onChange={setField} />
+          <Champ label="Adresse administrative" k="adresseAdmin" placeholder="Siège / facturation" value={form.adresseAdmin} onChange={setField} />
         </div>
       </div>
 
