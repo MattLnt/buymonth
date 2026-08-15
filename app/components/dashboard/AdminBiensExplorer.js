@@ -8,6 +8,7 @@ import { Icon } from './Icon'
 const TYPES = ['Appartement', 'Maison', 'Studio', 'Villa', 'Terrain', 'Bureau', 'Commerce']
 const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', 'Flandre-Occidentale', 'Flandre-Orientale', 'Hainaut', 'Liège', 'Limbourg', 'Luxembourg', 'Namur']
 
+const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
 export function AdminBiensExplorer({ biens }) {
@@ -16,8 +17,9 @@ export function AdminBiensExplorer({ biens }) {
   const [province, setProvince] = useState('')
   const [statut, setStatut] = useState('')
   const [tri, setTri] = useState('recent')
+
   const [isMobile, setIsMobile] = useState(false)
-  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 820px)')
@@ -26,6 +28,17 @@ export function AdminBiensExplorer({ biens }) {
     mq.addEventListener('change', sync)
     return () => mq.removeEventListener('change', sync)
   }, [])
+
+  useEffect(() => {
+    if (!sheetOpen) return
+    document.body.style.overflow = 'hidden'
+    const onKey = (e) => { if (e.key === 'Escape') setSheetOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = ''
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [sheetOpen])
 
   const filtered = useMemo(() => {
     const qLow = q.trim().toLowerCase()
@@ -58,8 +71,8 @@ export function AdminBiensExplorer({ biens }) {
     setQ(''); setType(''); setProvince(''); setStatut(''); setTri('recent')
   }
 
-  // Grille des champs de filtre, partagée desktop / panneau mobile
-  const filterGrid = (
+  // Grille horizontale des filtres (DESKTOP)
+  const filterGridDesktop = (
     <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr 1fr', gap: 12, alignItems: 'end' }} className="adm-filters-grid">
       <div style={{ position: 'relative' }}>
         <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#A9B0BE', display: 'flex' }}>
@@ -67,16 +80,12 @@ export function AdminBiensExplorer({ biens }) {
         </span>
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher bien ou promoteur..." style={{ ...inputStyle, paddingLeft: 36 }} />
       </div>
-
       <FormSelect value={type} onChange={setType} placeholder="Tous les types"
         options={['', ...TYPES].map((t) => ({ value: t, label: t || 'Tous les types' }))} />
-
       <FormSelect value={province} onChange={setProvince} placeholder="Toutes provinces"
         options={['', ...PROVINCES].map((p) => ({ value: p, label: p || 'Toutes provinces' }))} />
-
       <FormSelect value={statut} onChange={setStatut} placeholder="Tous statuts"
         options={[{ value: '', label: 'Tous statuts' }, { value: 'publie', label: 'Publiés' }, { value: 'brouillon', label: 'Brouillons' }]} />
-
       <FormSelect value={tri} onChange={setTri} placeholder="Trier"
         options={[
           { value: 'recent', label: 'Plus récents' },
@@ -87,6 +96,42 @@ export function AdminBiensExplorer({ biens }) {
     </div>
   )
 
+  // Champs labellisés empilés (SHEET MOBILE)
+  const sheetFields = (
+    <>
+      <div style={{ marginBottom: 18 }}>
+        <label style={labelStyle}>Recherche</label>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#A9B0BE', display: 'flex' }}>
+            <Icon name="search" size={16} />
+          </span>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Bien ou promoteur..." style={{ ...inputStyle, paddingLeft: 36 }} />
+        </div>
+      </div>
+      <div style={{ marginBottom: 18 }}>
+        <FormSelect label="Type de bien" value={type} onChange={setType} placeholder="Tous les types"
+          options={['', ...TYPES].map((t) => ({ value: t, label: t || 'Tous les types' }))} />
+      </div>
+      <div style={{ marginBottom: 18 }}>
+        <FormSelect label="Province" value={province} onChange={setProvince} placeholder="Toutes provinces"
+          options={['', ...PROVINCES].map((p) => ({ value: p, label: p || 'Toutes provinces' }))} />
+      </div>
+      <div style={{ marginBottom: 18 }}>
+        <FormSelect label="Statut" value={statut} onChange={setStatut} placeholder="Tous statuts"
+          options={[{ value: '', label: 'Tous statuts' }, { value: 'publie', label: 'Publiés' }, { value: 'brouillon', label: 'Brouillons' }]} />
+      </div>
+      <div>
+        <FormSelect label="Trier par" value={tri} onChange={setTri} placeholder="Trier"
+          options={[
+            { value: 'recent', label: 'Plus récents' },
+            { value: 'mensualite', label: 'Mensualité ↓' },
+            { value: 'prix', label: 'Prix ↓' },
+            { value: 'leads', label: 'Leads ↓' },
+          ]} />
+      </div>
+    </>
+  )
+
   return (
     <div>
       <style>{`
@@ -95,53 +140,38 @@ export function AdminBiensExplorer({ biens }) {
       `}</style>
 
       {isMobile ? (
-        /* MOBILE : compteur + bouton Filtres sur une ligne, panneau dépliable */
-        <>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <div style={{ fontSize: 14, color: '#5A6275', fontWeight: 500, minWidth: 0 }}>
-              <strong style={{ color: '#193B5E' }}>{nb} bien{nb > 1 ? 's' : ''}</strong> {hasFilters ? `trouvé${nb > 1 ? 's' : ''}` : 'sur la plateforme'}
-            </div>
-            <button
-              onClick={() => setFiltersOpen((o) => !o)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 11, border: '1.5px solid #193B5E', background: '#fff', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer', flexShrink: 0 }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
-              Filtres
-              {activeCount > 0 && (
-                <span style={{ background: '#193B5E', color: '#fff', borderRadius: 999, minWidth: 20, height: 20, padding: '0 6px', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{activeCount}</span>
-              )}
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 2, transition: 'transform 0.18s', transform: filtersOpen ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9" /></svg>
-            </button>
-          </div>
-
-          {filtersOpen && (
-            <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 16, marginBottom: 16 }}>
-              {filterGrid}
-              {hasFilters && (
-                <div style={{ marginTop: 12 }}>
-                  <button onClick={reset} style={{ background: 'none', border: 'none', color: '#7CB8A8', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Réinitialiser les filtres</button>
-                </div>
-              )}
+        /* MOBILE : bouton Filtres (déclencheur du sheet) + compteur */
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <button
+            onClick={() => setSheetOpen(true)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', borderRadius: 12, border: '1.5px solid #193B5E', background: '#fff', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+            Filtres
+            {activeCount > 0 && (
+              <span style={{ background: '#193B5E', color: '#fff', borderRadius: 999, minWidth: 20, height: 20, padding: '0 6px', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{activeCount}</span>
+            )}
+          </button>
+          {hasFilters && (
+            <button onClick={reset} style={{ fontSize: 13, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Réinitialiser</button>
+          )}
+        </div>
+      ) : (
+        /* DESKTOP : barre de filtres */
+        <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 18, marginBottom: 18 }}>
+          {filterGridDesktop}
+          {hasFilters && (
+            <div style={{ marginTop: 12 }}>
+              <button onClick={reset} style={{ background: 'none', border: 'none', color: '#7CB8A8', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Réinitialiser les filtres</button>
             </div>
           )}
-        </>
-      ) : (
-        /* DESKTOP : carte de filtres + compteur en dessous */
-        <>
-          <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 18, marginBottom: 18 }}>
-            {filterGrid}
-            {hasFilters && (
-              <div style={{ marginTop: 12 }}>
-                <button onClick={reset} style={{ background: 'none', border: 'none', color: '#7CB8A8', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Réinitialiser les filtres</button>
-              </div>
-            )}
-          </div>
-
-          <div style={{ fontSize: 13.5, color: '#5A6275', marginBottom: 14, fontWeight: 500 }}>
-            {nb} bien{nb > 1 ? 's' : ''} {hasFilters ? 'trouvé' + (nb > 1 ? 's' : '') : 'au total'}
-          </div>
-        </>
+        </div>
       )}
+
+      {/* Compteur */}
+      <div style={{ fontSize: 13.5, color: '#5A6275', marginBottom: 14, fontWeight: 500 }}>
+        {nb} bien{nb > 1 ? 's' : ''} {hasFilters ? 'trouvé' + (nb > 1 ? 's' : '') : 'au total'}
+      </div>
 
       {/* Liste */}
       {nb === 0 ? (
@@ -232,6 +262,46 @@ export function AdminBiensExplorer({ biens }) {
             </table>
           </div>
         </div>
+      )}
+
+      {/* BOTTOM SHEET MOBILE (même effet que Mes biens promoteur) */}
+      {isMobile && (
+        <>
+          <div
+            onClick={() => setSheetOpen(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 1200, background: 'rgba(11,26,42,0.45)', opacity: sheetOpen ? 1 : 0, pointerEvents: sheetOpen ? 'auto' : 'none', transition: 'opacity .25s ease' }}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            style={{
+              position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 1201,
+              background: '#fff', borderRadius: '20px 20px 0 0', maxHeight: '88dvh',
+              display: 'flex', flexDirection: 'column',
+              boxShadow: '0 -10px 40px rgba(11,26,42,0.2)',
+              transform: sheetOpen ? 'translateY(0)' : 'translateY(100%)',
+              transition: 'transform .3s cubic-bezier(.4,0,.2,1)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 20px', borderBottom: '1px solid #EEF2F7', flex: 'none' }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#193B5E' }}>Filtres</h3>
+              <button onClick={() => setSheetOpen(false)} aria-label="Fermer" style={{ width: 36, height: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'none', cursor: 'pointer', color: '#193B5E' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
+              </button>
+            </div>
+
+            <div style={{ padding: '16px 20px 8px', overflowY: 'auto', flex: 1 }}>
+              {sheetFields}
+            </div>
+
+            <div style={{ display: 'flex', gap: 12, padding: '14px 20px', borderTop: '1px solid #EEF2F7', flex: 'none' }}>
+              <button onClick={reset} style={{ flex: '0 0 auto', padding: '13px 18px', borderRadius: 12, border: '1.5px solid #E8EDF2', background: '#fff', color: '#193B5E', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Réinitialiser</button>
+              <button onClick={() => setSheetOpen(false)} style={{ flex: 1, padding: '13px 18px', borderRadius: 12, border: 'none', background: '#193B5E', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+                Voir {nb} bien{nb > 1 ? 's' : ''}
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )
