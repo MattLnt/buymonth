@@ -35,7 +35,7 @@ function resolveTitle(pathname, role) {
 
 export function TopBar({ societe, email, statut, role = 'client', collapsed, onToggle }) {
   const pathname = usePathname()
-  const { title, parent, parentHref } = resolveTitle(pathname, role)
+  const { title } = resolveTitle(pathname, role)
 
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
@@ -100,13 +100,6 @@ export function TopBar({ societe, email, statut, role = 'client', collapsed, onT
           </button>
 
           <div style={{ minWidth: 0 }}>
-            {parent && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'rgba(255,255,255,0.55)', marginBottom: 1 }}>
-                <Link href={parentHref} style={{ color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }}>{parent}</Link>
-                <span>/</span>
-                <span style={{ color: '#7CB8A8', fontWeight: 600 }}>{title}</span>
-              </div>
-            )}
             <h1 style={{ fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</h1>
           </div>
         </div>
