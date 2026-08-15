@@ -27,15 +27,5 @@ export default async function AdminBiensPage() {
     nbLeads: b._count?.leads || 0,
   }))
 
-  return (
-    <>
-      <div style={{ marginBottom: 20 }}>
-        <p style={{ fontSize: 14.5, color: '#5A6275', margin: 0 }}>
-          <strong style={{ color: '#193B5E' }}>{biens.length} bien{biens.length > 1 ? 's' : ''}</strong> sur la plateforme.
-        </p>
-      </div>
-
-      <AdminBiensExplorer biens={biens} />
-    </>
-  )
+  return <AdminBiensExplorer biens={biens} />
 }

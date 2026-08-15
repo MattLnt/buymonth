@@ -52,26 +52,58 @@ export function AdminBiensExplorer({ biens }) {
 
   const hasFilters = q || type || province || statut
   const activeCount = [q, type, province, statut].filter(Boolean).length
+  const nb = filtered.length
 
   function reset() {
     setQ(''); setType(''); setProvince(''); setStatut(''); setTri('recent')
   }
 
+  // Grille des champs de filtre, partagée desktop / panneau mobile
+  const filterGrid = (
+    <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr 1fr', gap: 12, alignItems: 'end' }} className="adm-filters-grid">
+      <div style={{ position: 'relative' }}>
+        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#A9B0BE', display: 'flex' }}>
+          <Icon name="search" size={16} />
+        </span>
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher bien ou promoteur..." style={{ ...inputStyle, paddingLeft: 36 }} />
+      </div>
+
+      <FormSelect value={type} onChange={setType} placeholder="Tous les types"
+        options={['', ...TYPES].map((t) => ({ value: t, label: t || 'Tous les types' }))} />
+
+      <FormSelect value={province} onChange={setProvince} placeholder="Toutes provinces"
+        options={['', ...PROVINCES].map((p) => ({ value: p, label: p || 'Toutes provinces' }))} />
+
+      <FormSelect value={statut} onChange={setStatut} placeholder="Tous statuts"
+        options={[{ value: '', label: 'Tous statuts' }, { value: 'publie', label: 'Publiés' }, { value: 'brouillon', label: 'Brouillons' }]} />
+
+      <FormSelect value={tri} onChange={setTri} placeholder="Trier"
+        options={[
+          { value: 'recent', label: 'Plus récents' },
+          { value: 'mensualite', label: 'Mensualité ↓' },
+          { value: 'prix', label: 'Prix ↓' },
+          { value: 'leads', label: 'Leads ↓' },
+        ]} />
+    </div>
+  )
+
   return (
     <div>
-      {/* Barre de filtres */}
-      <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 18, marginBottom: 18 }}>
-        <style>{`
-          @media (max-width: 1100px){ .adm-filters-grid { grid-template-columns: 1fr 1fr !important; } }
-          @media (max-width: 600px){ .adm-filters-grid { grid-template-columns: 1fr !important; } }
-        `}</style>
+      <style>{`
+        @media (max-width: 1100px){ .adm-filters-grid { grid-template-columns: 1fr 1fr !important; } }
+        @media (max-width: 600px){ .adm-filters-grid { grid-template-columns: 1fr !important; } }
+      `}</style>
 
-        {/* Bouton déplier/replier (mobile) */}
-        {isMobile && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: filtersOpen ? 16 : 0 }}>
+      {isMobile ? (
+        /* MOBILE : compteur + bouton Filtres sur une ligne, panneau dépliable */
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ fontSize: 14, color: '#5A6275', fontWeight: 500, minWidth: 0 }}>
+              <strong style={{ color: '#193B5E' }}>{nb} bien{nb > 1 ? 's' : ''}</strong> {hasFilters ? `trouvé${nb > 1 ? 's' : ''}` : 'sur la plateforme'}
+            </div>
             <button
               onClick={() => setFiltersOpen((o) => !o)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 11, border: '1.5px solid #193B5E', background: '#fff', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 11, border: '1.5px solid #193B5E', background: '#fff', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer', flexShrink: 0 }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
               Filtres
@@ -80,54 +112,39 @@ export function AdminBiensExplorer({ biens }) {
               )}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 2, transition: 'transform 0.18s', transform: filtersOpen ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9" /></svg>
             </button>
+          </div>
+
+          {filtersOpen && (
+            <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 16, marginBottom: 16 }}>
+              {filterGrid}
+              {hasFilters && (
+                <div style={{ marginTop: 12 }}>
+                  <button onClick={reset} style={{ background: 'none', border: 'none', color: '#7CB8A8', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Réinitialiser les filtres</button>
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      ) : (
+        /* DESKTOP : carte de filtres + compteur en dessous */
+        <>
+          <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 18, marginBottom: 18 }}>
+            {filterGrid}
             {hasFilters && (
-              <button onClick={reset} style={{ background: 'none', border: 'none', color: '#7CB8A8', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Réinitialiser</button>
+              <div style={{ marginTop: 12 }}>
+                <button onClick={reset} style={{ background: 'none', border: 'none', color: '#7CB8A8', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Réinitialiser les filtres</button>
+              </div>
             )}
           </div>
-        )}
 
-        {/* Grille de filtres : toujours visible en desktop, dépliable en mobile */}
-        {(!isMobile || filtersOpen) && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr 1fr', gap: 12, alignItems: 'end' }} className="adm-filters-grid">
-          <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#A9B0BE', display: 'flex' }}>
-              <Icon name="search" size={16} />
-            </span>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher bien ou promoteur..." style={{ ...inputStyle, paddingLeft: 36 }} />
+          <div style={{ fontSize: 13.5, color: '#5A6275', marginBottom: 14, fontWeight: 500 }}>
+            {nb} bien{nb > 1 ? 's' : ''} {hasFilters ? 'trouvé' + (nb > 1 ? 's' : '') : 'au total'}
           </div>
+        </>
+      )}
 
-          <FormSelect value={type} onChange={setType} placeholder="Tous les types"
-            options={['', ...TYPES].map((t) => ({ value: t, label: t || 'Tous les types' }))} />
-
-          <FormSelect value={province} onChange={setProvince} placeholder="Toutes provinces"
-            options={['', ...PROVINCES].map((p) => ({ value: p, label: p || 'Toutes provinces' }))} />
-
-          <FormSelect value={statut} onChange={setStatut} placeholder="Tous statuts"
-            options={[{ value: '', label: 'Tous statuts' }, { value: 'publie', label: 'Publiés' }, { value: 'brouillon', label: 'Brouillons' }]} />
-
-          <FormSelect value={tri} onChange={setTri} placeholder="Trier"
-            options={[
-              { value: 'recent', label: 'Plus récents' },
-              { value: 'mensualite', label: 'Mensualité ↓' },
-              { value: 'prix', label: 'Prix ↓' },
-              { value: 'leads', label: 'Leads ↓' },
-            ]} />
-        </div>
-        )}
-
-        {!isMobile && hasFilters && (
-          <div style={{ marginTop: 12 }}>
-            <button onClick={reset} style={{ background: 'none', border: 'none', color: '#7CB8A8', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Réinitialiser les filtres</button>
-          </div>
-        )}
-      </div>
-
-      {/* Compteur */}
-      <div style={{ fontSize: 13.5, color: '#5A6275', marginBottom: 14, fontWeight: 500 }}>
-        {filtered.length} bien{filtered.length > 1 ? 's' : ''} {hasFilters ? 'trouvé' + (filtered.length > 1 ? 's' : '') : 'au total'}
-      </div>
-
-      {filtered.length === 0 ? (
+      {/* Liste */}
+      {nb === 0 ? (
         <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: '48px 24px', textAlign: 'center', color: '#8A92A6', fontSize: 14 }}>Aucun bien ne correspond à ces filtres.</div>
       ) : isMobile ? (
         /* MOBILE : cartes */
