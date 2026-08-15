@@ -8,11 +8,20 @@ import { Icon } from './Icon'
 export function Sidebar({ items, societe, email, collapsed = false }) {
   const pathname = usePathname()
 
-  const isActive = (href) =>
-    href === pathname ||
-    (href !== '/dashboard/client' && href !== '/dashboard/admin' && pathname.startsWith(href))
-
   const flatItems = items.flatMap((it) => (it.section ? it.items : [it]))
+
+  // Item actif = le PLUS PRÉCIS : parmi les hrefs qui préfixent le pathname, on garde le plus long
+  // (ex. /dashboard/client/biens/nouveau l'emporte sur /dashboard/client/biens).
+  const activeHref = flatItems.reduce((best, it) => {
+    const h = it.href
+    const matches =
+      h === pathname ||
+      (h !== '/dashboard/client' && h !== '/dashboard/admin' && pathname.startsWith(h))
+    if (matches && (!best || h.length > best.length)) return h
+    return best
+  }, null)
+
+  const isActive = (href) => href === activeHref
 
   const renderLink = (item) => {
     const active = isActive(item.href)
