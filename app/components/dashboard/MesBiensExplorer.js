@@ -187,7 +187,7 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
           {isMobile && (
             <button
               onClick={() => setSheetOpen(true)}
-              style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', borderRadius: 10, border: '1.5px solid #193B5E', background: '#fff', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}
+              style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', borderRadius: 10, border: 'none', background: '#EEF2F7', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
               Filtres
