@@ -21,8 +21,8 @@ export default function Showcase() {
             <div className="varg">
               <span className="vic">✓</span>
               <div>
-                <b>Vous gardez la main.</b> Vous choisissez les biens que vous y exposez, et votre
-                badge fonctionne sur votre propre site indépendamment de la vitrine.
+                <b>Vous gardez la main.</b> Vos biens y sont diffusés par défaut, et vous pouvez
+                demander le retrait de l'un d'eux à tout moment.
               </div>
             </div>
             <div className="varg">
@@ -79,6 +79,9 @@ export default function Showcase() {
               hypothèses validées par BuyMonth Finance.
             </p>
           </div>
+          <p style={{ fontSize: 11, color: "rgba(25,59,94,0.4)", margin: "10px 0 0", textAlign: "center", fontStyle: "italic" }}>
+            Illustration — interface et données fictives.
+          </p>
         </div>
       </div>
 

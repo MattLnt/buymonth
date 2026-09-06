@@ -108,6 +108,9 @@ export default function Hero() {
               </div>
             </div>
           </div>
+          <p style={{ fontSize: 11, color: "rgba(25,59,94,0.4)", margin: "10px 0 0", textAlign: "center", fontStyle: "italic" }}>
+            Illustration — interface et données fictives.
+          </p>
         </div>
       </div>
     </header>

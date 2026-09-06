@@ -33,10 +33,8 @@ const STATUT_COLOR = {
 
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
-function formatDateHeure(d) {
-  const date = new Date(d)
-  return date.toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit', year: '2-digit' })
-    + ' · ' + date.toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit' })
+function formatDate(d) {
+  return new Date(d).toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 // Dropdown custom avec pastilles colorées — menu en position fixe, s'ouvre vers le haut si pas de place en bas
@@ -280,6 +278,11 @@ export function MesLeadsClient({ leads }) {
                         </a>
                       )}
                     </div>
+                    {/* Ligne « Demande de simulation effectuée le … » (sous les coordonnées) */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: '#1C6B52', fontWeight: 600, marginTop: 10 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
+                      Demande de simulation effectuée le {formatDate(lead.createdAt)}
+                    </div>
                   </div>
 
                   <div style={{ flexShrink: 0 }}>
@@ -301,12 +304,6 @@ export function MesLeadsClient({ leads }) {
                   </div>
                   <Info label="Projet" value={lead.bien?.projet && lead.bien.projet !== 'Hors projet' ? lead.bien.projet : null} />
                   <Info label="Unité" value={lead.bien?.unite} />
-                </div>
-
-                {/* Pied : date */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#A9B0BE', borderTop: '1px solid #F4F7FB', paddingTop: 12 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                  Reçu le {formatDateHeure(lead.createdAt)}
                 </div>
               </div>
             )

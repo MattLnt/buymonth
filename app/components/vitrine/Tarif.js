@@ -77,6 +77,11 @@ export default function Tarif() {
           Abonnement souscrit pour 12 mois, avec une facturation mensuelle minimale garantie définie
           au contrat.
         </div>
+        <div style={{ textAlign: "center", marginTop: 24 }}>
+          <a className="btn btn-primary" href="/calculateur" target="_blank" rel="noopener noreferrer">
+            Calculer votre retour sur investissement
+          </a>
+        </div>
       </div>
     </section>
   );

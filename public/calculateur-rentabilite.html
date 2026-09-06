@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BuyMonth — Calculateur de rentabilité promoteur</title>
+<style>
+  :root{
+    --navy:#183b5e;
+    --green:#88b49e;
+    --green-dark:#749d89;
+    --green-light:#d1e2da;
+    --blue-pro:#4e7dd4;
+    --bg:#f7faf8;
+    --ink:#22303c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Montserrat','Poppins','Segoe UI',Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.55;
+    padding:32px 16px 64px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+  header{text-align:center;margin-bottom:36px;}
+  header .brand{
+    font-family:'Fraunces','Lora',Georgia,serif;
+    font-size:clamp(1.9rem,4vw,2.6rem);
+    font-weight:700;
+    color:var(--navy);
+  }
+  header .brand span{color:var(--green);}
+  header .sub{
+    margin-top:6px;
+    font-size:.95rem;
+    color:var(--green-dark);
+    font-weight:600;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width:760px){.grid{grid-template-columns:1fr;}}
+
+  .card{
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 4px 20px rgba(24,59,94,.08);
+    padding:26px 26px 30px;
+  }
+  .card h2{
+    font-family:'Fraunces','Lora',Georgia,serif;
+    font-size:1.15rem;
+    color:var(--navy);
+    margin-bottom:20px;
+    padding-bottom:10px;
+    border-bottom:2px solid var(--green-light);
+  }
+
+  .field{margin-bottom:22px;}
+  .field label{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:.85rem;
+    font-weight:600;
+    color:var(--navy);
+    margin-bottom:8px;
+  }
+  .field label output{
+    font-family:'Fraunces','Lora',Georgia,serif;
+    font-size:1.15rem;
+    font-weight:700;
+    color:var(--green-dark);
+  }
+  input[type=range]{
+    width:100%;
+    accent-color:var(--green-dark);
+    height:6px;
+    cursor:pointer;
+  }
+  .hint{font-size:.75rem;color:#7c8a96;margin-top:4px;}
+
+  .toggle{
+    display:flex;
+    border:2px solid var(--green-light);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .toggle button{
+    flex:1;
+    padding:10px 0;
+    border:none;
+    background:#fff;
+    font-family:'Montserrat','Segoe UI',Arial,sans-serif;
+    font-weight:700;
+    font-size:.9rem;
+    color:var(--navy);
+    cursor:pointer;
+    transition:background .15s,color .15s;
+  }
+  .toggle button.active-pro{background:var(--green-dark);color:#fff;}
+  .toggle button.active-proplus{background:var(--blue-pro);color:#fff;}
+
+  .verdict{
+    background:var(--navy);
+    color:#fff;
+    border-radius:16px;
+    padding:28px 26px;
+    text-align:center;
+    margin-bottom:24px;
+  }
+  .verdict .lead{
+    font-size:.8rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--green-light);
+    font-weight:600;
+  }
+  .verdict .big{
+    font-family:'Fraunces','Lora',Georgia,serif;
+    font-size:clamp(2.2rem,6vw,3.2rem);
+    font-weight:700;
+    color:var(--green);
+    margin:6px 0 4px;
+  }
+  .verdict .expl{font-size:.9rem;color:#d8e2ec;}
+
+  .rows{display:flex;flex-direction:column;gap:0;}
+  .row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:11px 2px;
+    border-bottom:1px solid #eef3f0;
+    font-size:.92rem;
+  }
+  .row:last-child{border-bottom:none;}
+  .row .k{color:#51606d;}
+  .row .v{
+    font-weight:700;
+    color:var(--navy);
+    font-variant-numeric:tabular-nums;
+  }
+  .row.total .k,.row.total .v{
+    font-family:'Fraunces','Lora',Georgia,serif;
+    font-size:1.05rem;
+    color:var(--navy);
+  }
+  .row.gain .v{color:var(--green-dark);}
+
+  .note{
+    margin-top:18px;
+    background:var(--green-light);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:.78rem;
+    color:var(--navy);
+  }
+  footer{
+    text-align:center;
+    margin-top:36px;
+    font-size:.72rem;
+    color:#8b98a4;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">Buy<span>Month</span></div>
+    <div class="sub">Calculateur de rentabilité promoteur</div>
+  </header>
+
+  <div class="grid">
+    <!-- INPUTS -->
+    <div class="card">
+      <h2>Votre situation</h2>
+
+      <div class="field">
+        <label>Formule</label>
+        <div class="toggle">
+          <button id="btnPro" class="active-pro" onclick="setFormule('pro')">Pro — 39&nbsp;€/bien</button>
+          <button id="btnProPlus" onclick="setFormule('proplus')">Pro+ — 45&nbsp;€/bien</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Biens actifs sur la plateforme <output id="outBiens">20</output></label>
+        <input type="range" id="inBiens" min="1" max="125" value="20" oninput="calc()">
+        <div class="hint">Statut « Disponible » ou « Sous option »</div>
+      </div>
+
+      <div class="field">
+        <label>Prix moyen d'un bien <output id="outPrix">350 000 €</output></label>
+        <input type="range" id="inPrix" min="150000" max="900000" step="10000" value="350000" oninput="calc()">
+      </div>
+
+      <div class="field">
+        <label>Marge brute par vente <output id="outMarge">15 %</output></label>
+        <input type="range" id="inMarge" min="5" max="30" step="1" value="15" oninput="calc()">
+        <div class="hint">Marge promoteur estimée sur le prix de vente</div>
+      </div>
+
+    </div>
+
+    <!-- OUTPUTS -->
+    <div>
+      <div class="verdict">
+        <div class="lead">Seuil de rentabilité</div>
+        <div class="big" id="vBreakeven">—</div>
+        <div class="expl" id="vBreakevenTxt"></div>
+      </div>
+
+      <div class="card">
+        <h2>Le détail sur 12 mois</h2>
+        <div class="rows">
+          <div class="row"><span class="k">Mise en service (une fois)</span><span class="v">1 490 €</span></div>
+          <div class="row"><span class="k">Abonnement mensuel</span><span class="v" id="rMensuel">—</span></div>
+          <div class="row"><span class="k">Soit par bien et par jour</span><span class="v" id="rParJour">—</span></div>
+          <div class="row total"><span class="k">Coût total année 1</span><span class="v" id="rTotal">—</span></div>
+          <div class="row gain"><span class="k">Marge brute sur 1 seule vente</span><span class="v" id="rMargeVente">—</span></div>
+          <div class="row total gain"><span class="k">Soit, par rapport au coût annuel</span><span class="v" id="rROI">—</span></div>
+        </div>
+        <div class="note" id="rPlancher"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Outil d'aide à la décision B2B — montants HTVA. Hypothèses indicatives, sans valeur contractuelle.<br>BuyMonth SRL — plateforme technologique.</footer>
+</div>
+
+<script>
+let formule = 'pro';
+const TARIFS = {pro:39, proplus:45};
+const fmtEUR = n => n.toLocaleString('fr-BE',{maximumFractionDigits:0}) + ' €';
+const fmtEUR2 = n => n.toLocaleString('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+
+function setFormule(f){
+  formule = f;
+  document.getElementById('btnPro').className = f==='pro' ? 'active-pro' : '';
+  document.getElementById('btnProPlus').className = f==='proplus' ? 'active-proplus' : '';
+  calc();
+}
+
+function floorRate(n){
+  if(n<=30) return {rate:.33,label:'33 %'};
+  if(n<=75) return {rate:.25,label:'25 %'};
+  return {rate:.20,label:'20 %'};
+}
+
+function calc(){
+  const biens = +document.getElementById('inBiens').value;
+  const prix  = +document.getElementById('inPrix').value;
+  const marge = +document.getElementById('inMarge').value/100;
+  const tarif = TARIFS[formule];
+
+  document.getElementById('outBiens').textContent = biens;
+  document.getElementById('outPrix').textContent = fmtEUR(prix);
+  document.getElementById('outMarge').textContent = Math.round(marge*100)+' %';
+
+  const mensuel = biens * tarif;
+  const total = 1490 + mensuel*12;
+  const margeVente = prix * marge;
+  const parJour = tarif*12/365;
+
+  // Seuil : nombre de ventes nécessaires pour couvrir l'année 1
+  const seuil = total / margeVente;
+  const seuilTxt = seuil < 1
+    ? seuil.toLocaleString('fr-BE',{maximumFractionDigits:1}) + ' vente'
+    : Math.ceil(seuil*10)/10 + ' ventes';
+
+  document.getElementById('vBreakeven').textContent = seuilTxt;
+  document.getElementById('vBreakevenTxt').textContent =
+    seuil < 1
+      ? 'Une fraction d\u2019une seule vente suffit \u00e0 couvrir l\u2019int\u00e9gralit\u00e9 de votre premi\u00e8re ann\u00e9e BuyMonth.'
+      : 'C\u2019est le nombre de ventes n\u00e9cessaires pour couvrir l\u2019int\u00e9gralit\u00e9 de votre premi\u00e8re ann\u00e9e BuyMonth.';
+
+  document.getElementById('rMensuel').textContent = fmtEUR(mensuel) + ' / mois';
+  document.getElementById('rParJour').textContent = fmtEUR2(parJour);
+  document.getElementById('rTotal').textContent = fmtEUR(total);
+  document.getElementById('rMargeVente').textContent = fmtEUR(margeVente);
+  document.getElementById('rROI').textContent =
+    '\u00d7 ' + (margeVente/total).toLocaleString('fr-BE',{maximumFractionDigits:1});
+
+  // Plancher
+  const fr = floorRate(biens);
+  const plancherBiens = Math.max(1, Math.ceil(biens*fr.rate));
+  document.getElementById('rPlancher').innerHTML =
+    '<strong>Engagement minimum :</strong> avec un portefeuille de r\u00e9f\u00e9rence de ' + biens +
+    ' bien' + (biens>1?'s':'') + ', le plancher (' + fr.label + ') est de <strong>' + plancherBiens +
+    ' bien' + (plancherBiens>1?'s':'') + '</strong>, soit <strong>' + fmtEUR(plancherBiens*tarif) +
+    ' / mois minimum</strong> pendant la p\u00e9riode d\u2019engagement de 12 mois, m\u00eame en cas de d\u00e9sactivation de biens.';
+}
+
+calc();
+</script>
+</body>
+</html>
