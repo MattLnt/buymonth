@@ -74,6 +74,8 @@ export default function Tarif() {
           <b>Vous ne payez que vos biens actifs</b>
           Le décompte est revu chaque mois : la facturation suit votre portefeuille, et un bien vendu
           sort automatiquement du décompte. Portefeuilles de plus de 125 biens : offre sur mesure.
+          Abonnement souscrit pour 12 mois, avec une facturation mensuelle minimale garantie définie
+          au contrat.
         </div>
       </div>
     </section>

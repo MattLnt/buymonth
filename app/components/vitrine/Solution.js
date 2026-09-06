@@ -28,8 +28,10 @@ export default function Solution() {
             <div className="n">03</div>
             <h3>Qualifier &amp; fluidifier</h3>
             <p>
-              S'il le souhaite, il obtient un pré-scoring indicatif réalisé par notre partenaire
-              agréé, BuyMonth Finance. Vous ne traitez que des acheteurs finançables.
+              S'il le souhaite, l'acheteur fait étudier sa capacité de financement par notre
+              partenaire agréé, BuyMonth Finance, et repart avec une estimation personnalisée de son
+              budget. Vous voyez dans votre tableau de bord lesquels de vos contacts ont franchi
+              cette étape.
             </p>
           </div>
         </div>

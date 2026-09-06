@@ -36,13 +36,12 @@ export default function Faq() {
             </div>
           </details>
           <details>
-            <summary>Suis-je couvert légalement ?</summary>
+            <summary>Qui porte les mentions légales ?</summary>
             <div className="a">
-              Oui. Chaque mensualité affichée porte la mention « emprunter de l'argent coûte aussi de
-              l'argent », l'exemple représentatif (TAEG, durée…) et les disclaimers exigés. Les
-              hypothèses financières du simulateur (taux, TAEG, durées) sont fournies, validées et
-              mises à jour exclusivement par BuyMonth Finance, intermédiaire agréé FSMA — jamais par
-              la plateforme. La conformité RGPD est intégrée d'office.
+              Chaque mensualité affichée par BuyMonth porte l'avertissement légal et l'exemple
+              représentatif exigés. Les hypothèses financières du simulateur — taux, TAEG, durées —
+              sont fournies et validées exclusivement par BuyMonth Finance, intermédiaire agréé FSMA.
+              Vous restez responsable de l'exactitude des informations que vous encodez sur vos biens.
             </div>
           </details>
           <details>
@@ -77,7 +76,8 @@ export default function Faq() {
               Une mise en service unique de 1 490 € HTVA, puis 39 € HTVA par bien actif et par mois en
               formule Pro — 45 € en <b style={{ color: "var(--proplus)" }}>Pro+</b>. Vous ne payez que
               vos biens actifs : un bien vendu sort automatiquement du décompte. Aucune commission sur
-              vos ventes.
+              vos ventes. Abonnement souscrit pour 12 mois, avec une facturation mensuelle minimale
+              garantie définie au contrat.
             </div>
           </details>
         </div>

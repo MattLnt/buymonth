@@ -7,9 +7,10 @@ export default function PublicFooter() {
         @media (max-width: 768px) {
           .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 36px 24px !important; padding: 40px 24px 32px !important; }
           .footer-brand { grid-column: 1 / -1 !important; }
+          .footer-fin { grid-column: 1 / -1 !important; }
           .footer-email { margin: 0 !important; flex-direction: column !important; align-items: flex-start !important; padding: 20px 24px !important; }
           .footer-bottom { padding: 16px 24px !important; flex-direction: column !important; gap: 12px !important; text-align: center !important; }
-          .footer-bottom-links { justify-content: center !important; }
+          .footer-bottom-links { justify-content: center !important; flex-wrap: wrap !important; }
         }
       `}</style>
 
@@ -17,20 +18,16 @@ export default function PublicFooter() {
 
         <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(124,184,168,0.3), transparent)" }} />
 
-        <div className="footer-grid" style={{ maxWidth: 1100, margin: "0 auto", padding: "64px 48px 48px", display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 48 }}>
+        <div className="footer-grid" style={{ maxWidth: 1100, margin: "0 auto", padding: "64px 48px 48px", display: "grid", gridTemplateColumns: "2fr 1fr 1.6fr", gap: 48 }}>
 
           <div className="footer-brand">
             <div style={{ fontSize: 22, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em", marginBottom: 14 }}>
               Buy<span style={{ color: "#7CB8A8" }}>Month</span>
             </div>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.8, margin: "0 0 20px", maxWidth: 280 }}>
-              Le nouvel outil qui facilite la vente immobilière. Vendez vos biens en mensualités, pas en m².
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.8, margin: "0 0 20px", maxWidth: 300 }}>
+              Trouvez le bien qui correspond à votre budget mensuel, pas à un prix affiché.
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(124,184,168,0.1)", border: "1px solid rgba(124,184,168,0.2)", borderRadius: 20, padding: "5px 12px" }}>
-                <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#7CB8A8" }} />
-                <span style={{ fontSize: 11, color: "#7CB8A8", fontWeight: 600, letterSpacing: "0.06em" }}>AGRÉÉ FSMA</span>
-              </div>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "5px 12px" }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#7CB8A8" }} />
                 <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 600, letterSpacing: "0.06em" }}>BELGIQUE</span>
@@ -42,11 +39,10 @@ export default function PublicFooter() {
             <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 18px" }}>Navigation</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {[
-                { label: "Accueil", href: "/" },
                 { label: "Les biens", href: "/biens" },
-                { label: "Process", href: "/#process" },
-                { label: "Tarifs", href: "/#tarifs" },
+                { label: "Comment ça marche", href: "/#comment-ca-marche" },
                 { label: "FAQ", href: "/#faq" },
+                { label: "Contact", href: "/contact" },
               ].map(l => (
                 <Link key={l.label} href={l.href} style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(124,184,168,0.6)" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -56,26 +52,18 @@ export default function PublicFooter() {
             </div>
           </div>
 
-          <div>
-            <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 18px" }}>Espace pro</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <Link href="/login" style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(124,184,168,0.6)" strokeWidth="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                Connexion
-              </Link>
-              <Link href="/register" style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(124,184,168,0.6)" strokeWidth="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                Devenir partenaire
-              </Link>
-              <a href="mailto:info@buymonth.be" style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(124,184,168,0.6)" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                info@buymonth.be
-              </a>
-              <a href="tel:+32497709494" style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(124,184,168,0.6)" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
-                +32 497 70 94 94
-              </a>
-            </div>
+          <div className="footer-fin">
+            <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 18px" }}>Votre financement</p>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.7, margin: "0 0 14px" }}>
+              Votre estimation reste indicative. Pour connaître vos conditions réelles, un conseiller
+              BuyMonth Finance analyse votre situation.
+            </p>
+            <Link href="/contact" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(124,184,168,0.15)", border: "1px solid rgba(124,184,168,0.25)", color: "#7CB8A8", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: "none", marginBottom: 16 }}>
+              Demander une étude personnalisée →
+            </Link>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, margin: 0 }}>
+              BuyMonth Finance (JG Management SRL), intermédiaire en crédit agréé FSMA n° 1021.366.349.
+            </p>
           </div>
         </div>
 
@@ -87,13 +75,13 @@ export default function PublicFooter() {
             display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16,
           }}>
             <div>
-              <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 6px" }}>Prêt à booster vos ventes ?</p>
-              <a href="mailto:info@buymonth.be" style={{ fontSize: 15, color: "#7CB8A8", textDecoration: "none", fontWeight: 600 }}>info@buymonth.be</a>
-              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", margin: "4px 0 0" }}>Et si on faisait le test sur vos prochains biens ?</p>
+              <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 6px" }}>Pas encore trouvé votre bien ?</p>
+              <p style={{ fontSize: 15, color: "#fff", margin: 0, fontWeight: 600 }}>Parcourez les biens disponibles</p>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", margin: "4px 0 0" }}>Tous affichés avec leur mensualité estimée.</p>
             </div>
-            <Link href="/register"
+            <Link href="/biens"
               style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(124,184,168,0.15)", border: "1px solid rgba(124,184,168,0.25)", color: "#7CB8A8", padding: "12px 20px", borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>
-              Devenir partenaire →
+              Voir tous les biens →
             </Link>
           </div>
         </div>
@@ -107,6 +95,7 @@ export default function PublicFooter() {
               <Link href="/cgv" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>CGV</Link>
               <Link href="/confidentialite" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>Confidentialité</Link>
               <Link href="/mentions-legales" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>Mentions légales</Link>
+              <Link href="/pro" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>Devenir partenaire</Link>
             </div>
           </div>
         </div>

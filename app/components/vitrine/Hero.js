@@ -9,12 +9,12 @@ export default function Hero() {
         <div>
           <span className="eyebrow">Plateforme marketing pour promoteurs</span>
           <h1>
-            Vendez vos biens en <span className="hl">mensualités</span>, pas en prix globaux.
+            Présentez vos biens en <span className="hl">mensualités</span>, pas en prix globaux.
           </h1>
           <p>
             BuyMonth transforme chaque prix de vente en une estimation mensuelle claire, affichée
-            sur vos supports — badges, widgets, QR codes — et convertit les visiteurs de vos annonces
-            en acquéreurs dont le budget a déjà été étudié.
+            sur vos supports — badges, widgets, QR codes — et amène à vos équipes des visiteurs qui
+            ne se demandent plus s'ils peuvent se le permettre.
           </p>
           <div className="hero-cta">
             <Link className="btn btn-primary" href="/register">
@@ -25,11 +25,23 @@ export default function Hero() {
             </Link>
           </div>
           <p className="aud">
-            Pensé pour : <b>Promoteurs</b> · Constructeurs · Agences · Notaires · Courtiers
+            Pensé pour : <b>Promoteurs</b> · Constructeurs · Agences · Notaires · Courtiers immobiliers
           </p>
         </div>
 
         <div className="reveal in">
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "rgba(25,59,94,0.45)",
+              marginBottom: 8,
+            }}
+          >
+            Vue plateforme
+          </div>
           <div className="dash">
             <div className="dash-top">
               <span className="hello">Bonjour, Delvaux Promotions 👋</span>
@@ -69,9 +81,9 @@ export default function Hero() {
                 <div className="prix">
                   Prix de vente{" "}
                   <b>
-                    250.000 € <span>HTVA**</span>
+                    302.500 € <span>TVA 21 % comprise</span>
                   </b>{" "}
-                  <small>** soit 302.500 € TVA 21 % incluse</small>
+                  <small>soit 250.000 € HTVA</small>
                 </div>
                 <div className="reframe" style={{ marginTop: 8 }}>
                   <div className="badge" style={{ flex: 1 }}>
