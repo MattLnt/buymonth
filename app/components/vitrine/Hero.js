@@ -71,7 +71,11 @@ export default function Hero() {
             </div>
             <div className="dash-bien">
               <div className="db-photo">
-                <span className="roof" />
+                <img
+                  src="/biens/residence.jpg"
+                  alt="Résidence"
+                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                />
                 <span className="tag">Nouvelle résidence</span>
               </div>
               <div className="db-body">

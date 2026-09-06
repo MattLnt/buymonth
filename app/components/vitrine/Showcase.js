@@ -40,7 +40,7 @@ export default function Showcase() {
               Vitrine BuyMonth <small>Tous les biens · en €/mois</small>
             </div>
             <div className="vrow hlrow">
-              <span className="ph" />
+              <span className="ph"><img src="/biens/interieur-1.jpg" alt="" /></span>
               <div className="vt">
                 <b>Résidence Les Tilleuls — App. B2.03</b>
                 <small>
@@ -53,7 +53,7 @@ export default function Showcase() {
               </span>
             </div>
             <div className="vrow">
-              <span className="ph" />
+              <span className="ph"><img src="/biens/maison.jpg" alt="" /></span>
               <div className="vt">
                 <b>Clos du Verger — Maison 3 façades</b>
                 <small>3 ch · 142 m² · jardin</small>
@@ -64,7 +64,7 @@ export default function Showcase() {
               </span>
             </div>
             <div className="vrow">
-              <span className="ph" />
+              <span className="ph"><img src="/biens/interieur-2.jpg" alt="" /></span>
               <div className="vt">
                 <b>Quai des Aulnes — App. penthouse</b>
                 <small>2 ch · 118 m² · terrasse</small>
@@ -86,6 +86,15 @@ export default function Showcase() {
       </div>
 
       <style>{`
+        /* Vignettes de biens : vraies images, on masque le motif décoratif d'origine */
+        #vitrine .vrow .ph::after { display: none !important; }
+        #vitrine .vrow .ph img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
         /* Lignes de la carte vitrine : restructuration sur petit écran.
            Scopé sous #vitrine, ne touche pas le reste du site. */
         @media (max-width: 560px) {
