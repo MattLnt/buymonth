@@ -25,7 +25,7 @@ export default function Footer() {
           <div>
             <h5>Contact</h5>
             <p className="sep">
-              +32 (0)497 70 94 94
+              +32 (0)474 27 26 49
               <br />
               <a href="mailto:info@buymonth.be">info@buymonth.be</a>
               <br />
