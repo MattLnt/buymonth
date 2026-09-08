@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
-import CalMark from "./CalMark";
 
 export default function Nav() {
   const { status } = useSession();
@@ -49,8 +48,7 @@ export default function Nav() {
       <nav ref={navRef} className={isMobile ? "bm-nav-fixed" : ""}>
         <div className="wrap nav-in">
           <Link className="brand" href="/" onClick={close}>
-            <CalMark size={34} />
-            BuyMonth
+            <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 40, width: "auto", display: "block" }} />
           </Link>
 
           {/* Liens desktop */}

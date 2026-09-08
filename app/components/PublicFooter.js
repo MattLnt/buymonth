@@ -21,8 +21,8 @@ export default function PublicFooter() {
         <div className="footer-grid" style={{ maxWidth: 1100, margin: "0 auto", padding: "64px 48px 48px", display: "grid", gridTemplateColumns: "2fr 1fr 1.6fr", gap: 48 }}>
 
           <div className="footer-brand">
-            <div style={{ fontSize: 22, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em", marginBottom: 14 }}>
-              Buy<span style={{ color: "#7CB8A8" }}>Month</span>
+            <div style={{ display: "inline-flex", background: "#fff", borderRadius: 12, padding: "10px 14px", marginBottom: 16 }}>
+              <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 42, width: "auto", display: "block" }} />
             </div>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.8, margin: "0 0 20px", maxWidth: 300 }}>
               Trouvez le bien qui correspond à votre budget mensuel, pas à un prix affiché.

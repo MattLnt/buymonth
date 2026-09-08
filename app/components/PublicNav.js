@@ -30,7 +30,6 @@ export default function PublicNav({ variant = "dark" }) {
   // Dès qu'on scrolle (fond navy) ou que le menu mobile est ouvert, on repasse en texte clair.
   const lightMode = variant === "light" && !scrolled && !menuOpen;
 
-  const logoColor = lightMode ? "#193B5E" : "#fff";
   const linkColor = lightMode ? "rgba(25,59,94,0.72)" : "rgba(255,255,255,0.75)";
   const loginColor = lightMode ? "#193B5E" : "#fff";
   const logoutColor = lightMode ? "rgba(25,59,94,0.7)" : "rgba(255,255,255,0.7)";
@@ -55,8 +54,10 @@ export default function PublicNav({ variant = "dark" }) {
         transition: "background 0.4s ease, border-color 0.3s ease",
       }}>
         <Link href="/biens" onClick={() => setMenuOpen(false)}
-          style={{ display: "flex", alignItems: "center", textDecoration: "none", zIndex: 201, fontSize: 20, fontWeight: 700, color: logoColor, letterSpacing: "-0.02em", transition: "color 0.3s ease" }}>
-          Buy<span style={{ color: "#7CB8A8" }}>Month</span>
+          style={{ display: "flex", alignItems: "center", textDecoration: "none", zIndex: 201 }}>
+          <span style={{ display: "inline-flex", background: "#fff", borderRadius: 9, padding: "6px 10px" }}>
+            <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 28, width: "auto", display: "block" }} />
+          </span>
         </Link>
 
         <div className="desktop-links" style={{ display: "flex", gap: 28, alignItems: "center" }}>

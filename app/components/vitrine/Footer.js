@@ -1,5 +1,4 @@
 import Link from "next/link";
-import CalMark from "./CalMark";
 
 export default function Footer() {
   return (
@@ -7,9 +6,8 @@ export default function Footer() {
       <div className="wrap">
         <div className="foot-grid">
           <div>
-            <div className="fb">
-              <CalMark size={34} />
-              BuyMonth
+            <div style={{ display: "inline-flex", background: "#fff", borderRadius: 12, padding: "10px 14px", marginBottom: 12 }}>
+              <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 42, width: "auto", display: "block" }} />
             </div>
             <p className="sep">
               La plateforme marketing d'affichage en mensualités et de mise en relation, éditée par{" "}
