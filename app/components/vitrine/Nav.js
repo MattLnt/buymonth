@@ -48,7 +48,7 @@ export default function Nav() {
       <nav ref={navRef} className={isMobile ? "bm-nav-fixed" : ""}>
         <div className="wrap nav-in">
           <Link className="brand" href="/" onClick={close}>
-            <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 40, width: "auto", display: "block" }} />
+            <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 48, width: "auto", display: "block" }} />
           </Link>
 
           {/* Liens desktop */}

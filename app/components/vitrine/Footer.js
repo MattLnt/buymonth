@@ -6,9 +6,7 @@ export default function Footer() {
       <div className="wrap">
         <div className="foot-grid">
           <div>
-            <div style={{ display: "inline-flex", background: "#fff", borderRadius: 12, padding: "10px 14px", marginBottom: 12 }}>
-              <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 42, width: "auto", display: "block" }} />
-            </div>
+            <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 50, width: "auto", display: "block", filter: "brightness(0) invert(1)", marginBottom: 14 }} />
             <p className="sep">
               La plateforme marketing d'affichage en mensualités et de mise en relation, éditée par{" "}
               <b style={{ color: "#fff" }}>BuyMonth SRL</b>. BuyMonth ne réalise aucun conseil en
