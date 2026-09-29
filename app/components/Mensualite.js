@@ -7,6 +7,7 @@ import {
   NOTE_ESTIMATION,
   IDENTIFICATION_FINANCE,
   exempleRepresentatif,
+  texteExempleRepresentatif,
 } from "@/lib/mensualiteConfig";
 import { phraseRegime } from "@/lib/regime";
 
@@ -29,7 +30,9 @@ const pct = (t) =>
  *   variant     "inline" | "card" | "badge" | "hero"   (défaut "inline")
  *   tone        "light" | "dark"   (défaut "light" ; "dark" = sur fond sombre)
  *   prefix      texte avant le montant (défaut "À partir de")
- *   showExemple bool — affiche l'icône i + infobulle (défaut true)
+ *   showExemple bool — affiche l'icône i + détail des hypothèses (défaut true)
+ *   exempleVisible bool — bloc « Exemple représentatif » toujours visible sous le montant (défaut true)
+ *                    Obligatoire dès qu'un €/mois apparaît (SPF Économie : « le renvoi ne suffit pas »).
  */
 export default function Mensualite({
   prixTotal,
@@ -39,6 +42,7 @@ export default function Mensualite({
   tone = "light",
   prefix = "À partir de",
   showExemple = true,
+  exempleVisible = true,
 }) {
   const [open, setOpen] = useState(false);
 
@@ -46,6 +50,7 @@ export default function Mensualite({
 
   const ex = exempleRepresentatif(prixTotal, regime, cfg);
   const phrase = phraseRegime(regime);
+  const texteExemple = texteExempleRepresentatif(prixTotal, regime, cfg);
 
   return (
     <span className={`mens mens--${variant} mens--${tone}`}>
@@ -71,8 +76,15 @@ export default function Mensualite({
 
       {/* Avertissement légal — toujours affiché avec le montant */}
       <span className="mens-warn">
-        * {AVERTISSEMENT_LEGAL} {NOTE_ESTIMATION} {IDENTIFICATION_FINANCE}
+        * {AVERTISSEMENT_LEGAL} {NOTE_ESTIMATION}
       </span>
+
+      {/* Exemple représentatif — bloc distinct, visible en permanence (ordinateur et mobile) */}
+      {exempleVisible && (
+        <span className="mens-exemple-visible" role="note">
+          {texteExemple} {IDENTIFICATION_FINANCE}
+        </span>
+      )}
 
       {showExemple && open && (
         <span className="mens-exemple" role="note">
@@ -174,6 +186,18 @@ export default function Mensualite({
           color: #8b98a3;
           max-width: 44ch;
         }
+        .mens-exemple-visible {
+          display: block;
+          margin-top: 2px;
+          padding: 8px 10px;
+          border-radius: 8px;
+          background: rgba(25, 59, 94, 0.05);
+          border: 1px solid rgba(25, 59, 94, 0.1);
+          font-size: 0.64rem;
+          line-height: 1.45;
+          color: #5a6b7d;
+          max-width: 44ch;
+        }
         .mens-exemple {
           display: flex;
           flex-direction: column;
@@ -237,6 +261,11 @@ export default function Mensualite({
         }
         .mens--dark .mens-warn {
           color: rgba(255, 255, 255, 0.55);
+        }
+        .mens--dark .mens-exemple-visible {
+          background: rgba(255, 255, 255, 0.08);
+          border-color: rgba(255, 255, 255, 0.14);
+          color: rgba(255, 255, 255, 0.72);
         }
         .mens--dark .mens-info {
           border-color: rgba(255, 255, 255, 0.4);

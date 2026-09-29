@@ -75,9 +75,11 @@ export default function Showcase() {
               </span>
             </div>
             <p className="vnote">
-              * Attention, emprunter de l'argent coûte aussi de l'argent. Simulations indicatives.
-              Hypothèses fournies par BuyMonth Finance, nom commercial de JG Management SRL,
-              intermédiaire de crédit.
+              * Attention, emprunter de l'argent coûte aussi de l'argent. Estimations indicatives, hors
+              droits d'enregistrement et frais de notaire. Exemple représentatif : bien de 302.500 € TVA
+              21 % comprise, apport de 10 %, durée de 30 ans, taux débiteur de 3,95 %, TAEG de 4,25 %,
+              mensualité de 1.290 €. Sous réserve d'acceptation du dossier. Hypothèses fournies par
+              BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit.
             </p>
           </div>
           <p style={{ fontSize: 11, color: "rgba(25,59,94,0.4)", margin: "10px 0 0", textAlign: "center", fontStyle: "italic" }}>
