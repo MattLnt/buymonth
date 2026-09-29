@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { calculMensualite } from '@/lib/calcul'
+import Mensualite from '@/app/components/Mensualite'
 import { Simulateur } from '@/app/components/public/Simulateur'
 import Link from 'next/link'
 
@@ -54,10 +54,8 @@ export default async function SimulateurPage({ searchParams }) {
                   <div style={{ padding: 18 }}>
                     <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 4px' }}>{bien.titre}</h3>
                     <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 12 }}>{[bien.ville, bien.province].filter(Boolean).join(', ') || 'Belgique'}</div>
-                    <div style={{ fontSize: 22, fontWeight: 700, color: '#7CB8A8' }}>
-                      {(bien.mensualite || calculMensualite(bien.prixTotal)).toLocaleString('fr-BE')} €<span style={{ fontSize: 13 }}>/mois</span>
-                    </div>
-                    <div style={{ fontSize: 13, color: '#A9B0BE', marginTop: 2 }}>{bien.prixTotal.toLocaleString('fr-BE')} €</div>
+                    <Mensualite prix={bien.prixTotal} variant="card" prefix="À partir de" showExemple={false} />
+                    <div style={{ fontSize: 13, color: '#A9B0BE', marginTop: 8 }}>Prix du bien : {bien.prixTotal.toLocaleString('fr-BE')} €</div>
                   </div>
                 </div>
               </Link>
