@@ -26,6 +26,7 @@ export async function POST(req) {
         titre: `${src.titre} (copie)`,
         description: src.description,
         prixTotal: src.prixTotal,
+        regime: src.regime,
         mensualite: src.mensualite,
         type: src.type,
         chambres: src.chambres,

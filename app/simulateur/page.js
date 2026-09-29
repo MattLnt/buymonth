@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import Mensualite from '@/app/components/Mensualite'
 import { Simulateur } from '@/app/components/public/Simulateur'
 import Link from 'next/link'
+import { getConfigMensualite } from '@/lib/settings'
+import { prixDecaisse, libellePrixPublic } from '@/lib/regime'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,9 +15,11 @@ export default async function SimulateurPage({ searchParams }) {
   if (bienId) {
     bien = await prisma.bien.findUnique({
       where: { id: bienId },
-      select: { id: true, titre: true, prixTotal: true, mensualite: true, ville: true, province: true, images: true },
+      select: { id: true, titre: true, prixTotal: true, regime: true, mensualite: true, ville: true, province: true, images: true },
     })
+    if (bien) bien = { ...bien, prixDecaisse: prixDecaisse(bien.prixTotal, bien.regime) }
   }
+  const cfg = await getConfigMensualite()
 
   const WRAP = { maxWidth: 1040, margin: '0 auto', padding: '0 24px' }
   const card = { background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 28 }
@@ -42,7 +46,7 @@ export default async function SimulateurPage({ searchParams }) {
 
           {/* Formulaire */}
           <div style={card}>
-            <Simulateur bien={bien} />
+            <Simulateur bien={bien} cfg={cfg} />
           </div>
 
           {/* Récap du bien */}
@@ -54,8 +58,8 @@ export default async function SimulateurPage({ searchParams }) {
                   <div style={{ padding: 18 }}>
                     <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 4px' }}>{bien.titre}</h3>
                     <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 12 }}>{[bien.ville, bien.province].filter(Boolean).join(', ') || 'Belgique'}</div>
-                    <Mensualite prix={bien.prixTotal} variant="card" prefix="À partir de" showExemple={false} />
-                    <div style={{ fontSize: 13, color: '#A9B0BE', marginTop: 8 }}>Prix du bien : {bien.prixTotal.toLocaleString('fr-BE')} €</div>
+                    <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="card" prefix="À partir de" showExemple={false} />
+                    <div style={{ fontSize: 13, color: '#A9B0BE', marginTop: 8 }}>Prix du bien : {libellePrixPublic(bien.prixTotal, bien.regime)}</div>
                   </div>
                 </div>
               </Link>

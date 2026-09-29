@@ -1,10 +1,13 @@
 'use client'
 
 import { calculMensualite } from '@/lib/calcul'
+import { MENSUALITE_CONFIG } from '@/lib/mensualiteConfig'
+import { prixDecaisse, libellePrixPublic, REGIMES } from '@/lib/regime'
 
-export function FormRecap({ form, photos = [], loading, isFormValid, mode, onDelete, deleting }) {
+export function FormRecap({ form, cfg = null, photos = [], loading, isFormValid, mode, onDelete, deleting }) {
+  const c = { ...MENSUALITE_CONFIG, ...(cfg || {}) }
   const prix = parseInt(form.prixTotal, 10)
-  const mensualite = prix > 0 ? calculMensualite(prix) : null
+  const mensualite = prix > 0 && form.regime ? calculMensualite(prixDecaisse(prix, form.regime), c) : null
 
   // Ville : renseignée via l'autocomplétion d'adresse ; à défaut, on retombe sur l'adresse saisie
   const localisation = form.ville || form.adresse || null
@@ -13,7 +16,9 @@ export function FormRecap({ form, photos = [], loading, isFormValid, mode, onDel
     { label: 'Projet', value: form.projet && form.projet !== 'Hors projet' ? form.projet : null },
     { label: 'Unité', value: form.unite },
     { label: 'Titre', value: form.titre },
-    { label: 'Prix du bien', value: prix > 0 ? `${prix.toLocaleString('fr-BE')} €` : null },
+    { label: 'Régime fiscal', value: REGIMES[form.regime]?.court || null },
+    { label: 'Prix encodé', value: prix > 0 ? `${prix.toLocaleString('fr-BE')} €` : null },
+    { label: 'Prix public', value: prix > 0 && form.regime ? libellePrixPublic(prix, form.regime) : null },
     { label: 'Type', value: form.type },
     { label: 'Province', value: form.province },
     { label: 'Ville', value: localisation },
@@ -31,7 +36,7 @@ export function FormRecap({ form, photos = [], loading, isFormValid, mode, onDel
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Aperçu du badge</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>Propriétaire de ce bien dès</div>
           <div style={{ fontSize: 32, fontWeight: 700, color: '#7CB8A8', letterSpacing: '-0.02em', lineHeight: 1 }}>
-            {mensualite ? `${mensualite} €` : '— €'}<span style={{ fontSize: 15 }}>/mois</span>
+            {mensualite ? `${mensualite.toLocaleString('fr-BE')} €` : '— €'}<span style={{ fontSize: 15 }}>/mois</span>
           </div>
         </div>
       </div>
@@ -57,7 +62,7 @@ export function FormRecap({ form, photos = [], loading, isFormValid, mode, onDel
       <div style={{ display: 'flex', gap: 10, background: 'rgba(124,184,168,0.08)', border: '1px solid rgba(124,184,168,0.2)', borderRadius: 12, padding: '12px 14px', marginBottom: 16 }}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
         <p style={{ fontSize: 12, color: '#5A6B7D', margin: 0, lineHeight: 1.5 }}>
-          La mensualité est calculée automatiquement (apport 10 %, 25 ans).
+          La mensualité est calculée automatiquement sur le prix TVA comprise (apport {Math.round(c.apportPct * 100)} %, {Math.round(c.dureeMois / 12)} ans, taux {(c.tauxAnnuel * 100).toFixed(2).replace('.', ',')} %). Choisissez le régime fiscal pour l'obtenir.
         </p>
       </div>
 

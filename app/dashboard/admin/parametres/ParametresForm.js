@@ -30,8 +30,9 @@ function Suffix({ children, suffix }) {
 
 export function ParametresForm({ initial }) {
   const [apportPct, setApportPct] = useState(Math.round((initial.apportPct ?? 0.10) * 100))
-  const [tauxAnnuel, setTauxAnnuel] = useState(((initial.tauxAnnuel ?? 0.0345) * 100).toFixed(2))
-  const [dureeAns, setDureeAns] = useState(Math.round((initial.dureeMois ?? 300) / 12))
+  const [tauxAnnuel, setTauxAnnuel] = useState(((initial.tauxAnnuel ?? 0.0395) * 100).toFixed(2))
+  const [taegAnnuel, setTaegAnnuel] = useState(((initial.taegAnnuel ?? 0.0425) * 100).toFixed(2))
+  const [dureeAns, setDureeAns] = useState(Math.round((initial.dureeMois ?? 360) / 12))
   const [emails, setEmails] = useState(initial.leadEmails || [])
   const [newEmail, setNewEmail] = useState('')
   const [saving, setSaving] = useState(false)
@@ -62,6 +63,7 @@ export function ParametresForm({ initial }) {
         body: JSON.stringify({
           apportPct: Number(apportPct) / 100,
           tauxAnnuel: Number(tauxAnnuel) / 100,
+          taegAnnuel: Number(taegAnnuel) / 100,
           dureeMois: Number(dureeAns) * 12,
           leadEmails: emails,
         }),
@@ -93,15 +95,19 @@ export function ParametresForm({ initial }) {
     <div style={{ maxWidth: 880 }}>
       {/* Calcul de mensualité */}
       <div style={card}>
-        <SectionHeader icon="euro" title="Calcul de la mensualité" desc="Ces paramètres définissent la mensualité affichée sur les biens, le widget et le simulateur." />
+        <SectionHeader icon="euro" title="Calcul de la mensualité" desc="Hypothèses fournies par BuyMonth Finance. Elles pilotent le calcul ET la mention légale affichée sous chaque montant (fiche, cartes, badge, widget, simulateur). Le calcul se fait sur le prix TVA comprise pour le neuf. Après modification, enregistrez puis recalculez les biens." />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 18 }}>
           <div>
             <label style={labelStyle}>Apport requis</label>
             <Suffix suffix="%"><input type="number" value={apportPct} onChange={(e) => setApportPct(e.target.value)} style={{ ...inputStyle, paddingRight: 34 }} /></Suffix>
           </div>
           <div>
-            <label style={labelStyle}>Taux annuel (TAEG)</label>
+            <label style={labelStyle}>Taux débiteur annuel fixe</label>
             <Suffix suffix="%"><input type="number" step="0.01" value={tauxAnnuel} onChange={(e) => setTauxAnnuel(e.target.value)} style={{ ...inputStyle, paddingRight: 34 }} /></Suffix>
+          </div>
+          <div>
+            <label style={labelStyle}>TAEG (mention)</label>
+            <Suffix suffix="%"><input type="number" step="0.01" value={taegAnnuel} onChange={(e) => setTaegAnnuel(e.target.value)} style={{ ...inputStyle, paddingRight: 34 }} /></Suffix>
           </div>
           <div>
             <label style={labelStyle}>Durée du crédit</label>

@@ -4,6 +4,7 @@ import { BienPublicCard } from '@/app/components/public/BienPublicCard'
 import PublicNav from '@/app/components/PublicNav'
 import PublicFooter from '@/app/components/PublicFooter'
 import { estPromoteurActif } from '@/lib/facturation'
+import { getConfigMensualite } from '@/lib/settings'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,10 +38,12 @@ export default async function AgencePage({ params }) {
           id: true, titre: true, mensualite: true, prixTotal: true, type: true,
           ville: true, province: true, chambres: true, sallesDeBain: true,
           surface: true, terrasse: true, jardin: true, statut: true, images: true, description: true,
+          regime: true, demo: true,
         },
       },
     },
   })
+  const cfg = await getConfigMensualite()
 
   // 404 si l'agence n'existe pas ou si le promoteur n'est pas abonné
   if (!client || !estPromoteurActif(client)) notFound()
@@ -103,7 +106,7 @@ export default async function AgencePage({ params }) {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 22 }}>
             {client.biens.map((bien) => (
-              <BienPublicCard key={bien.id} bien={bien} />
+              <BienPublicCard key={bien.id} bien={bien} cfg={cfg} />
             ))}
           </div>
         )}

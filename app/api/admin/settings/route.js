@@ -25,6 +25,7 @@ export async function PUT(req) {
     // calcul
     const apportPct = b.apportPct != null ? Math.max(0, Math.min(1, Number(b.apportPct))) : undefined
     const tauxAnnuel = b.tauxAnnuel != null ? Math.max(0, Number(b.tauxAnnuel)) : undefined
+    const taegAnnuel = b.taegAnnuel != null ? Math.max(0, Number(b.taegAnnuel)) : undefined
     const dureeMois = b.dureeMois != null ? Math.max(1, parseInt(b.dureeMois, 10)) : undefined
 
     // essai gratuit
@@ -46,6 +47,7 @@ export async function PUT(req) {
       data: {
         ...(apportPct !== undefined && { apportPct }),
         ...(tauxAnnuel !== undefined && { tauxAnnuel }),
+        ...(taegAnnuel !== undefined && { taegAnnuel }),
         ...(dureeMois !== undefined && { dureeMois }),
         ...(essaiActif !== undefined && { essaiActif }),
         ...(essaiJours !== undefined && { essaiJours }),

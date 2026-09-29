@@ -2,11 +2,13 @@ import { getCurrentClient } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/app/components/dashboard/Ui'
 import { BienForm } from '@/app/components/dashboard/BienForm'
+import { getConfigMensualite } from '@/lib/settings'
 
 export const dynamic = 'force-dynamic'
 
 export default async function NouveauBienPage() {
   const client = await getCurrentClient()
+  const cfg = await getConfigMensualite()
 
   // Liste des projets existants du client (pour l'autocomplétion), sans doublon ni vide
   const rows = await prisma.bien.findMany({
@@ -20,7 +22,7 @@ export default async function NouveauBienPage() {
   return (
     <>
       <PageHeader title="Nouveau bien" subtitle="Encodez votre bien, la mensualité est calculée automatiquement." />
-      <BienForm mode="create" projets={projets} />
+      <BienForm mode="create" projets={projets} cfg={cfg} />
     </>
   )
 }

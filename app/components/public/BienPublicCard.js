@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import Mensualite from '@/app/components/Mensualite'
+import { libellePrixPublic } from '@/lib/regime'
 
 const STATUT_PASTILLE = {
   ACTIF: { label: 'Disponible', bg: 'rgba(36,158,124,0.95)' },
   OPTION: { label: 'Sous option', bg: 'rgba(232,153,35,0.95)' },
 }
 
-export function BienPublicCard({ bien }) {
+export function BienPublicCard({ bien, cfg }) {
   const pastille = STATUT_PASTILLE[bien.statut]
 
   return (
@@ -49,12 +50,12 @@ export function BienPublicCard({ bien }) {
 
           <div style={{ marginTop: 'auto' }}>
             <div style={{ marginBottom: 12 }}>
-              <Mensualite prix={bien.prixTotal} variant="card" showExemple={false} prefix="À partir de" />
+              <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="card" showExemple={false} prefix="À partir de" />
             </div>
             <div style={{ display: 'flex', gap: 14, fontSize: 12.5, color: '#5A6275', flexWrap: 'wrap' }}>
               {bien.chambres != null && <span>{bien.chambres} ch.</span>}
               {bien.surface != null && <span>{bien.surface} m²</span>}
-              <span style={{ marginLeft: 'auto', color: '#A9B0BE' }}>{bien.prixTotal.toLocaleString('fr-BE')} €</span>
+              <span style={{ marginLeft: 'auto', color: '#A9B0BE', textAlign: 'right' }}>{libellePrixPublic(bien.prixTotal, bien.regime)}</span>
             </div>
           </div>
         </div>

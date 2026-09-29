@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { libellePrixPublic } from '@/lib/regime'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Icon } from './Icon'
@@ -76,7 +77,7 @@ export function BienCard({ bien }) {
 
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
           <span style={{ fontSize: 22, fontWeight: 700, color: '#7CB8A8', letterSpacing: '-0.02em' }}>{bien.mensualite} €<span style={{ fontSize: 13 }}>/mois</span></span>
-          <span style={{ fontSize: 13, color: '#A9B0BE' }}>· {bien.prixTotal.toLocaleString('fr-BE')} €</span>
+          <span style={{ fontSize: 13, color: '#A9B0BE' }}>· {libellePrixPublic(bien.prixTotal, bien.regime)}{bien.regime && bien.regime !== 'ENREGISTREMENT' ? ` (${bien.prixTotal.toLocaleString('fr-BE')} € HTVA)` : ''}</span>
         </div>
 
         {/* Ligne facturation / visibilité */}

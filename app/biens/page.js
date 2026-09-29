@@ -3,6 +3,7 @@ import { BiensExplorer } from '@/app/components/public/BiensExplorer'
 import PublicNav from '@/app/components/PublicNav'
 import PublicFooter from '@/app/components/PublicFooter'
 import { STATUTS_ABONNEMENT_ACTIFS } from '@/lib/facturation'
+import { getConfigMensualite } from '@/lib/settings'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,9 +26,10 @@ export default async function BiensPublicPage() {
       id: true, titre: true, mensualite: true, prixTotal: true, type: true,
       ville: true, province: true, chambres: true, sallesDeBain: true,
       surface: true, terrasse: true, jardin: true, statut: true, images: true, description: true,
-      demo: true,
+      demo: true, regime: true,
     },
   })
+  const cfg = await getConfigMensualite()
 
   // Biens de démonstration (fictifs) : affichés tant qu'aucun vrai bien n'est en ligne.
   // Dès qu'un vrai bien est publié, les démos sortent de la vitrine (leur URL reste accessible).
@@ -65,7 +67,7 @@ export default async function BiensPublicPage() {
 
         {/* CONTENU */}
         <div style={{ ...WRAP, padding: '32px 24px 64px' }}>
-          <BiensExplorer biens={biens} />
+          <BiensExplorer biens={biens} cfg={cfg} />
         </div>
 
         <PublicFooter />

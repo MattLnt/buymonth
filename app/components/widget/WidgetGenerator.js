@@ -17,7 +17,7 @@ const ic = {
   code: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>,
 }
 
-function buildSVG({ mensualite, premium, style, primaire, accent, fond, cTitre, cMentions, cCredit }) {
+function buildSVG({ mensualite, premium, style, primaire, accent, fond, cTitre, cMentions, cCredit, cfg }) {
   const dark = style === 'dark'
   const bg = fond || (dark ? '#16324F' : '#FFFFFF')
   const textMain = cTitre || (dark ? '#FFFFFF' : '#16324F')
@@ -35,15 +35,16 @@ function buildSVG({ mensualite, premium, style, primaire, accent, fond, cTitre, 
   <text x="160" y="128" font-family="system-ui,Arial,sans-serif" font-size="14" font-weight="600" fill="${textMain}" text-anchor="middle">Propriétaire de ce bien dès</text>
   <text x="160" y="178" font-family="system-ui,Arial,sans-serif" font-size="40" font-weight="700" fill="${accent}" text-anchor="middle">${mensualite ? mensualite.toLocaleString('fr-BE') : '—'} €<tspan font-size="19">/mois*</tspan></text>
   <line x1="24" y1="200" x2="296" y2="200" stroke="#EEF2F7"/>
-  <text x="160" y="220" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">* Emprunter de l'argent coûte aussi de l'argent. Estimation indicative hors frais</text>
-  <text x="160" y="233" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">(apport ${Math.round(MENSUALITE_CONFIG.apportPct * 100)} %, ${Math.round(MENSUALITE_CONFIG.dureeMois / 12)} ans, taux ${pct(MENSUALITE_CONFIG.tauxAnnuel)}, TAEG ${pct(MENSUALITE_CONFIG.taegAnnuel)}).</text>
-  <text x="160" y="246" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">Sous réserve d'acceptation du crédit.</text>
+  <text x="160" y="220" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">* Emprunter de l'argent coûte aussi de l'argent. Estimation indicative, hors droits</text>
+  <text x="160" y="233" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">d'enregistrement et frais de notaire (apport ${Math.round(cfg.apportPct * 100)} %, ${Math.round(cfg.dureeMois / 12)} ans, taux ${pct(cfg.tauxAnnuel)}, TAEG ${pct(cfg.taegAnnuel)}).</text>
+  <text x="160" y="246" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">Sous réserve d'acceptation du dossier.</text>
   <text x="160" y="263" font-family="system-ui,Arial,sans-serif" font-size="8.5" font-weight="600" fill="${textCredit}" text-anchor="middle">Hypothèses fournies par BuyMonth Finance, nom commercial</text>
   <text x="160" y="275" font-family="system-ui,Arial,sans-serif" font-size="8.5" font-weight="600" fill="${textCredit}" text-anchor="middle">de JG Management SRL, intermédiaire de crédit.</text>
 </svg>`
 }
 
-export function WidgetGenerator({ biens, plan }) {
+export function WidgetGenerator({ biens, plan, cfg: cfgProp }) {
+  const cfg = { ...MENSUALITE_CONFIG, ...(cfgProp || {}) }
   const isPremiumPlan = plan === 'PRO_PLUS' || plan === 'PREMIUM'
   const [bienId, setBienId] = useState(biens[0]?.id || '')
   const [style, setStyle] = useState('light')
@@ -116,7 +117,7 @@ export function WidgetGenerator({ biens, plan }) {
   }
 
   function downloadSVG() {
-    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond, cTitre: effTitre, cMentions: effMentions, cCredit: effCredit })
+    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond, cTitre: effTitre, cMentions: effMentions, cCredit: effCredit, cfg })
     const blob = new Blob([svg], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -127,7 +128,7 @@ export function WidgetGenerator({ biens, plan }) {
   }
 
   function downloadPNG() {
-    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond, cTitre: effTitre, cMentions: effMentions, cCredit: effCredit })
+    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond, cTitre: effTitre, cMentions: effMentions, cCredit: effCredit, cfg })
     const img = new Image()
     const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
     const url = URL.createObjectURL(svgBlob)

@@ -71,8 +71,9 @@ model Bien {
   client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
   titre       String
   description String?
-  prixTotal   Int
-  mensualite  Int
+  prixTotal   Int       // prix encodé par le promoteur : HTVA pour le neuf, prix de vente pour l'existant
+  regime      String?   // régime fiscal : TVA_21 | TVA_6 | ENREGISTREMENT (cf. lib/regime.js)
+  mensualite  Int       // calculée sur le prix décaissé (TVAC pour le neuf)
   type        String?
   chambres    Int?
   sallesDeBain Int?
@@ -142,8 +143,9 @@ model Lead {
 model Settings {
   id           String   @id @default("default")
   apportPct    Float    @default(0.10)
-  tauxAnnuel   Float    @default(0.0345)
-  dureeMois    Int      @default(300)
+  tauxAnnuel   Float    @default(0.0395) // taux débiteur annuel fixe
+  taegAnnuel   Float    @default(0.0425) // TAEG (mention de l'exemple représentatif)
+  dureeMois    Int      @default(360)    // 30 ans, référence des badges
   leadEmails   String[]
   essaiActif   Boolean  @default(false)
   essaiJours   Int      @default(14)

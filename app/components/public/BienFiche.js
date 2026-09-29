@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { calculMensualite } from '@/lib/calcul'
+import { getConfigMensualite } from '@/lib/settings'
+import { prixDecaisse, libellePrixPublic } from '@/lib/regime'
 import { BienGallery } from '@/app/components/public/BienGallery'
 import { SimulateurModal } from '@/app/components/public/SimulateurModal'
 import Mensualite from '@/app/components/Mensualite'
@@ -33,8 +34,8 @@ const STATUT_PASTILLE = {
  *   - la page publique /biens/[id] (apercu = false)
  *   - la page preview /dashboard/client/biens/[id]/apercu (apercu = true)
  */
-export function BienFiche({ bien, apercu = false }) {
-  const mensualite = bien.mensualite || calculMensualite(bien.prixTotal)
+export async function BienFiche({ bien, apercu = false }) {
+  const cfg = await getConfigMensualite()
 
   const specs = [
     bien.type && { icon: 'type', label: 'Type de bien', value: bien.type },
@@ -47,7 +48,8 @@ export function BienFiche({ bien, apercu = false }) {
     (bien.ville || bien.province) && { icon: 'pin', label: 'Localisation', value: [bien.ville, bien.province].filter(Boolean).join(', ') },
   ].filter(Boolean)
 
-  const simBien = { id: bien.id, titre: bien.titre, prixTotal: bien.prixTotal, mensualite }
+  // Le simulateur compare le budget du visiteur au prix décaissé (TVAC pour le neuf)
+  const simBien = { id: bien.id, titre: bien.titre, prixTotal: bien.prixTotal, prixDecaisse: prixDecaisse(bien.prixTotal, bien.regime), regime: bien.regime }
 
   const WRAP = { maxWidth: 1240, margin: '0 auto', padding: '0 24px' }
   const card = { background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 28 }
@@ -198,9 +200,9 @@ export function BienFiche({ bien, apercu = false }) {
             <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 16, padding: 26, position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: -40, right: -30, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.2) 0%, transparent 65%)' }} />
               <div style={{ position: 'relative' }}>
-                <Mensualite prix={bien.prixTotal} variant="hero" tone="dark" prefix="Propriétaire dès" />
+                <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="hero" tone="dark" prefix="Propriétaire dès" />
                 <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                  Prix du bien : <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{bien.prixTotal.toLocaleString('fr-BE')} €</strong>
+                  Prix du bien : <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{libellePrixPublic(bien.prixTotal, bien.regime)}</strong>
                 </div>
               </div>
             </div>
@@ -211,7 +213,7 @@ export function BienFiche({ bien, apercu = false }) {
                   Bien fictif, à titre d'illustration : cette résidence n'existe pas.
                 </p>
               )}
-              <SimulateurModal bien={simBien} />
+              <SimulateurModal bien={simBien} cfg={cfg} />
               {bien.urlClient && (
                 <a href={bien.urlClient} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', background: '#fff', color: '#193B5E', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none', border: '1.5px solid #E8EDF2', marginTop: 10 }}>
                   Voir l'annonce complète

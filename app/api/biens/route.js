@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { calculMensualiteServeur } from '@/lib/settings'
 import { syncQuantiteAbonnement } from '@/lib/facturationSync'
 import { STATUTS_FACTURABLES } from '@/lib/facturation'
+import { estRegimeValide } from '@/lib/regime'
 
 const STATUTS = ['ACTIF', 'OPTION', 'HORS_LIGNE', 'VENDU']
 const normStatut = (s) => (STATUTS.includes(s) ? s : 'ACTIF')
@@ -29,7 +30,10 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Titre et prix valides requis.' }, { status: 400 })
     }
 
-    const mensualite = await calculMensualiteServeur(prixTotal)
+    if (!estRegimeValide(b.regime)) {
+      return NextResponse.json({ error: 'Choisissez le régime fiscal du bien (TVA 21 %, TVA 6 % ou droits d\'enregistrement).' }, { status: 400 })
+    }
+    const mensualite = await calculMensualiteServeur(prixTotal, b.regime)
     const statut = normStatut(b.statut)
 
     const bien = await prisma.bien.create({
@@ -38,6 +42,7 @@ export async function POST(req) {
         titre: b.titre,
         description: b.description || null,
         prixTotal,
+        regime: b.regime,
         mensualite,
         type: b.type || null,
         chambres: b.chambres ? parseInt(b.chambres, 10) : null,
@@ -87,7 +92,10 @@ export async function PUT(req) {
       return NextResponse.json({ error: 'Titre et prix valides requis.' }, { status: 400 })
     }
 
-    const mensualite = await calculMensualiteServeur(prixTotal)
+    if (!estRegimeValide(b.regime)) {
+      return NextResponse.json({ error: 'Choisissez le régime fiscal du bien (TVA 21 %, TVA 6 % ou droits d\'enregistrement).' }, { status: 400 })
+    }
+    const mensualite = await calculMensualiteServeur(prixTotal, b.regime)
     const nouveauStatut = b.statut !== undefined ? normStatut(b.statut) : existing.statut
 
     const bien = await prisma.bien.update({
@@ -96,6 +104,7 @@ export async function PUT(req) {
         titre: b.titre,
         description: b.description || null,
         prixTotal,
+        regime: b.regime,
         mensualite,
         type: b.type || null,
         chambres: b.chambres ? parseInt(b.chambres, 10) : null,

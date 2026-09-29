@@ -4,11 +4,13 @@ import { PageHeader, EmptyState } from '@/app/components/dashboard/Ui'
 import { WidgetGenerator } from '@/app/components/widget/WidgetGenerator'
 import { Icon } from '@/app/components/dashboard/Icon'
 import Link from 'next/link'
+import { getConfigMensualite } from '@/lib/settings'
 
 export const dynamic = 'force-dynamic'
 
 export default async function WidgetsPage() {
   const client = await getCurrentClient()
+  const cfg = await getConfigMensualite()
 
   const biens = await prisma.bien.findMany({
     where: { clientId: client.id },
@@ -32,7 +34,7 @@ export default async function WidgetsPage() {
           }
         />
       ) : (
-        <WidgetGenerator biens={biens} plan={client.formule} />
+        <WidgetGenerator biens={biens} plan={client.formule} cfg={cfg} />
       )}
     </>
   )

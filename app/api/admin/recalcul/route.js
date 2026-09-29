@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { getSettings } from '@/lib/settings'
+import { getConfigMensualite } from '@/lib/settings'
 import { calculMensualite } from '@/lib/calcul'
+import { prixDecaisse } from '@/lib/regime'
 
 export async function POST() {
   const session = await getServerSession(authOptions)
@@ -12,14 +13,13 @@ export async function POST() {
   }
 
   try {
-    const s = await getSettings()
-    const params = { apportPct: s.apportPct, tauxAnnuel: s.tauxAnnuel, dureeMois: s.dureeMois }
+    const params = await getConfigMensualite()
 
-    const biens = await prisma.bien.findMany({ select: { id: true, prixTotal: true } })
+    const biens = await prisma.bien.findMany({ select: { id: true, prixTotal: true, regime: true } })
 
     let count = 0
     for (const b of biens) {
-      const mensualite = calculMensualite(b.prixTotal, params)
+      const mensualite = calculMensualite(prixDecaisse(b.prixTotal, b.regime), params)
       await prisma.bien.update({ where: { id: b.id }, data: { mensualite } })
       count++
     }

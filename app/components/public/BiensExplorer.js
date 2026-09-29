@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { FormSelect } from '@/app/components/dashboard/FormSelect'
 import { BienPublicCard } from '@/app/components/public/BienPublicCard'
+import { estNeuf as estNeufRegime } from '@/lib/regime'
 
 const TYPES = ['Appartement', 'Maison', 'Studio', 'Villa', 'Terrain', 'Bureau', 'Commerce']
 const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', 'Flandre-Occidentale', 'Flandre-Orientale', 'Hainaut', 'Liège', 'Limbourg', 'Luxembourg', 'Namur']
@@ -10,13 +11,15 @@ const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', '
 const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
-// Détecte un bien "neuf" sans moteur fiscal (Phase 2) : simple heuristique d'affichage sur type/titre/description.
+// Neuf / existant : d'abord le régime fiscal du bien ; à défaut (bien historique), heuristique sur le texte.
 function estNeuf(b) {
+  const r = estNeufRegime(b.regime)
+  if (r !== null) return r
   const hay = `${b.type || ''} ${b.titre || ''} ${b.description || ''}`.toLowerCase()
   return hay.includes('neuf') || hay.includes('nouvelle construction') || hay.includes('sur plan')
 }
 
-export function BiensExplorer({ biens }) {
+export function BiensExplorer({ biens, cfg }) {
   const [q, setQ] = useState('')
   const [type, setType] = useState('')
   const [province, setProvince] = useState('')
@@ -301,7 +304,7 @@ export function BiensExplorer({ biens }) {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 22 }}>
             {filtered.map((bien) => (
-              <BienPublicCard key={bien.id} bien={bien} />
+              <BienPublicCard key={bien.id} bien={bien} cfg={cfg} />
             ))}
           </div>
         )}

@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { calculMensualite } from "@/lib/calcul";
 import {
   MENSUALITE_CONFIG,
   AVERTISSEMENT_LEGAL,
-  NOTE_HORS_FRAIS,
+  NOTE_ESTIMATION,
   IDENTIFICATION_FINANCE,
   exempleRepresentatif,
 } from "@/lib/mensualiteConfig";
+import { phraseRegime } from "@/lib/regime";
 
 const eur = (n) =>
   new Intl.NumberFormat("fr-BE", { maximumFractionDigits: 0 }).format(n) + " €";
@@ -20,36 +20,39 @@ const pct = (t) =>
 /*
  * <Mensualite> — affichage réutilisable d'un montant en €/mois.
  * L'avertissement légal est INDISSOCIABLE du montant (jamais l'un sans l'autre).
+ * Le montant et sa mention sortent du même calcul (exempleRepresentatif).
  *
  * props :
- *   prix        (number, requis) — prix du bien servant au calcul
+ *   prixTotal   (number, requis) — prix ENCODÉ par le promoteur (HTVA pour le neuf)
+ *   regime      "TVA_21" | "TVA_6" | "ENREGISTREMENT" | null — régime fiscal du bien
+ *   cfg         hypothèses venant des paramètres admin (apportPct, tauxAnnuel, taegAnnuel, dureeMois)
  *   variant     "inline" | "card" | "badge" | "hero"   (défaut "inline")
  *   tone        "light" | "dark"   (défaut "light" ; "dark" = sur fond sombre)
  *   prefix      texte avant le montant (défaut "À partir de")
  *   showExemple bool — affiche l'icône i + infobulle (défaut true)
- *   cfg         hypothèses (défaut MENSUALITE_CONFIG)
  */
 export default function Mensualite({
-  prix,
+  prixTotal,
+  regime = null,
+  cfg = MENSUALITE_CONFIG,
   variant = "inline",
   tone = "light",
   prefix = "À partir de",
   showExemple = true,
-  cfg = MENSUALITE_CONFIG,
 }) {
   const [open, setOpen] = useState(false);
 
-  if (!prix || prix <= 0) return null;
+  if (!prixTotal || prixTotal <= 0) return null;
 
-  const mensualite = calculMensualite(prix, cfg);
-  const ex = exempleRepresentatif(prix, cfg);
+  const ex = exempleRepresentatif(prixTotal, regime, cfg);
+  const phrase = phraseRegime(regime);
 
   return (
     <span className={`mens mens--${variant} mens--${tone}`}>
       <span className="mens-line">
         {prefix && <small className="mens-prefix">{prefix}</small>}
         <b className="mens-amount">
-          {eur(mensualite)}
+          {eur(ex.mensualite)}
           <span className="mens-unit">/mois*</span>
         </b>
 
@@ -68,19 +71,23 @@ export default function Mensualite({
 
       {/* Avertissement légal — toujours affiché avec le montant */}
       <span className="mens-warn">
-        * {AVERTISSEMENT_LEGAL} {NOTE_HORS_FRAIS}
+        * {AVERTISSEMENT_LEGAL} {NOTE_ESTIMATION} {IDENTIFICATION_FINANCE}
       </span>
 
       {showExemple && open && (
         <span className="mens-exemple" role="note">
           <b>Exemple représentatif</b>
           <span className="mens-ex-row">
-            <span>Capital emprunté</span>
-            <span>{eur(ex.capital)}</span>
+            <span>Prix du bien{phrase ? ` (${phrase})` : ""}</span>
+            <span>{eur(ex.prixDecaisse)}</span>
           </span>
           <span className="mens-ex-row">
             <span>Apport pris en compte</span>
             <span>{eur(ex.apport)}</span>
+          </span>
+          <span className="mens-ex-row">
+            <span>Capital emprunté</span>
+            <span>{eur(ex.capital)}</span>
           </span>
           <span className="mens-ex-row">
             <span>Durée</span>
@@ -97,7 +104,7 @@ export default function Mensualite({
             <span>{pct(ex.taegAnnuel)}</span>
           </span>
           <span className="mens-ex-row">
-            <span>Mensualité</span>
+            <span>Mensualité ({ex.dureeMois} mensualités)</span>
             <span>{eur(ex.mensualite)}</span>
           </span>
           <span className="mens-ex-row">
@@ -105,8 +112,7 @@ export default function Mensualite({
             <span>{eur(ex.montantTotalDu)}</span>
           </span>
           <span className="mens-ex-note">
-            Estimation indicative. {IDENTIFICATION_FINANCE} Les hypothèses ne constituent pas une
-            offre de crédit.
+            Sous réserve d'acceptation du dossier. Les hypothèses ne constituent pas une offre de crédit.
           </span>
         </span>
       )}

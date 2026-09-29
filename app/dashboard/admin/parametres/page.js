@@ -14,6 +14,7 @@ export default async function AdminParametresPage() {
         initial={{
           apportPct: settings.apportPct,
           tauxAnnuel: settings.tauxAnnuel,
+          taegAnnuel: settings.taegAnnuel,
           dureeMois: settings.dureeMois,
           essaiActif: settings.essaiActif,
           essaiJours: settings.essaiJours,

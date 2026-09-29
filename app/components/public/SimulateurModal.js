@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Simulateur } from './Simulateur'
 
-export function SimulateurModal({ bien, label = 'Demander mon estimation de capacité' }) {
+export function SimulateurModal({ bien, cfg, label = 'Demander mon estimation de capacité' }) {
   const [open, setOpen] = useState(false)
   const [hover, setHover] = useState(false)
   const [step, setStep] = useState(1)
@@ -86,7 +86,7 @@ export function SimulateurModal({ bien, label = 'Demander mon estimation de capa
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
             </button>
 
-            <Simulateur bien={bien} onStepChange={setStep} />
+            <Simulateur bien={bien} cfg={cfg} onStepChange={setStep} />
           </div>
         </div>
       )}

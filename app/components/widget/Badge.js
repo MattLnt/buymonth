@@ -1,5 +1,4 @@
-import Mensualite from '@/app/components/Mensualite'
-import { MENSUALITE_CONFIG, IDENTIFICATION_FINANCE } from '@/lib/mensualiteConfig'
+import { MENSUALITE_CONFIG, IDENTIFICATION_FINANCE, NOTE_ESTIMATION } from '@/lib/mensualiteConfig'
 
 // Composant badge pur (présentation). Utilisé par /embed/badge ET la preview du générateur.
 
@@ -16,6 +15,7 @@ export function Badge({
   couleurCredit = null,
   logoUrl = null,
   width = 320,
+  cfg = null,
 }) {
   const dark = theme === 'dark'
   const bg = couleurFond || (dark ? '#16324F' : '#FFFFFF')
@@ -25,7 +25,7 @@ export function Badge({
   const textCredit = couleurCredit || (dark ? 'rgba(255,255,255,0.6)' : '#8A92A6')
   const border = dark ? 'rgba(255,255,255,0.1)' : '#EEF2F7'
 
-  const cfg = MENSUALITE_CONFIG
+  const c = { ...MENSUALITE_CONFIG, ...(cfg || {}) }
   const pct = (t) => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(t * 100) + ' %'
 
   return (
@@ -53,9 +53,9 @@ export function Badge({
         </div>
 
         <div style={{ fontSize: 9.5, color: textMuted, marginTop: 16, lineHeight: 1.5, borderTop: `1px solid ${border}`, paddingTop: 12 }}>
-          * Attention, emprunter de l'argent coûte aussi de l'argent. Estimation indicative hors frais,
-          sur base d'un exemple représentatif (apport {Math.round(cfg.apportPct * 100)} %, durée {Math.round(cfg.dureeMois / 12)} ans,
-          taux débiteur {pct(cfg.tauxAnnuel)}, TAEG {pct(cfg.taegAnnuel)}). Sous réserve d'acceptation du crédit.
+          * Attention, emprunter de l'argent coûte aussi de l'argent. {NOTE_ESTIMATION} Sur base d'un
+          exemple représentatif (apport {Math.round(c.apportPct * 100)} %, durée {Math.round(c.dureeMois / 12)} ans,
+          taux débiteur {pct(c.tauxAnnuel)}, TAEG {pct(c.taegAnnuel)}). Sous réserve d'acceptation du dossier.
           <div style={{ marginTop: 6, fontWeight: 600, color: textCredit }}>{IDENTIFICATION_FINANCE}</div>
         </div>
       </div>

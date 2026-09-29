@@ -14,7 +14,7 @@ function Euro({ children }) {
 const pct = (t) => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(t * 100) + ' %'
 const euro = (n) => (n || 0).toLocaleString('fr-BE') + ' €'
 
-export function Simulateur({ bien, onStepChange }) {
+export function Simulateur({ bien, cfg, onStepChange }) {
   const [step, setStep] = useState(1)
   const [sim, setSim] = useState({ revenus: '', apport: '', creditsEnCours: '' })
   const [contact, setContact] = useState({ nom: '', societe: '', email: '', telephone: '' })
@@ -23,7 +23,7 @@ export function Simulateur({ bien, onStepChange }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const cfgM = MENSUALITE_CONFIG
+  const cfgM = { ...MENSUALITE_CONFIG, ...(cfg || {}) }
   const dureeAns = Math.round(cfgM.dureeMois / 12)
 
   useEffect(() => { onStepChange?.(step) }, [step, onStepChange])
@@ -55,7 +55,7 @@ export function Simulateur({ bien, onStepChange }) {
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Erreur.'); setLoading(false); return }
 
-      const r = evalueBien({ revenus: sim.revenus, apport: sim.apport, creditsEnCours: sim.creditsEnCours, prixBien: bien?.prixTotal || 0 })
+      const r = evalueBien({ revenus: sim.revenus, apport: sim.apport, creditsEnCours: sim.creditsEnCours, prixBien: bien?.prixDecaisse || bien?.prixTotal || 0 }, cfgM)
       setResult(r)
       setLoading(false)
       setStep(2)
@@ -101,7 +101,7 @@ export function Simulateur({ bien, onStepChange }) {
         </div>
 
         <p style={{ fontSize: 10.5, color: '#8A92A6', margin: '12px 0 0', lineHeight: 1.45 }}>
-          Estimation hors frais, sur base d'un crédit à {dureeAns} ans, taux débiteur {pct(cfgM.tauxAnnuel)}, TAEG {pct(cfgM.taegAnnuel)}. Le budget total maximum additionne le capital empruntable et votre apport. Indicatif uniquement.
+          Estimation indicative, hors droits d'enregistrement et frais de notaire, sur base d'un crédit à {dureeAns} ans, taux débiteur {pct(cfgM.tauxAnnuel)}, TAEG {pct(cfgM.taegAnnuel)}. Le budget total maximum additionne le capital empruntable et votre apport. Indicatif uniquement.
         </p>
 
         <button type="button" onClick={() => setStep(1)} style={{ width: '100%', padding: '11px', marginTop: 12, borderRadius: 10, background: 'transparent', color: '#5A6275', border: '1.5px solid #E8EDF2', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>

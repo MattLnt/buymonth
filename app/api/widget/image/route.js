@@ -1,13 +1,13 @@
 import { prisma } from '@/lib/prisma'
 import { calculMensualite } from '@/lib/calcul'
-import { MENSUALITE_CONFIG } from '@/lib/mensualiteConfig'
+import { getConfigMensualite } from '@/lib/settings'
 import { estPromoteurActif } from '@/lib/facturation'
 
 export const dynamic = 'force-dynamic'
 
 const pct = (t) => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(t * 100) + ' %'
 
-function buildSVG({ mensualite, premium, theme, primaire, accent, fond, cTitre, cMentions, cCredit }) {
+function buildSVG({ mensualite, premium, theme, primaire, accent, fond, cTitre, cMentions, cCredit, cfg }) {
   const dark = theme === 'dark'
   const bg = fond || (dark ? '#16324F' : '#FFFFFF')
   const textMain = cTitre || (dark ? '#FFFFFF' : '#16324F')
@@ -25,9 +25,9 @@ function buildSVG({ mensualite, premium, theme, primaire, accent, fond, cTitre, 
   <text x="160" y="128" font-family="system-ui,Arial,sans-serif" font-size="14" font-weight="600" fill="${textMain}" text-anchor="middle">Propriétaire de ce bien dès</text>
   <text x="160" y="178" font-family="system-ui,Arial,sans-serif" font-size="40" font-weight="700" fill="${accent}" text-anchor="middle">${mensualite ? mensualite.toLocaleString('fr-BE') : '—'} €<tspan font-size="19">/mois*</tspan></text>
   <line x1="24" y1="200" x2="296" y2="200" stroke="#EEF2F7"/>
-  <text x="160" y="220" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">* Emprunter de l'argent coûte aussi de l'argent. Estimation indicative hors frais</text>
-  <text x="160" y="233" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">(apport ${Math.round(MENSUALITE_CONFIG.apportPct * 100)} %, ${Math.round(MENSUALITE_CONFIG.dureeMois / 12)} ans, taux ${pct(MENSUALITE_CONFIG.tauxAnnuel)}, TAEG ${pct(MENSUALITE_CONFIG.taegAnnuel)}).</text>
-  <text x="160" y="246" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">Sous réserve d'acceptation du crédit.</text>
+  <text x="160" y="220" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">* Emprunter de l'argent coûte aussi de l'argent. Estimation indicative, hors droits</text>
+  <text x="160" y="233" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">d'enregistrement et frais de notaire (apport ${Math.round(cfg.apportPct * 100)} %, ${Math.round(cfg.dureeMois / 12)} ans, taux ${pct(cfg.tauxAnnuel)}, TAEG ${pct(cfg.taegAnnuel)}).</text>
+  <text x="160" y="246" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">Sous réserve d'acceptation du dossier.</text>
   <text x="160" y="263" font-family="system-ui,Arial,sans-serif" font-size="8.5" font-weight="600" fill="${textCredit}" text-anchor="middle">Hypothèses fournies par BuyMonth Finance, nom commercial</text>
   <text x="160" y="275" font-family="system-ui,Arial,sans-serif" font-size="8.5" font-weight="600" fill="${textCredit}" text-anchor="middle">de JG Management SRL, intermédiaire de crédit.</text>
 </svg>`
@@ -50,6 +50,7 @@ function buildSVGIndisponible({ theme, primaire, fond }) {
 }
 
 export async function GET(req) {
+  const cfg = await getConfigMensualite()
   const { searchParams } = new URL(req.url)
   const bienId = searchParams.get('bien')
   const premium = searchParams.get('premium') === '1'
@@ -77,7 +78,7 @@ export async function GET(req) {
   }
 
   const svg = diffusable
-    ? buildSVG({ mensualite, premium, theme, primaire, accent, fond, cTitre, cMentions, cCredit })
+    ? buildSVG({ mensualite, premium, theme, primaire, accent, fond, cTitre, cMentions, cCredit, cfg })
     : buildSVGIndisponible({ theme, primaire, fond })
 
   return new Response(svg, {

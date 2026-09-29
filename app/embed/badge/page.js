@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { calculMensualite } from '@/lib/calcul'
+import { getConfigMensualite, calculMensualiteServeur } from '@/lib/settings'
 import { Badge } from '@/app/components/widget/Badge'
 
 export const dynamic = 'force-dynamic'
@@ -23,16 +23,19 @@ export default async function EmbedBadgePage({ searchParams }) {
   if (bienId) {
     const bien = await prisma.bien.findUnique({ where: { id: bienId } })
     if (bien) {
-      mensualite = bien.mensualite || calculMensualite(bien.prixTotal)
+      mensualite = bien.mensualite || (await calculMensualiteServeur(bien.prixTotal, bien.regime))
       urlClient = bien.urlClient
       // incrémente les vues du widget (fire and forget)
       prisma.widget.updateMany({ where: { bienId: bien.id }, data: { vues: { increment: 1 } } }).catch(() => {})
     }
   }
 
+  const cfg = await getConfigMensualite()
+
   const content = (
     <Badge
       mensualite={mensualite}
+      cfg={cfg}
       premium={premium}
       theme={theme}
       couleurPrimaire={couleurPrimaire}

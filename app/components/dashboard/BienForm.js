@@ -9,6 +9,7 @@ import { AddressInput } from './AddressInput'
 import { PhotoUploader } from './PhotoUploader'
 import { FormRecap } from './FormRecap'
 import { ConfirmModal } from './ConfirmModal'
+import { libelleChampPrix, libellePrixPublic } from '@/lib/regime'
 
 const TYPES = ['Appartement', 'Maison', 'Studio', 'Villa', 'Terrain', 'Bureau', 'Commerce']
 const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', 'Flandre-Occidentale', 'Flandre-Orientale', 'Hainaut', 'Liège', 'Limbourg', 'Luxembourg', 'Namur']
@@ -27,6 +28,44 @@ const STATUT_STYLE = {
   OPTION: { c: '#8A6D1B', bg: 'rgba(232,153,35,0.16)', dot: '#E89923', court: 'Sous option' },
   HORS_LIGNE: { c: '#5A6B7D', bg: '#EEF1F5', dot: '#8A92A6', court: 'Hors-ligne' },
   VENDU: { c: '#193B5E', bg: 'rgba(25,59,94,0.10)', dot: '#193B5E', court: 'Vendu' },
+}
+
+// Régime fiscal : deux temps (TVA / droits d'enregistrement, puis 21 % / 6 %) en boutons côte à côte.
+// Le libellé du champ prix s'adapte ; le promoteur n'encode jamais de montant TVAC.
+function RegimeSelect({ value, onChange }) {
+  const soumisTva = value === 'TVA_21' || value === 'TVA_6'
+  const famille = soumisTva ? 'TVA' : value === 'ENREGISTREMENT' ? 'ENREGISTREMENT' : ''
+
+  const btn = (actif) => ({
+    flex: 1, padding: '11px 14px', borderRadius: 10, cursor: 'pointer', fontSize: 13.5, fontWeight: 600,
+    border: `1.5px solid ${actif ? '#193B5E' : '#E8EDF2'}`,
+    background: actif ? '#193B5E' : '#FAFDFD', color: actif ? '#fff' : '#5A6B7D',
+    transition: 'all 0.15s ease',
+  })
+  const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
+
+  return (
+    <div>
+      <label style={labelStyle}>Régime fiscal du bien <span style={{ color: '#7CB8A8' }}>*</span></label>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button type="button" style={btn(famille === 'TVA')} onClick={() => onChange('TVA_21')}>Bien soumis à la TVA</button>
+        <button type="button" style={btn(famille === 'ENREGISTREMENT')} onClick={() => onChange('ENREGISTREMENT')}>Bien soumis aux droits d'enregistrement</button>
+      </div>
+      {famille === 'TVA' && (
+        <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+          <button type="button" style={btn(value === 'TVA_21')} onClick={() => onChange('TVA_21')}>TVA 21 %</button>
+          <button type="button" style={btn(value === 'TVA_6')} onClick={() => onChange('TVA_6')}>TVA 6 % — démolition-reconstruction</button>
+        </div>
+      )}
+      <p style={{ fontSize: 12, color: '#8A92A6', margin: '10px 0 0', lineHeight: 1.5 }}>
+        {famille === 'TVA'
+          ? 'Vous encodez le prix hors TVA. La plateforme calcule le prix TVA comprise et la mensualité dessus.'
+          : famille === 'ENREGISTREMENT'
+            ? 'Vous encodez le prix de vente. Les droits d\'enregistrement et frais de notaire restent hors calcul.'
+            : 'Ce choix détermine le calcul de la mensualité indicative affichée. Vous déclarez l\'exactitude de cette information.'}
+      </p>
+    </div>
+  )
 }
 
 // Valeur spéciale du select pour déclencher la saisie d'un nouveau projet
@@ -106,7 +145,7 @@ function StatutSelect({ value, onChange }) {
   )
 }
 
-export function BienForm({ initial = null, mode = 'create', projets = [] }) {
+export function BienForm({ initial = null, mode = 'create', projets = [], cfg = null }) {
   const router = useRouter()
   const [form, setForm] = useState({
     projet: initial?.projet || 'Hors projet',
@@ -115,6 +154,7 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
     description: initial?.description || '',
     type: initial?.type || '',
     prixTotal: initial?.prixTotal || '',
+    regime: initial?.regime || '',
     chambres: initial?.chambres || '',
     sallesDeBain: initial?.sallesDeBain || '',
     surface: initial?.surface || '',
@@ -161,12 +201,12 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
     }
   }
 
-  const isFormValid = form.titre && parseInt(form.prixTotal, 10) > 0
+  const isFormValid = form.titre && parseInt(form.prixTotal, 10) > 0 && !!form.regime
   const estVisible = form.statut === 'ACTIF' || form.statut === 'OPTION'
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!isFormValid) { setError('Titre et prix valides requis.'); return }
+    if (!isFormValid) { setError(form.regime ? 'Titre et prix valides requis.' : 'Choisissez le régime fiscal du bien.'); return }
     // Au moins une photo obligatoire pour un bien visible en ligne
     if (estVisible && photos.length === 0) {
       setError('Ajoutez au moins une photo pour mettre ce bien en ligne.')
@@ -264,8 +304,16 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
               <FormInput label="Description" name="description" type="textarea" value={form.description} onChange={handle('description')} placeholder="Points forts, emplacement, particularités..." />
             </FormSection>
 
-            <FormSection icon={ic.euro} title="Prix" subtitle="La mensualité est calculée automatiquement">
-              <FormInput label="Prix du bien" name="prixTotal" type="number" value={form.prixTotal} onChange={handle('prixTotal')} placeholder="215000" suffix="€" required min="0" />
+            <FormSection icon={ic.euro} title="Prix & régime fiscal" subtitle="La mensualité est calculée automatiquement sur le prix TVA comprise">
+              <div style={{ marginBottom: 16 }}>
+                <RegimeSelect value={form.regime} onChange={(v) => setField('regime', v)} />
+              </div>
+              <FormInput label={libelleChampPrix(form.regime)} name="prixTotal" type="number" value={form.prixTotal} onChange={handle('prixTotal')} placeholder="250000" suffix="€" required min="0" />
+              {form.regime && parseInt(form.prixTotal, 10) > 0 && (
+                <p style={{ fontSize: 12.5, color: '#5A6B7D', margin: '10px 0 0' }}>
+                  Prix affiché au public : <strong style={{ color: '#193B5E' }}>{libellePrixPublic(parseInt(form.prixTotal, 10), form.regime)}</strong>
+                </p>
+              )}
             </FormSection>
 
             <FormSection icon={ic.pin} title="Localisation" subtitle="Adresse et province du bien">
@@ -342,7 +390,7 @@ export function BienForm({ initial = null, mode = 'create', projets = [] }) {
           </div>
 
           {/* RÉCAP STICKY */}
-          <FormRecap form={form} photos={photos} loading={loading} isFormValid={isFormValid} mode={mode} onDelete={() => setConfirmOpen(true)} deleting={deleting} />
+          <FormRecap form={form} cfg={cfg} photos={photos} loading={loading} isFormValid={isFormValid} mode={mode} onDelete={() => setConfirmOpen(true)} deleting={deleting} />
         </div>
       </form>
 
