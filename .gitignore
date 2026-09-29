@@ -46,3 +46,6 @@ stripe.exe
 
 .agents/
 skills-lock.json
+
+# Retours client (non déployés)
+docs/
