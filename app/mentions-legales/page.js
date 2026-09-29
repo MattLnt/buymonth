@@ -6,10 +6,30 @@ export const metadata = {
   title: "Mentions légales — BuyMonth",
 };
 
+const H2 = ({ children }) => (
+  <h2 style={{ fontSize: 18, fontWeight: 700, color: "#193B5E", margin: "0 0 14px", letterSpacing: "-0.01em" }}>{children}</h2>
+);
+
+const Row = ({ label, children }) => (
+  <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: 12, padding: "10px 0", borderBottom: "1px solid #F2F5FA", fontSize: 14 }} className="ml-row">
+    <span style={{ color: "#8A92A6" }}>{label}</span>
+    <span style={{ color: "#193B5E", fontWeight: 600 }}>{children}</span>
+  </div>
+);
+
+const card = { background: "#fff", border: "1px solid #EEF2F7", borderRadius: 18, padding: "32px 36px", marginBottom: 20 };
+
 export default function MentionsLegalesPage() {
   return (
     <div style={{ minHeight: "100vh", background: "#EEF1F6" }}>
       <PublicNav />
+
+      <style>{`
+        @media (max-width: 600px) {
+          .ml-row { grid-template-columns: 1fr !important; gap: 2px !important; }
+          .ml-card { padding: 24px 20px !important; }
+        }
+      `}</style>
 
       <div style={{ paddingTop: 64 }}>
         {/* Hero */}
@@ -21,24 +41,75 @@ export default function MentionsLegalesPage() {
           </h1>
         </div>
 
-        {/* Contenu placeholder */}
-        <div style={{ maxWidth: 720, margin: "0 auto", padding: "64px 24px 80px" }}>
-          <div style={{ background: "#fff", border: "1px solid #EEF2F7", borderRadius: 18, padding: "48px 40px", textAlign: "center" }}>
-            <div style={{ display: "inline-flex", width: 56, height: 56, borderRadius: 16, background: "rgba(124,184,168,0.12)", alignItems: "center", justifyContent: "center", marginBottom: 22 }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>
-            </div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: "#193B5E", margin: "0 0 10px" }}>Page en cours de finalisation</h2>
-            <p style={{ fontSize: 14.5, color: "#5A6275", lineHeight: 1.7, margin: "0 0 28px", maxWidth: 480, marginLeft: "auto", marginRight: "auto" }}>
-              Les mentions légales de BuyMonth sont en cours de rédaction et seront publiées prochainement. Pour toute question d'ici là, vous pouvez nous contacter directement.
+        <div style={{ maxWidth: 760, margin: "0 auto", padding: "56px 24px 80px" }}>
+
+          {/* Éditeur */}
+          <div style={card} className="ml-card">
+            <H2>Éditeur de la plateforme</H2>
+            <Row label="Dénomination">BuyMonth SRL</Row>
+            <Row label="Siège social">Rue Lucien Poncelet 58, 4520 Wanze, Belgique</Row>
+            <Row label="Numéro d'entreprise">BCE 1041.967.664</Row>
+            <Row label="E-mail"><a href="mailto:info@buymonth.be" style={{ color: "#193B5E" }}>info@buymonth.be</a></Row>
+            <Row label="Téléphone">+32 (0)474 27 26 49</Row>
+            <p style={{ fontSize: 14, color: "#5A6275", lineHeight: 1.7, margin: "18px 0 0" }}>
+              BuyMonth SRL édite une plateforme d'affichage de biens immobiliers en mensualités et de mise en relation
+              entre promoteurs et acheteurs. <strong style={{ color: "#193B5E" }}>BuyMonth SRL n'est pas intermédiaire de crédit</strong> :
+              elle ne réalise aucun conseil en crédit, aucune analyse de solvabilité et ne propose aucun contrat de crédit.
             </p>
-            <a href="mailto:info@buymonth.be" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#193B5E", color: "#fff", padding: "12px 24px", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none" }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
-              info@buymonth.be
-            </a>
           </div>
 
-          <p style={{ textAlign: "center", fontSize: 12.5, color: "#9AA2B4", marginTop: 28, lineHeight: 1.7 }}>
-            BuyMonth est une marque de JG Management SRL,<br />intermédiaire en crédit immobilier agréé par la FSMA n°1021.366.349.
+          {/* Partenaire crédit */}
+          <div style={card} className="ml-card">
+            <H2>Partenaire crédit</H2>
+            <Row label="Nom commercial">BuyMonth Finance</Row>
+            <Row label="Société">JG Management SRL</Row>
+            <Row label="Qualité">Intermédiaire de crédit</Row>
+            <Row label="Inscription FSMA">
+              n° 1021.366.349 —{" "}
+              <a href="https://www.fsma.be/fr/registres" target="_blank" rel="noopener noreferrer" style={{ color: "#249E7C" }}>
+                consulter le registre public de la FSMA
+              </a>
+            </Row>
+            <p style={{ fontSize: 14, color: "#5A6275", lineHeight: 1.7, margin: "18px 0 0" }}>
+              Les hypothèses de simulation affichées sur la plateforme (apport, durée, taux, TAEG) sont fournies par
+              BuyMonth Finance. Toute étude de financement, tout pré-scoring et tout conseil en crédit sont réalisés
+              exclusivement par BuyMonth Finance. Les mensualités affichées sur BuyMonth sont indicatives et ne
+              constituent pas une offre de crédit.
+            </p>
+          </div>
+
+          {/* Avertissement */}
+          <div style={card} className="ml-card">
+            <H2>Avertissement</H2>
+            <p style={{ fontSize: 14, color: "#5A6275", lineHeight: 1.7, margin: 0 }}>
+              <strong style={{ color: "#193B5E" }}>Attention, emprunter de l'argent coûte aussi de l'argent.</strong> Les montants exprimés
+              en euros par mois sur cette plateforme sont des estimations indicatives, hors droits d'enregistrement et frais de notaire,
+              sous réserve d'acceptation du crédit par l'organisme prêteur. L'exemple représentatif complet accompagne chaque montant affiché.
+            </p>
+          </div>
+
+          {/* Hébergement & propriété */}
+          <div style={card} className="ml-card">
+            <H2>Hébergement</H2>
+            <p style={{ fontSize: 14, color: "#5A6275", lineHeight: 1.7, margin: 0 }}>
+              Le site est hébergé par Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis.
+              Les données sont stockées sur des serveurs situés dans l'Union européenne.
+            </p>
+          </div>
+
+          <div style={card} className="ml-card">
+            <H2>Propriété intellectuelle</H2>
+            <p style={{ fontSize: 14, color: "#5A6275", lineHeight: 1.7, margin: 0 }}>
+              L'ensemble des éléments de la plateforme (marque, logo, textes, interfaces, code) est la propriété de BuyMonth SRL
+              ou de ses partenaires. Les annonces immobilières restent la propriété des promoteurs qui les publient et qui sont
+              seuls responsables de leur exactitude. Toute reproduction sans autorisation écrite est interdite.
+            </p>
+          </div>
+
+          <p style={{ textAlign: "center", fontSize: 13, color: "#8A92A6", marginTop: 8, lineHeight: 1.7 }}>
+            Voir aussi : <Link href="/confidentialite" style={{ color: "#249E7C", fontWeight: 600 }}>Politique de confidentialité</Link>
+            {" · "}
+            <Link href="/cgv" style={{ color: "#249E7C", fontWeight: 600 }}>Conditions générales</Link>
           </p>
         </div>
 

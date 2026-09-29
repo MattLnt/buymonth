@@ -12,7 +12,7 @@ export default function Trust() {
         </span>
         <span>
           <i className="dot" />
-          Partenaire crédit agréé FSMA
+          Partenaire crédit : BuyMonth Finance
         </span>
       </div>
     </div>

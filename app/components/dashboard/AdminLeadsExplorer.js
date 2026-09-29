@@ -23,7 +23,6 @@ const STATUTS_ADMIN = [
   'Dossier accepté',
   'Acte passé',
   'Abandon',
-  'Refus crédit',
   'Mauvaises coordonnées',
 ]
 
@@ -35,7 +34,6 @@ const STATUT_COLOR = {
   'Dossier accepté': { c: '#0F5132', bg: 'rgba(36,158,124,0.18)' },
   'Acte passé': { c: '#0F5132', bg: 'rgba(36,158,124,0.24)' },
   'Abandon': { c: '#8A92A6', bg: '#F0F2F6' },
-  'Refus crédit': { c: '#C0392B', bg: 'rgba(229,72,77,0.12)' },
   'Mauvaises coordonnées': { c: '#8A92A6', bg: '#F0F2F6' },
 }
 

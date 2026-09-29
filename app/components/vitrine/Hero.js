@@ -105,8 +105,9 @@ export default function Hero() {
                   </div>
                 </div>
                 <p className="disclaimer">
-                  * Attention, emprunter de l'argent coûte aussi de l'argent. Simulation indicative —
-                  hypothèses validées et supervisées par BuyMonth Finance.
+                  * Attention, emprunter de l'argent coûte aussi de l'argent. Simulation indicative.
+                  Hypothèses fournies par BuyMonth Finance, nom commercial de JG Management SRL,
+                  intermédiaire de crédit.
                 </p>
                 <div className="mini-cta">Simuler mon budget mensuel</div>
               </div>

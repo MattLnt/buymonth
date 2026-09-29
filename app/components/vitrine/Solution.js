@@ -29,7 +29,7 @@ export default function Solution() {
             <h3>Qualifier &amp; fluidifier</h3>
             <p>
               S'il le souhaite, l'acheteur fait étudier sa capacité de financement par notre
-              partenaire agréé, BuyMonth Finance, et repart avec une estimation personnalisée de son
+              partenaire crédit, BuyMonth Finance, et repart avec une estimation personnalisée de son
               budget. Vous voyez dans votre tableau de bord lesquels de vos contacts ont franchi
               cette étape.
             </p>

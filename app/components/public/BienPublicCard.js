@@ -25,6 +25,13 @@ export function BienPublicCard({ bien }) {
             </span>
           )}
 
+          {/* Bien de démonstration : mention obligatoire */}
+          {bien.demo && (
+            <span style={{ position: 'absolute', bottom: 12, left: 12, background: 'rgba(25,59,94,0.88)', color: '#fff', fontSize: 10.5, fontWeight: 600, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.02em' }}>
+              Bien fictif, à titre d'illustration
+            </span>
+          )}
+
           {/* Pastille de statut (haut droite) */}
           {pastille && (
             <span style={{ position: 'absolute', top: 12, right: 12, background: pastille.bg, color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20 }}>

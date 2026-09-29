@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { evalueBien } from '@/lib/capacite'
-import { MENSUALITE_CONFIG, AVERTISSEMENT_LEGAL } from '@/lib/mensualiteConfig'
+import { MENSUALITE_CONFIG, AVERTISSEMENT_LEGAL, IDENTIFICATION_FINANCE } from '@/lib/mensualiteConfig'
 
 const labelStyle = { display: 'block', fontSize: 11.5, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }
 const inputStyle = { width: '100%', padding: '11px 13px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14.5, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
@@ -109,7 +109,7 @@ export function Simulateur({ bien, onStepChange }) {
         </button>
 
         <p style={{ fontSize: 10, color: '#A9B0BE', margin: '12px 0 0', lineHeight: 1.4, textAlign: 'center' }}>
-          {AVERTISSEMENT_LEGAL} Crédit : BuyMonth Finance — intermédiaire agréé FSMA n° 1021.366.349.
+          {AVERTISSEMENT_LEGAL} {IDENTIFICATION_FINANCE}
         </p>
       </div>
     )
@@ -143,7 +143,7 @@ export function Simulateur({ bien, onStepChange }) {
           </p>
 
           <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 24 }}>
-            {['Réponse immédiate', 'Sans engagement', 'Étude par un conseiller agréé FSMA'].map((t) => (
+            {['Réponse immédiate', 'Sans engagement', 'Étude par un conseiller BuyMonth Finance'].map((t) => (
               <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(124,184,168,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
@@ -175,7 +175,7 @@ export function Simulateur({ bien, onStepChange }) {
 
           <div style={{ borderTop: '1px solid #F2F5FA', paddingTop: 14, marginBottom: 4 }}>
             <p style={{ fontSize: 12, color: '#5A6275', margin: '0 0 12px', lineHeight: 1.45 }}>
-              Vos coordonnées permettent à <strong style={{ color: '#193B5E' }}>BuyMonth Finance</strong> de préparer votre offre.
+              Vos coordonnées permettent à <strong style={{ color: '#193B5E' }}>BuyMonth Finance</strong> d'affiner votre estimation.
             </p>
             <div className="sim-row" style={{ marginBottom: 10 }}>
               <div>
@@ -202,7 +202,7 @@ export function Simulateur({ bien, onStepChange }) {
           <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', cursor: 'pointer', marginBottom: 14 }}>
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ marginTop: 2, width: 15, height: 15, flexShrink: 0, cursor: 'pointer', accentColor: '#7CB8A8' }} />
             <span style={{ fontSize: 11, color: '#5A6275', lineHeight: 1.4 }}>
-              J'accepte que mes données soient transmises à BuyMonth Finance (agréé FSMA) afin d'être recontacté(e). <a href="/confidentialite" target="_blank" rel="noopener noreferrer" style={{ color: '#7CB8A8', fontWeight: 600 }}>Confidentialité</a>.
+              J'accepte que mes données soient transmises à BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit, afin d'être recontacté(e). <a href="/confidentialite" target="_blank" rel="noopener noreferrer" style={{ color: '#7CB8A8', fontWeight: 600 }}>Confidentialité</a>.
             </span>
           </label>
 
@@ -212,8 +212,11 @@ export function Simulateur({ bien, onStepChange }) {
             {loading ? 'Envoi...' : 'Voir ma capacité'}
           </button>
 
-          <p style={{ fontSize: 9.5, color: '#A9B0BE', margin: '10px 0 0', lineHeight: 1.35, textAlign: 'center' }}>
-            Simulation indicative, sans valeur contractuelle. FSMA n° 1021.366.349.
+          {/* Écran précontractuel : identification complète de l'éditeur et du partenaire crédit (seul endroit du tunnel où le n° FSMA figure) */}
+          <p style={{ fontSize: 9.5, color: '#A9B0BE', margin: '10px 0 0', lineHeight: 1.45, textAlign: 'center' }}>
+            Simulation indicative, sans valeur contractuelle. Plateforme éditée par BuyMonth SRL (BCE 1041.967.664), qui n'est pas intermédiaire de crédit.
+            Partenaire crédit : BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit inscrit auprès de la FSMA sous le n° 1021.366.349
+            (<a href="https://www.fsma.be/fr/registres" target="_blank" rel="noopener noreferrer" style={{ color: '#A9B0BE' }}>registre FSMA</a>).
           </p>
         </form>
       </div>

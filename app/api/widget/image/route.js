@@ -13,7 +13,7 @@ function buildSVG({ mensualite, premium, theme, primaire, accent, fond, cTitre, 
   const textMain = cTitre || (dark ? '#FFFFFF' : '#16324F')
   const textMuted = cMentions || (dark ? '#9FB0C4' : '#8A92A6')
   const textCredit = cCredit || (dark ? '#9FB0C4' : '#8A92A6')
-  const w = 320, h = 288
+  const w = 320, h = 300
   const header = premium
     ? `<rect x="137" y="20" width="46" height="46" rx="10" fill="${accent}"/>`
     : `<text x="160" y="50" font-family="system-ui,Arial,sans-serif" font-size="22" font-weight="700" text-anchor="middle"><tspan fill="#FFFFFF">Buy</tspan><tspan fill="${accent}">Month</tspan></text>`
@@ -28,7 +28,8 @@ function buildSVG({ mensualite, premium, theme, primaire, accent, fond, cTitre, 
   <text x="160" y="220" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">* Emprunter de l'argent coûte aussi de l'argent. Estimation indicative hors frais</text>
   <text x="160" y="233" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">(apport ${Math.round(MENSUALITE_CONFIG.apportPct * 100)} %, ${Math.round(MENSUALITE_CONFIG.dureeMois / 12)} ans, taux ${pct(MENSUALITE_CONFIG.tauxAnnuel)}, TAEG ${pct(MENSUALITE_CONFIG.taegAnnuel)}).</text>
   <text x="160" y="246" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">Sous réserve d'acceptation du crédit.</text>
-  <text x="160" y="264" font-family="system-ui,Arial,sans-serif" font-size="9" font-weight="600" fill="${textCredit}" text-anchor="middle">Crédit : BuyMonth Finance — FSMA 1021.366.349</text>
+  <text x="160" y="263" font-family="system-ui,Arial,sans-serif" font-size="8.5" font-weight="600" fill="${textCredit}" text-anchor="middle">Hypothèses fournies par BuyMonth Finance, nom commercial</text>
+  <text x="160" y="275" font-family="system-ui,Arial,sans-serif" font-size="8.5" font-weight="600" fill="${textCredit}" text-anchor="middle">de JG Management SRL, intermédiaire de crédit.</text>
 </svg>`
 }
 

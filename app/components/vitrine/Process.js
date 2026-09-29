@@ -7,8 +7,8 @@ export default function Process() {
           <h2>De la communication à la vente, un parcours maîtrisé.</h2>
           <p className="lead">
             Six étapes claires. Tout ce qui relève du crédit — hypothèses de simulation,
-            pré-scoring, étude — est pris en charge par BuyMonth Finance, agréé FSMA. Chacun son
-            expertise.
+            pré-scoring, étude — est pris en charge par BuyMonth Finance, intermédiaire de crédit.
+            Chacun son expertise.
           </p>
         </div>
         <div className="steps">
@@ -18,7 +18,7 @@ export default function Process() {
               <h4>Affichage en mensualités</h4>
               <p>
                 Chaque bien porte une estimation mensuelle claire, sur vos supports comme sur la
-                vitrine BuyMonth, selon les règles de BuyMonth Finance, intermédiaire agréé FSMA.
+                vitrine BuyMonth, sur base d'hypothèses fournies par BuyMonth Finance, intermédiaire de crédit.
               </p>
             </div>
           </div>
@@ -47,10 +47,10 @@ export default function Process() {
             <div className="num">4</div>
             <div>
               <h4>
-                Pré-scoring personnalisé <span className="pill">BuyMonth Finance · FSMA</span>
+                Pré-scoring personnalisé <span className="pill">BuyMonth Finance</span>
               </h4>
               <p>
-                Un conseiller agréé affine l'estimation avec les paramètres qu'un calcul automatique
+                Un conseiller BuyMonth Finance affine l'estimation avec les paramètres qu'un calcul automatique
                 ne peut pas prendre en compte.
               </p>
             </div>
@@ -59,7 +59,7 @@ export default function Process() {
             <div className="num">5</div>
             <div>
               <h4>
-                Étude approfondie <span className="pill">BuyMonth Finance · FSMA</span>
+                Étude approfondie <span className="pill">BuyMonth Finance</span>
               </h4>
               <p>
                 Sur accord du prospect, le dossier passe à la cellule crédit : conditions réelles,

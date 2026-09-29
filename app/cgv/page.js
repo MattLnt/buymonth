@@ -38,7 +38,8 @@ export default function CGVPage() {
           </div>
 
           <p style={{ textAlign: "center", fontSize: 12.5, color: "#9AA2B4", marginTop: 28, lineHeight: 1.7 }}>
-            BuyMonth est une marque de JG Management SRL,<br />intermédiaire en crédit immobilier agréé par la FSMA n°1021.366.349.
+            Plateforme éditée par BuyMonth SRL (BCE 1041.967.664), qui n'est pas intermédiaire de crédit.<br />
+            Partenaire crédit : BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit — voir les <Link href="/mentions-legales" style={{ color: "#9AA2B4" }}>mentions légales</Link>.
           </p>
         </div>
 

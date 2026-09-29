@@ -3,6 +3,7 @@ import { calculMensualite } from '@/lib/calcul'
 import { BienGallery } from '@/app/components/public/BienGallery'
 import { SimulateurModal } from '@/app/components/public/SimulateurModal'
 import Mensualite from '@/app/components/Mensualite'
+import { IDENTIFICATION_FINANCE } from '@/lib/mensualiteConfig'
 import PublicNav from '@/app/components/PublicNav'
 import PublicFooter from '@/app/components/PublicFooter'
 
@@ -155,6 +156,12 @@ export function BienFiche({ bien, apercu = false }) {
                 </span>
               )}
               <h1 style={{ fontSize: 28, fontWeight: 700, color: '#193B5E', margin: '0 0 6px', letterSpacing: '-0.02em' }}>{bien.titre}</h1>
+              {bien.demo && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(25,59,94,0.06)', border: '1px solid rgba(25,59,94,0.12)', borderRadius: 10, padding: '7px 12px', margin: '6px 0 10px', fontSize: 12.5, fontWeight: 600, color: '#193B5E' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                  Bien fictif, à titre d'illustration
+                </div>
+              )}
               <div style={{ fontSize: 15, color: '#8A92A6', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
                 {[bien.ville, bien.province].filter(Boolean).join(', ') || 'Belgique'}
@@ -199,6 +206,11 @@ export function BienFiche({ bien, apercu = false }) {
             </div>
 
             <div style={{ ...card, padding: 22 }}>
+              {bien.demo && (
+                <p style={{ fontSize: 12, color: '#5A6275', margin: '0 0 12px', lineHeight: 1.5, textAlign: 'center' }}>
+                  Bien fictif, à titre d'illustration : cette résidence n'existe pas.
+                </p>
+              )}
               <SimulateurModal bien={simBien} />
               {bien.urlClient && (
                 <a href={bien.urlClient} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', background: '#fff', color: '#193B5E', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none', border: '1.5px solid #E8EDF2', marginTop: 10 }}>
@@ -220,7 +232,7 @@ export function BienFiche({ bien, apercu = false }) {
             )}
 
             <p style={{ fontSize: 10.5, color: '#A9B0BE', margin: 0, lineHeight: 1.5, textAlign: 'center', padding: '0 8px' }}>
-              Sous réserve d'acceptation du crédit. Étude réalisée par BuyMonth Finance, intermédiaire en crédit agréé FSMA n° 1021.366.349.
+              Sous réserve d'acceptation du crédit. {IDENTIFICATION_FINANCE}
             </p>
           </div>
         </div>

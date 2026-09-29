@@ -305,7 +305,7 @@ export default function LoginPage() {
               "Affichez vos biens en budget mensuel clair",
               "Générez des widgets pour votre site",
               "Recevez des leads qualifiés en temps réel",
-              "Conforme — crédit agréé FSMA",
+              "Conforme — partenaire crédit BuyMonth Finance",
             ].map((item, i) => (
               <div
                 key={i}

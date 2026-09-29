@@ -91,6 +91,7 @@ model Bien {
   urlClient   String?
   statut      BienStatut @default(ACTIF)
   published   Boolean    @default(true)
+  demo        Boolean    @default(false) // bien fictif de démonstration (exclu de la vitrine dès qu'un vrai bien est en ligne)
   vues        Int        @default(0)
   leads       Lead[]
   widgets     Widget[]

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Simulateur } from './Simulateur'
 
-export function SimulateurModal({ bien, label = 'Recevoir une offre personnalisée' }) {
+export function SimulateurModal({ bien, label = 'Demander mon estimation de capacité' }) {
   const [open, setOpen] = useState(false)
   const [hover, setHover] = useState(false)
   const [step, setStep] = useState(1)

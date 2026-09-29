@@ -75,8 +75,9 @@ export default function Showcase() {
               </span>
             </div>
             <p className="vnote">
-              * Attention, emprunter de l'argent coûte aussi de l'argent. Simulations indicatives —
-              hypothèses validées par BuyMonth Finance.
+              * Attention, emprunter de l'argent coûte aussi de l'argent. Simulations indicatives.
+              Hypothèses fournies par BuyMonth Finance, nom commercial de JG Management SRL,
+              intermédiaire de crédit.
             </p>
           </div>
           <p style={{ fontSize: 11, color: "rgba(25,59,94,0.4)", margin: "10px 0 0", textAlign: "center", fontStyle: "italic" }}>

@@ -22,6 +22,7 @@ export default async function AdminBiensPage() {
     mensualite: b.mensualite,
     prixTotal: b.prixTotal,
     published: b.published,
+    demo: b.demo,
     images: b.images,
     societe: b.client?.societe || null,
     nbLeads: b._count?.leads || 0,

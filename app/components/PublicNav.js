@@ -112,7 +112,7 @@ export default function PublicNav({ variant = "dark" }) {
           <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "88px 28px 32px", position: "relative", zIndex: 1, overflowY: "auto" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(124,184,168,0.1)", border: "1px solid rgba(124,184,168,0.2)", borderRadius: 20, padding: "5px 12px", marginBottom: 36, alignSelf: "flex-start", animation: "itemIn 0.4s ease 0.05s both" }}>
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#7CB8A8" }} />
-              <span style={{ fontSize: 10, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.08em" }}>INTERMÉDIAIRE EN CRÉDIT AGRÉÉ FSMA</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.08em" }}>VOTRE FUTUR BIEN EN MENSUALITÉS</span>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 28 }}>

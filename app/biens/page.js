@@ -15,7 +15,7 @@ export const metadata = {
 export default async function BiensPublicPage() {
   // On charge les biens publiés DONT le promoteur a un abonnement actif.
   // Sans abonnement (subStatus hors active/trialing), les biens ne sont pas diffusés.
-  const biens = await prisma.bien.findMany({
+  const tous = await prisma.bien.findMany({
     where: {
       published: true,
       client: { subStatus: { in: STATUTS_ABONNEMENT_ACTIFS } },
@@ -25,8 +25,14 @@ export default async function BiensPublicPage() {
       id: true, titre: true, mensualite: true, prixTotal: true, type: true,
       ville: true, province: true, chambres: true, sallesDeBain: true,
       surface: true, terrasse: true, jardin: true, statut: true, images: true, description: true,
+      demo: true,
     },
   })
+
+  // Biens de démonstration (fictifs) : affichés tant qu'aucun vrai bien n'est en ligne.
+  // Dès qu'un vrai bien est publié, les démos sortent de la vitrine (leur URL reste accessible).
+  const aDesVraisBiens = tous.some((b) => !b.demo)
+  const biens = aDesVraisBiens ? tous.filter((b) => !b.demo) : tous
 
   const WRAP = { maxWidth: 1240, margin: '0 auto', padding: '0 24px' }
   const HERO_IMG = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=2000&q=80'

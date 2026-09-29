@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IDENTIFICATION_FINANCE_COURTE } from "@/lib/mensualiteConfig";
 
 export default function Footer() {
   return (
@@ -27,8 +28,9 @@ export default function Footer() {
           <div>
             <h5>Partenaire crédit</h5>
             <p className="sep">
-              <b style={{ color: "#fff" }}>BuyMonth Finance</b> (JG Management SRL), intermédiaire en
-              crédit immobilier agréé par la FSMA — n° 1021.366.349.
+              <b style={{ color: "#fff" }}>BuyMonth Finance</b>, nom commercial de JG Management SRL,
+              intermédiaire de crédit. Les hypothèses de simulation affichées sur la plateforme sont
+              fournies par BuyMonth Finance.
             </p>
           </div>
           <div>
@@ -49,8 +51,8 @@ export default function Footer() {
         </p>
         <p className="legal">Attention, emprunter de l'argent coûte aussi de l'argent.</p>
         <p className="fine">
-          © BuyMonth. Les simulations, le pré-scoring et l'accompagnement crédit sont assurés
-          exclusivement par BuyMonth Finance (JG Management SRL), agréé FSMA. Les mensualités
+          © BuyMonth SRL. Les simulations, le pré-scoring et l'accompagnement crédit sont assurés
+          exclusivement par {IDENTIFICATION_FINANCE_COURTE}. Les mensualités
           affichées sont indicatives et ne constituent pas une offre de crédit.
         </p>
       </div>

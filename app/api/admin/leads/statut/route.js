@@ -12,7 +12,6 @@ const STATUTS_ADMIN = [
   'Dossier accepté',
   'Acte passé',
   'Abandon',
-  'Refus crédit',
   'Mauvaises coordonnées',
 ]
 

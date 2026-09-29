@@ -24,7 +24,7 @@ export default function Why() {
           <div className="item reveal">
             <h3>Un écosystème complet</h3>
             <p>
-              Derrière la plateforme, un partenaire crédit agréé — BuyMonth Finance — dont l'expertise
+              Derrière la plateforme, un partenaire crédit — BuyMonth Finance, intermédiaire de crédit — dont l'expertise
               ouvre des solutions pour les profils atypiques, sans jamais interférer dans vos
               relations.
             </p>

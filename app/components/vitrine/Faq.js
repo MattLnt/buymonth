@@ -12,9 +12,9 @@ export default function Faq() {
           <details open>
             <summary>BuyMonth fait-il du crédit ?</summary>
             <div className="a">
-              Le crédit est pris en charge par un spécialiste agréé : BuyMonth Finance (JG Management
-              SRL), intermédiaire de crédit agréé FSMA sous le n° 1021.366.349, réalise l'étude, le
-              pré-scoring et le conseil. La plateforme BuyMonth se consacre à l'affichage en
+              Non. Le crédit est pris en charge par notre partenaire : BuyMonth Finance, nom commercial
+              de JG Management SRL, intermédiaire de crédit, réalise l'étude, le pré-scoring et le
+              conseil. La plateforme BuyMonth se consacre à l'affichage en
               mensualités et à la mise en relation. Chacun son métier — et vous êtes couvert des deux
               côtés.
             </div>
@@ -40,7 +40,8 @@ export default function Faq() {
             <div className="a">
               Chaque mensualité affichée par BuyMonth porte l'avertissement légal et l'exemple
               représentatif exigés. Les hypothèses financières du simulateur — taux, TAEG, durées —
-              sont fournies et validées exclusivement par BuyMonth Finance, intermédiaire agréé FSMA.
+              sont fournies exclusivement par BuyMonth Finance, nom commercial de JG Management SRL,
+              intermédiaire de crédit.
               Vous restez responsable de l'exactitude des informations que vous encodez sur vos biens.
             </div>
           </details>
@@ -57,15 +58,15 @@ export default function Faq() {
             <summary>Le pré-scoring, comment ça marche ?</summary>
             <div className="a">
               Lorsqu'un prospect le souhaite, il transmet quelques informations sur sa situation.
-              Notre partenaire agréé, BuyMonth Finance, réalise alors une évaluation indicative de sa
+              Notre partenaire crédit, BuyMonth Finance, réalise alors une évaluation indicative de sa
               capacité de financement. Vous recevez un lead avec un budget vérifié — et l'analyse
-              reste entre les mains de l'expert agréé, du début à la fin.
+              reste entre les mains de l'intermédiaire de crédit, du début à la fin.
             </div>
           </details>
           <details>
             <summary>Qui gère le dossier de financement ?</summary>
             <div className="a">
-              Exclusivement BuyMonth Finance (JG Management SRL), intermédiaire en crédit agréé FSMA.
+              Exclusivement BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit.
               C'est elle qui analyse le dossier, conseille l'acheteur et négocie avec les banques —
               jusqu'à la signature. Vous suivez l'avancement, sans avoir à vous en occuper.
             </div>

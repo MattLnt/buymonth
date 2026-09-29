@@ -16,10 +16,10 @@ export default function Conformite() {
         <div className="conf">
           <div className="c reveal">
             <div className="ic">🛡️</div>
-            <h3>Le financement, confié à un expert agréé</h3>
+            <h3>Le financement, confié à un intermédiaire de crédit</h3>
             <p>
-              Chaque étude de financement est réalisée par BuyMonth Finance, intermédiaire de crédit
-              agréé FSMA. La plateforme, elle, se consacre à ce qu'elle fait de mieux : votre
+              Chaque étude de financement est réalisée par BuyMonth Finance, nom commercial de
+              JG Management SRL, intermédiaire de crédit. La plateforme, elle, se consacre à ce qu'elle fait de mieux : votre
               visibilité et vos leads.
             </p>
           </div>

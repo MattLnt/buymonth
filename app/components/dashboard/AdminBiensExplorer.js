@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { FormSelect } from './FormSelect'
 import { Icon } from './Icon'
 
@@ -11,7 +12,44 @@ const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', '
 const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
+// Bascule du flag « bien de démonstration » (fictif, à titre d'illustration)
+function DemoToggle({ bien, onDone }) {
+  const [loading, setLoading] = useState(false)
+  async function toggle() {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/biens/demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bienId: bien.id, demo: !bien.demo }),
+      })
+      if (res.ok) onDone?.()
+    } finally {
+      setLoading(false)
+    }
+  }
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={loading}
+      title={bien.demo ? 'Bien de démonstration (fictif). Cliquer pour le passer en bien réel.' : 'Marquer comme bien de démonstration (fictif)'}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 600,
+        cursor: loading ? 'wait' : 'pointer', whiteSpace: 'nowrap',
+        border: `1px solid ${bien.demo ? 'rgba(25,59,94,0.25)' : '#E8EDF2'}`,
+        color: bien.demo ? '#193B5E' : '#A9B0BE',
+        background: bien.demo ? 'rgba(25,59,94,0.08)' : '#fff',
+      }}
+    >
+      <span style={{ width: 7, height: 7, borderRadius: '50%', background: bien.demo ? '#193B5E' : '#D5DBE5' }} />
+      {bien.demo ? 'Démo' : 'Réel'}
+    </button>
+  )
+}
+
 export function AdminBiensExplorer({ biens }) {
+  const router = useRouter()
   const [q, setQ] = useState('')
   const [type, setType] = useState('')
   const [province, setProvince] = useState('')
@@ -191,6 +229,9 @@ export function AdminBiensExplorer({ biens }) {
                   {b.published ? 'Publié' : 'Brouillon'}
                 </span>
               </div>
+              <div style={{ marginBottom: 14 }}>
+                <DemoToggle bien={b} onDone={() => router.refresh()} />
+              </div>
 
               <div style={{ background: '#FAFBFE', borderRadius: 10, padding: '12px 14px', marginBottom: 14 }}>
                 <div style={{ marginBottom: 12 }}>
@@ -227,7 +268,7 @@ export function AdminBiensExplorer({ biens }) {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 820 }}>
               <thead>
                 <tr style={{ background: '#FAFBFE', borderBottom: '1px solid #EEF2F7' }}>
-                  {['Bien', 'Promoteur', 'Mensualité', 'Prix', 'Leads', 'Statut', ''].map((h, i) => (
+                  {['Bien', 'Promoteur', 'Mensualité', 'Prix', 'Leads', 'Statut', 'Démo', ''].map((h, i) => (
                     <th key={i} style={{ textAlign: 'left', padding: '13px 18px', fontSize: 11.5, fontWeight: 700, color: '#8A92A6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                   ))}
                 </tr>
@@ -252,6 +293,9 @@ export function AdminBiensExplorer({ biens }) {
                       <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 600, color: b.published ? '#249E7C' : '#A9B0BE', background: b.published ? 'rgba(36,158,124,0.12)' : '#F2F5FA' }}>
                         {b.published ? 'Publié' : 'Brouillon'}
                       </span>
+                    </td>
+                    <td style={{ padding: '12px 18px' }}>
+                      <DemoToggle bien={b} onDone={() => router.refresh()} />
                     </td>
                     <td style={{ padding: '12px 18px' }}>
                       <Link href={`/biens/${b.id}`} target="_blank" style={{ fontSize: 12.5, color: '#7CB8A8', textDecoration: 'none', fontWeight: 600, whiteSpace: 'nowrap' }}>Voir →</Link>

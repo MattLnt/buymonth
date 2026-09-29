@@ -3,6 +3,7 @@ import { getSettings } from '@/lib/settings'
 import { calculMensualite } from '@/lib/calcul'
 import { verifyApiKey, getAllowedOrigin, getClientIp } from '@/lib/apiSecurity'
 import { rateLimit } from '@/lib/rateLimit'
+import { IDENTIFICATION_FINANCE } from '@/lib/mensualiteConfig'
 
 // Bornes réalistes pour le prix d'un bien (anti-valeurs absurdes)
 const PRIX_MIN = 1000
@@ -99,7 +100,7 @@ export async function POST(req) {
       dureeMois: s.dureeMois,
       tauxAnnuel: s.tauxAnnuel,
       devise: 'EUR',
-      mention: `Estimation indicative hors frais (apport ${Math.round(s.apportPct * 100)} %, ${dureeAns} ans, taux ${tauxPct} %, hors assurances). Le TAEG et les conditions définitives sont communiqués par BuyMonth Finance. Sous réserve d'acceptation du crédit par l'organisme prêteur. Crédit : BuyMonth Finance (JG Management SRL, FSMA 1021.366.349).`,
+      mention: `Estimation indicative hors frais (apport ${Math.round(s.apportPct * 100)} %, ${dureeAns} ans, taux ${tauxPct} %, hors assurances). Le TAEG et les conditions définitives sont communiqués par BuyMonth Finance. Sous réserve d'acceptation du crédit par l'organisme prêteur. ${IDENTIFICATION_FINANCE}`,
     }, { headers })
   } catch (e) {
     console.error('[VIZION] Erreur serveur :', e?.message)

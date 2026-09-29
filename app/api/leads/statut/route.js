@@ -13,7 +13,6 @@ const STATUTS_PROMOTEUR = [
   'Compromis sans conditions',
   'Vente',
   'Abandon',
-  'Refus crédit',
   'Mauvaises coordonnées',
 ]
 

@@ -6,6 +6,7 @@ import {
   MENSUALITE_CONFIG,
   AVERTISSEMENT_LEGAL,
   NOTE_HORS_FRAIS,
+  IDENTIFICATION_FINANCE,
   exempleRepresentatif,
 } from "@/lib/mensualiteConfig";
 
@@ -104,8 +105,8 @@ export default function Mensualite({
             <span>{eur(ex.montantTotalDu)}</span>
           </span>
           <span className="mens-ex-note">
-            Estimation indicative. Le crédit est étudié par BuyMonth Finance (agréé FSMA). Les
-            hypothèses ne constituent pas une offre de crédit.
+            Estimation indicative. {IDENTIFICATION_FINANCE} Les hypothèses ne constituent pas une
+            offre de crédit.
           </span>
         </span>
       )}

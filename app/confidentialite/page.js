@@ -37,8 +37,22 @@ export default function ConfidentialitePage() {
             </a>
           </div>
 
+          <div style={{ background: "#fff", border: "1px solid #EEF2F7", borderRadius: 18, padding: "28px 32px", marginTop: 20 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: "#193B5E", margin: "0 0 12px" }}>Responsable du traitement</h2>
+            <p style={{ fontSize: 13.5, color: "#5A6275", lineHeight: 1.7, margin: "0 0 14px" }}>
+              <strong style={{ color: "#193B5E" }}>BuyMonth SRL</strong>, Rue Lucien Poncelet 58, 4520 Wanze — BCE 1041.967.664 —{" "}
+              <a href="mailto:info@buymonth.be" style={{ color: "#249E7C" }}>info@buymonth.be</a>. Éditeur de la plateforme, BuyMonth SRL n'est pas intermédiaire de crédit.
+            </p>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: "#193B5E", margin: "0 0 12px" }}>Destinataire des demandes d'estimation</h2>
+            <p style={{ fontSize: 13.5, color: "#5A6275", lineHeight: 1.7, margin: 0 }}>
+              Les données transmises via le simulateur sont communiquées, avec votre consentement, à{" "}
+              <strong style={{ color: "#193B5E" }}>BuyMonth Finance</strong>, nom commercial de JG Management SRL, intermédiaire de crédit inscrit auprès de la FSMA sous le n° 1021.366.349 —{" "}
+              <a href="https://www.fsma.be/fr/registres" target="_blank" rel="noopener noreferrer" style={{ color: "#249E7C" }}>registre public de la FSMA</a>.
+            </p>
+          </div>
+
           <p style={{ textAlign: "center", fontSize: 12.5, color: "#9AA2B4", marginTop: 28, lineHeight: 1.7 }}>
-            BuyMonth est une marque de JG Management SRL,<br />intermédiaire en crédit immobilier agréé par la FSMA n°1021.366.349.
+            Voir aussi les <Link href="/mentions-legales" style={{ color: "#9AA2B4" }}>mentions légales</Link>.
           </p>
         </div>
 
