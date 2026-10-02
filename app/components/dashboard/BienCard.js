@@ -5,6 +5,7 @@ import { libellePrixPublic } from '@/lib/regime'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Icon } from './Icon'
+import { EnvoyerSimulation } from './EnvoyerSimulation'
 
 const STATUT_META = {
   ACTIF: { label: 'Actif', bg: 'rgba(36,158,124,0.92)', visible: true, facture: true },
@@ -137,6 +138,11 @@ export function BienCard({ bien }) {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>
               {dupliquing ? '...' : 'Dupliquer'}
             </button>
+          </div>
+
+          {/* Ligne 3 : Envoyer la simulation à un client */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <EnvoyerSimulation bien={bien} />
           </div>
         </div>
       </div>

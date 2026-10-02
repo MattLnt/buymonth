@@ -2,6 +2,7 @@ import { getCurrentClient } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/app/components/dashboard/Ui'
 import { BienForm } from '@/app/components/dashboard/BienForm'
+import { EnvoyerSimulation } from '@/app/components/dashboard/EnvoyerSimulation'
 import { redirect } from 'next/navigation'
 import { getConfigMensualite } from '@/lib/settings'
 
@@ -26,7 +27,11 @@ export default async function EditBienPage({ params }) {
 
   return (
     <>
-      <PageHeader title="Éditer le bien" subtitle={bien.titre} />
+      <PageHeader
+        title="Éditer le bien"
+        subtitle={bien.titre}
+        action={<EnvoyerSimulation bien={{ id: bien.id, titre: bien.titre }} variant="header" />}
+      />
       <BienForm mode="edit" initial={bien} projets={projets} cfg={cfg} />
     </>
   )
