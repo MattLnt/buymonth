@@ -9,6 +9,10 @@
  * pour l'envoi d'un lien de simulation, alors que cette adresse n'est pas
  * conservée du tout. Le texte reste publié tel qu'il a été transmis : c'est au
  * client de l'ajuster s'il le souhaite.
+ *
+ * Seul ajout valide avec le client (accord de Valentino, 05/10/2026) : la liste
+ * des sous-traitants de la section 4 ne citait que Vercel. Railway, Cloudinary,
+ * Mapbox, Resend et Stripe y ont ete ajoutes.
  */
 
 import Link from 'next/link'
@@ -167,8 +171,10 @@ export default function ConfidentialitePage() {
           </li>
           <li>
             <Fort>Nos sous-traitants techniques</Fort>, qui agissent sur nos instructions : Vercel Inc.
-            (hébergement du site) et, le cas échéant, nos prestataires d&rsquo;envoi d&rsquo;e-mails et de mesure
-            d&rsquo;audience.
+            (hébergement du site), Railway (hébergement de la base de données, Pays-Bas), Cloudinary (stockage et
+            diffusion des photos des biens), Mapbox (géocodage des adresses des biens), Resend (envoi des
+            e-mails) et Stripe (paiement des abonnements des promoteurs). Le cas échéant, notre prestataire de
+            mesure d&rsquo;audience.
           </li>
           <li>
             <Fort>Les autorités</Fort>, lorsque la loi nous y oblige.
