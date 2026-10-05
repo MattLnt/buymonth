@@ -84,6 +84,13 @@ export function TopBar({ societe, email, statut, role = 'client', collapsed, onT
     <div style={{ position: 'sticky', top: 0, zIndex: 40, background: 'linear-gradient(100deg, #16324F 0%, #1D4267 100%)', borderBottom: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 4px 20px rgba(25,59,94,0.12)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '0 24px', minHeight: 68 }} className="bm-topbar">
         <style>{`
+          @media (max-width: 1024px){
+            /* Sous 1024px la sidebar est remplacee par la nav du bas : le bouton
+               de retractation n'a plus rien a reduire, et la pastille de statut
+               se reduit a une puce. On masque les deux. */
+            .bm-topbar-toggle { display: none !important; }
+            .bm-topbar-statut { display: none !important; }
+          }
           @media (max-width: 768px){
             .bm-topbar { padding: 0 16px !important; }
             .bm-topbar-statut-label { display: none !important; }
@@ -92,7 +99,7 @@ export function TopBar({ societe, email, statut, role = 'client', collapsed, onT
 
         {/* Gauche : bouton rétract + titre */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
-          <button onClick={onToggle} aria-label="Réduire le menu"
+          <button onClick={onToggle} aria-label="Réduire le menu" className="bm-topbar-toggle"
             style={{ width: 40, height: 40, borderRadius: 11, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', flexShrink: 0, transition: 'background 0.15s' }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.14)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}>
@@ -106,7 +113,9 @@ export function TopBar({ societe, email, statut, role = 'client', collapsed, onT
 
         {/* Droite : statut + avatar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-          {statutHref ? <Link href={statutHref} style={{ textDecoration: 'none' }}>{StatutPastille}</Link> : StatutPastille}
+          {statutHref
+            ? <Link href={statutHref} className="bm-topbar-statut" style={{ textDecoration: 'none', display: 'inline-flex' }}>{StatutPastille}</Link>
+            : <span className="bm-topbar-statut" style={{ display: 'inline-flex' }}>{StatutPastille}</span>}
 
           <div style={{ position: 'relative' }} ref={menuRef}>
             <button onClick={() => setMenuOpen(!menuOpen)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '5px 10px 5px 5px', cursor: 'pointer' }}>

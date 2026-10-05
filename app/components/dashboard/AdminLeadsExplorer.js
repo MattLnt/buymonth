@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useRef, useEffect } from 'react'
+import { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { FormSelect } from './FormSelect'
 import { Icon } from './Icon'
@@ -85,6 +85,18 @@ function StatutDropdown({ value, onChange, disabled }) {
     }
   }, [open])
 
+  // Le menu ne doit jamais sortir de l'écran : on le recale dans la fenêtre une fois mesuré
+  // (nécessaire en mobile, où « Mauvaises coordonnées » est plus large que le bouton).
+  useLayoutEffect(() => {
+    if (!open || !menuRef.current) return
+    const MARGE = 8
+    const r = menuRef.current.getBoundingClientRect()
+    let left = r.left
+    if (r.right > window.innerWidth - MARGE) left = window.innerWidth - MARGE - r.width
+    if (left < MARGE) left = MARGE
+    if (Math.round(left) !== Math.round(r.left)) setPos((p) => ({ ...p, left }))
+  }, [open])
+
   return (
     <>
       <button
@@ -109,7 +121,7 @@ function StatutDropdown({ value, onChange, disabled }) {
       {open && pos && (
         <div
           ref={menuRef}
-          style={{ position: 'fixed', top: pos.top, bottom: pos.bottom, left: pos.left, minWidth: pos.minWidth, zIndex: 1000, background: '#fff', border: '1px solid #EEF2F7', borderRadius: 12, boxShadow: '0 12px 32px rgba(25,59,94,0.16)', padding: 5, maxHeight: '70vh', overflowY: 'auto' }}
+          style={{ position: 'fixed', top: pos.top, bottom: pos.bottom, left: pos.left, minWidth: pos.minWidth, maxWidth: 'calc(100vw - 16px)', zIndex: 1000, background: '#fff', border: '1px solid #EEF2F7', borderRadius: 12, boxShadow: '0 12px 32px rgba(25,59,94,0.16)', padding: 5, maxHeight: '70vh', overflowY: 'auto' }}
         >
           {STATUTS_ADMIN.map((s) => {
             const sc = STATUT_COLOR[s] || STATUT_COLOR['À contacter']
