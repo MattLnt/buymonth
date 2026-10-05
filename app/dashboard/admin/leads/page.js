@@ -32,6 +32,8 @@ export default async function AdminLeadsPage() {
     apport: l.apport,
     source: l.source,
     statutAdmin: l.statutAdmin || 'À contacter',
+    consentPromoteur: l.consentPromoteur,
+    consentFinance: l.consentFinance,
     createdAt: l.createdAt,
     bienId: l.bien?.id || null,
     bienTitre: l.bien?.titre || null,

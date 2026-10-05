@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import LogoBuyMonth from "@/app/components/LogoBuyMonth";
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 
@@ -56,7 +57,7 @@ export default function PublicNav({ variant = "dark" }) {
         <Link href="/biens" onClick={() => setMenuOpen(false)}
           style={{ display: "flex", alignItems: "center", textDecoration: "none", zIndex: 201 }}>
           <span style={{ display: "inline-flex", background: "#fff", borderRadius: 9, padding: "6px 10px" }}>
-            <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 28, width: "auto", display: "block" }} />
+            <LogoBuyMonth height={34} />
           </span>
         </Link>
 

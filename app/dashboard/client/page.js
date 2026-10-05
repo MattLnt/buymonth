@@ -19,7 +19,8 @@ export default async function ClientDashboard() {
       select: { id: true, titre: true, type: true, vues: true, mensualite: true, statut: true },
     }),
     prisma.lead.findMany({
-      where: { bien: { clientId: client.id }, deletedAt: null },
+      // Seuls les leads dont le visiteur a autorisé la transmission au promoteur
+      where: { bien: { clientId: client.id }, deletedAt: null, consentPromoteur: true },
       select: { id: true, nom: true, email: true, source: true, statutPromoteur: true, createdAt: true, bien: { select: { id: true, titre: true } } },
       orderBy: { createdAt: 'desc' },
     }),

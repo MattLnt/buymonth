@@ -18,7 +18,8 @@ export function Simulateur({ bien, cfg, onStepChange }) {
   const [step, setStep] = useState(1)
   const [sim, setSim] = useState({ revenus: '', apport: '', creditsEnCours: '' })
   const [contact, setContact] = useState({ nom: '', societe: '', email: '', telephone: '' })
-  const [consent, setConsent] = useState(false)
+  const [consentPromoteur, setConsentPromoteur] = useState(false)
+  const [consentFinance, setConsentFinance] = useState(false)
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -35,7 +36,6 @@ export function Simulateur({ bien, cfg, onStepChange }) {
     e.preventDefault()
     if (!sim.revenus) { setError('Indiquez vos revenus.'); return }
     if (!contact.email && !contact.telephone) { setError('Un email ou un téléphone est requis.'); return }
-    if (!consent) { setError('Vous devez accepter la transmission de vos données pour continuer.'); return }
     setError(''); setLoading(true)
     try {
       const res = await fetch('/api/leads', {
@@ -49,6 +49,8 @@ export function Simulateur({ bien, cfg, onStepChange }) {
           telephone: contact.telephone,
           revenu: sim.revenus,
           apport: sim.apport,
+          consentPromoteur,
+          consentFinance,
           source: 'SIMULATEUR',
         }),
       })
@@ -199,12 +201,26 @@ export function Simulateur({ bien, cfg, onStepChange }) {
             </div>
           </div>
 
-          <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', cursor: 'pointer', marginBottom: 14 }}>
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ marginTop: 2, width: 15, height: 15, flexShrink: 0, cursor: 'pointer', accentColor: '#7CB8A8' }} />
-            <span style={{ fontSize: 11, color: '#5A6275', lineHeight: 1.4 }}>
-              J'accepte que mes données soient transmises à BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit, afin d'être recontacté(e). <a href="/confidentialite" target="_blank" rel="noopener noreferrer" style={{ color: '#7CB8A8', fontWeight: 600 }}>Confidentialité</a>.
-            </span>
-          </label>
+          {/* Deux consentements distincts, non coches, aucun obligatoire : le resultat
+              de la simulation s'affiche quel que soit le choix (annexe 1, section 2). */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+            <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', cursor: 'pointer' }}>
+              <input type="checkbox" checked={consentPromoteur} onChange={(e) => setConsentPromoteur(e.target.checked)} style={{ marginTop: 2, width: 15, height: 15, flexShrink: 0, cursor: 'pointer', accentColor: '#7CB8A8' }} />
+              <span style={{ fontSize: 11, color: '#5A6275', lineHeight: 1.4 }}>
+                J'accepte que mes coordonnées soient transmises au promoteur du bien consulté, afin qu'il puisse me recontacter.
+              </span>
+            </label>
+            <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', cursor: 'pointer' }}>
+              <input type="checkbox" checked={consentFinance} onChange={(e) => setConsentFinance(e.target.checked)} style={{ marginTop: 2, width: 15, height: 15, flexShrink: 0, cursor: 'pointer', accentColor: '#7CB8A8' }} />
+              <span style={{ fontSize: 11, color: '#5A6275', lineHeight: 1.4 }}>
+                J'accepte que mes coordonnées soient transmises à BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit, pour une étude de financement.
+              </span>
+            </label>
+            <p style={{ fontSize: 10.5, color: '#A9B0BE', margin: 0, lineHeight: 1.45 }}>
+              Les deux cases sont facultatives et indépendantes : votre résultat s'affiche dans tous les cas.{' '}
+              <a href="/confidentialite" target="_blank" rel="noopener noreferrer" style={{ color: '#7CB8A8', fontWeight: 600 }}>Confidentialité</a>.
+            </p>
+          </div>
 
           {error && <p style={{ color: '#E5484D', fontSize: 12.5, margin: '0 0 12px' }}>{error}</p>}
 

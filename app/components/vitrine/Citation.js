@@ -8,7 +8,7 @@ export default function Citation() {
           </span>
           <blockquote>
             Vos biens ne changent pas. Leur lisibilité, si : un logement affiché{" "}
-            <b>« à partir de 1.290 € / mois »</b> déclenche plus de projets qu'un prix de 302.500 €.
+            <b>à partir de 1.490 € par mois</b> suscite plus d'intérêt qu'un prix de 350.000 €.
           </blockquote>
         </figure>
       </div>

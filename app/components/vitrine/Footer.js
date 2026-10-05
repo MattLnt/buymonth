@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LogoBuyMonth from "@/app/components/LogoBuyMonth";
 import { IDENTIFICATION_FINANCE_COURTE } from "@/lib/mensualiteConfig";
 
 export default function Footer() {
@@ -7,7 +8,7 @@ export default function Footer() {
       <div className="wrap">
         <div className="foot-grid">
           <div>
-            <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 120, width: "auto", display: "block", filter: "brightness(0) invert(1)", marginBottom: 14 }} />
+            <span style={{ display: "block", marginBottom: 14 }}><LogoBuyMonth height={62} blanc /></span>
             <p className="sep">
               La plateforme marketing d'affichage en mensualités et de mise en relation, éditée par{" "}
               <b style={{ color: "#fff" }}>BuyMonth SRL</b>. BuyMonth ne réalise aucun conseil en

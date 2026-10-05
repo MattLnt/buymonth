@@ -44,6 +44,27 @@ function formatDateHeure(d) {
 }
 
 // Dropdown custom avec pastilles colorées — menu en position fixe, s'ouvre vers le haut si pas de place en bas
+// Pastille de consentement : indique ce que le visiteur a autorisé. Déterminant
+// avant toute transmission à un tiers (promoteur ou BuyMonth Finance).
+function Consentement({ ok, libelle }) {
+  return (
+    <span
+      title={ok ? `Consentement donné : ${libelle}` : `Pas de consentement : ${libelle}`}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600,
+        padding: '3px 9px', borderRadius: 20,
+        color: ok ? '#1B7A5E' : '#8A92A6',
+        background: ok ? 'rgba(36,158,124,0.12)' : '#F0F2F6',
+      }}
+    >
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+        {ok ? <polyline points="20 6 9 17 4 12" /> : <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>}
+      </svg>
+      {libelle}
+    </span>
+  )
+}
+
 function StatutDropdown({ value, onChange, disabled }) {
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState(null)
@@ -290,6 +311,8 @@ export function AdminLeadsExplorer({ leads }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
                       <span style={{ fontSize: 16, fontWeight: 700, color: '#193B5E' }}>{lead.nom || 'Sans nom'}</span>
                       <span style={{ fontSize: 11, fontWeight: 700, color: src.color, background: src.bg, padding: '3px 10px', borderRadius: 20, letterSpacing: '0.02em' }}>{src.label}</span>
+                      <Consentement ok={lead.consentPromoteur} libelle="Promoteur" />
+                      <Consentement ok={lead.consentFinance} libelle="BuyMonth Finance" />
                     </div>
                     {lead.societe && (
                       <div style={{ fontSize: 13, color: '#1C6B52', fontWeight: 600, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>

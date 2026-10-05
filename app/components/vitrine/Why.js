@@ -4,7 +4,7 @@ export default function Why() {
       <div className="wrap">
         <div className="sec-head reveal">
           <span className="eyebrow">Pourquoi BuyMonth</span>
-          <h2>Trois raisons d'y passer maintenant.</h2>
+          <h2>Trois raisons de démarrer maintenant.</h2>
         </div>
         <div className="why">
           <div className="item reveal">
@@ -18,7 +18,7 @@ export default function Why() {
             <h3>Un vrai gain de temps</h3>
             <p>
               Grâce à la qualification et au suivi digitalisé, vos équipes se concentrent sur les
-              acheteurs réellement finançables.
+              acheteurs dont le projet est solide.
             </p>
           </div>
           <div className="item reveal">

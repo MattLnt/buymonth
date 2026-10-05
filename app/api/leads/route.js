@@ -35,6 +35,9 @@ export async function POST(req) {
         telephone: b.telephone || null,
         revenu: b.revenu ? parseInt(b.revenu, 10) : null,
         apport: b.apport ? parseInt(b.apport, 10) : null,
+        consentPromoteur: b.consentPromoteur === true,
+        consentFinance: b.consentFinance === true,
+        consentAt: b.consentPromoteur === true || b.consentFinance === true ? new Date() : null,
         source: b.source || 'SIMULATEUR',
       },
     })
@@ -43,8 +46,10 @@ export async function POST(req) {
     try {
       const settings = await getSettings()
 
-      // Destinataires = adresses plateforme + e-mail du promoteur du bien concerné
-      const emailPromoteur = bien?.client?.user?.email
+      // Destinataires = adresses plateforme (BuyMonth, responsable du traitement)
+      // + e-mail du promoteur, uniquement si le visiteur a coché la case qui
+      // autorise la transmission au promoteur (annexe 1 du dossier du 05/10/2026).
+      const emailPromoteur = lead.consentPromoteur ? bien?.client?.user?.email : null
       const destinataires = [
         ...(settings.leadEmails || []),
         ...(emailPromoteur ? [emailPromoteur] : []),

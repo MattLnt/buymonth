@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import LogoBuyMonth from "@/app/components/LogoBuyMonth";
 import { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 
@@ -48,7 +49,7 @@ export default function Nav() {
       <nav ref={navRef} className={isMobile ? "bm-nav-fixed" : ""}>
         <div className="wrap nav-in">
           <Link className="brand" href="/" onClick={close}>
-            <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 120, width: "auto", display: "block" }} />
+            <LogoBuyMonth height={62} />
           </Link>
 
           {/* Liens desktop */}

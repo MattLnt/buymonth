@@ -19,7 +19,8 @@ export default async function BiensPage({ searchParams }) {
   const biensRaw = await prisma.bien.findMany({
     where: { clientId: client.id },
     orderBy: { createdAt: 'desc' },
-    include: { _count: { select: { leads: true } } },
+    // Même règle qu'ailleurs : on ne compte que les leads consentis côté promoteur
+    include: { _count: { select: { leads: { where: { deletedAt: null, consentPromoteur: true } } } } },
   })
 
   // On aplatit le _count en nbLeads pour la card

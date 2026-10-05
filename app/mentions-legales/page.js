@@ -50,7 +50,6 @@ export default function MentionsLegalesPage() {
             <Row label="Siège social">Rue Lucien Poncelet 58, 4520 Wanze, Belgique</Row>
             <Row label="Numéro d'entreprise">BCE 1041.967.664</Row>
             <Row label="E-mail"><a href="mailto:info@buymonth.be" style={{ color: "#193B5E" }}>info@buymonth.be</a></Row>
-            <Row label="Téléphone">+32 (0)474 27 26 49</Row>
             <p style={{ fontSize: 14, color: "#5A6275", lineHeight: 1.7, margin: "18px 0 0" }}>
               BuyMonth SRL édite une plateforme d'affichage de biens immobiliers en mensualités et de mise en relation
               entre promoteurs et acheteurs. <strong style={{ color: "#193B5E" }}>BuyMonth SRL n'est pas intermédiaire de crédit</strong> :
@@ -69,6 +68,16 @@ export default function MentionsLegalesPage() {
               <a href="https://www.fsma.be/fr/registres" target="_blank" rel="noopener noreferrer" style={{ color: "#249E7C" }}>
                 consulter le registre public de la FSMA
               </a>
+            </Row>
+            <Row label="Siège social">Rue Lucien Poncelet 58, 4520 Antheit, Belgique</Row>
+            <Row label="Contact"><a href="mailto:info@buymonth-finance.be" style={{ color: "#193B5E" }}>info@buymonth-finance.be</a></Row>
+            <Row label="Réclamations">
+              En cas de réclamation, contactez d'abord BuyMonth Finance à{" "}
+              <a href="mailto:info@buymonth-finance.be" style={{ color: "#249E7C" }}>info@buymonth-finance.be</a>.
+              Si aucune solution n'est trouvée, vous pouvez vous adresser à Ombudsfin, le service de médiation des
+              services financiers : North Gate II, Boulevard du Roi Albert II 8, bte 2, 1000 Bruxelles,{" "}
+              <a href="mailto:ombudsman@ombudsfin.be" style={{ color: "#249E7C" }}>ombudsman@ombudsfin.be</a>,{" "}
+              <a href="https://www.ombudsfin.be" target="_blank" rel="noopener noreferrer" style={{ color: "#249E7C" }}>www.ombudsfin.be</a>.
             </Row>
             <p style={{ fontSize: 14, color: "#5A6275", lineHeight: 1.7, margin: "18px 0 0" }}>
               Les hypothèses de simulation affichées sur la plateforme (apport, durée, taux, TAEG) sont fournies par

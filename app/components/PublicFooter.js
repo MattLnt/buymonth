@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LogoBuyMonth from "@/app/components/LogoBuyMonth";
 import { IDENTIFICATION_FINANCE, IDENTIFICATION_FINANCE_COURTE } from "@/lib/mensualiteConfig";
 
 export default function PublicFooter() {
@@ -22,7 +23,7 @@ export default function PublicFooter() {
         <div className="footer-grid" style={{ maxWidth: 1100, margin: "0 auto", padding: "64px 48px 48px", display: "grid", gridTemplateColumns: "2fr 1fr 1.6fr", gap: 48 }}>
 
           <div className="footer-brand">
-            <img src="/logo-buymonth.svg" alt="BuyMonth" style={{ height: 120, width: "auto", display: "block", filter: "brightness(0) invert(1)", marginBottom: 16 }} />
+            <span style={{ display: "block", marginBottom: 16 }}><LogoBuyMonth height={62} blanc /></span>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.8, margin: "0 0 20px", maxWidth: 300 }}>
               Trouvez le bien qui correspond à votre budget mensuel, pas à un prix affiché.
             </p>

@@ -133,6 +133,12 @@ model Lead {
   telephone       String?
   revenu          Int?
   apport          Int?
+  // Consentements RGPD, recueillis par deux cases distinctes et facultatives
+  // (annexe 1 du dossier client du 05/10/2026). Aucune n'est requise pour
+  // afficher le resultat de la simulation.
+  consentPromoteur Boolean  @default(false)
+  consentFinance   Boolean  @default(false)
+  consentAt        DateTime?
   source          String
   statutPromoteur String    @default("À contacter")
   statutAdmin     String    @default("À contacter")

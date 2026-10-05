@@ -8,9 +8,11 @@ export const dynamic = 'force-dynamic'
 export default async function ClientLeadsPage() {
   const client = await getCurrentClient()
 
-  // Conformité : on ne requête JAMAIS revenu/apport côté promoteur (réservés à l'admin)
+  // Conformité : on ne requête JAMAIS revenu/apport côté promoteur (réservés à l'admin).
+  // Et un lead n'est visible par le promoteur que si le visiteur a coché la case
+  // autorisant la transmission de ses coordonnées (annexe 1 du dossier du 05/10/2026).
   const leads = await prisma.lead.findMany({
-    where: { bien: { clientId: client.id }, deletedAt: null },
+    where: { bien: { clientId: client.id }, deletedAt: null, consentPromoteur: true },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
