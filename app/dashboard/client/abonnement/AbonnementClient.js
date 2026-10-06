@@ -16,6 +16,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { GestionAbonnement } from './GestionAbonnement'
 
 const TARIF = { PRO: 39, PRO_PLUS: 45 }
 const RANG = { PRO: 0, PRO_PLUS: 1 }
@@ -115,14 +116,10 @@ export function AbonnementClient({
     window.location.href = '/dashboard/client/abonnement/checkout'
   }
 
-  async function gerer() {
-    setLoading('portal'); setError('')
-    try {
-      const res = await fetch('/api/stripe/portal', { method: 'POST' })
-      const data = await res.json()
-      if (data.url) { window.location.href = data.url; return }
-      setError(data.error || 'Erreur.'); setLoading('')
-    } catch { setError('Erreur réseau.'); setLoading('') }
+  // Plus de renvoi vers le portail Stripe : tout se gere dans la section
+  // « Gerer mon abonnement », en bas de cette page.
+  function gerer() {
+    document.getElementById('gestion-abonnement')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   async function changerFormule(cible) {
@@ -161,7 +158,7 @@ export function AbonnementClient({
       sousTitre = nbFactures > 0
         ? `${nbFactures > 1 ? 'Ils apparaissent' : 'Il apparaît'} sur la vitrine, dans les résultats de recherche et dans vos widgets.`
         : "Mettez un bien en ligne pour qu'il soit diffusé. Sans bien en ligne, rien ne vous est facturé."
-      bouton = loading === 'portal' ? 'Ouverture…' : 'Gérer mon abonnement'
+      bouton = 'Gérer mon abonnement'
       action = gerer
       tonBouton = 'clair'
     } else if (enRetard) {
@@ -172,7 +169,7 @@ export function AbonnementClient({
       sousTitre = dansGrace
         ? `Vos biens restent en ligne jusqu'au ${formatDate(finGrace)}. Mettez votre moyen de paiement à jour avant cette date pour qu'ils y restent.`
         : "Le délai de régularisation est dépassé et vos biens ont été retirés du site. Ils reviendront en ligne dès que le paiement sera régularisé."
-      bouton = loading === 'portal' ? 'Ouverture…' : 'Régulariser mon paiement'
+      bouton = 'Régulariser mon paiement'
       action = gerer
       tonBouton = 'alerte'
     } else if (nbFactures > 0) {
@@ -207,10 +204,10 @@ export function AbonnementClient({
             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.65, maxWidth: 520 }}>{sousTitre}</p>
           </div>
 
-          <button onClick={action} disabled={loading === 'portal'}
+          <button onClick={action}
             style={{
               padding: '15px 26px', borderRadius: 12, background: fondBouton, color: texteBouton,
-              border: 'none', fontSize: 14.5, fontWeight: 700, cursor: loading === 'portal' ? 'wait' : 'pointer',
+              border: 'none', fontSize: 14.5, fontWeight: 700, cursor: 'pointer',
               flexShrink: 0, whiteSpace: 'nowrap',
             }}>
             {bouton}
@@ -357,12 +354,7 @@ export function AbonnementClient({
           </p>
         </div>
 
-        {estActif && (
-          <button onClick={gerer} disabled={loading === 'portal'}
-            style={{ width: '100%', marginTop: 16, padding: '12px', borderRadius: 10, background: '#F5F8FB', color: NAVY, border: '1px solid #E6EDF4', fontSize: 13.5, fontWeight: 600, cursor: loading === 'portal' ? 'wait' : 'pointer' }}>
-            {loading === 'portal' ? 'Ouverture…' : 'Moyen de paiement, factures et résiliation'}
-          </button>
-        )}
+
       </div>
     )
   }
@@ -492,6 +484,10 @@ export function AbonnementClient({
           <CarteFormule cle="PRO" />
           <CarteFormule cle="PRO_PLUS" />
         </div>
+      </div>
+
+      <div id="gestion-abonnement" style={{ scrollMarginTop: 90 }}>
+        <GestionAbonnement actif={estActif || enRetard} />
       </div>
 
       <p style={{ fontSize: 12, color: '#A9B0BE', margin: '24px 0 0', lineHeight: 1.6, textAlign: 'center' }}>
