@@ -2,7 +2,7 @@ import { getCurrentClient } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/app/components/dashboard/Ui'
 import { AbonnementClient } from './AbonnementClient'
-import { decompteFacturation } from '@/lib/facturation'
+import { decompteFacturation, prochainPremierDuMois } from '@/lib/facturation'
 import { stripe, PRICE_PRO, PRICE_PRO_PLUS } from '@/lib/stripe'
 
 export const dynamic = 'force-dynamic'
@@ -26,6 +26,14 @@ export default async function AbonnementPage({ searchParams }) {
     select: { statut: true },
   })
   const facturation = decompteFacturation(biens, client.formule)
+
+  // Facturation ancree au 1er du mois (dossier V9, partie 8.1). Le mois partiel
+  // entre l'activation et ce 1er est facture au prorata : on l'estime ici pour
+  // que le promoteur sache ce qu'il va payer avant de cliquer.
+  const ancrageMs = prochainPremierDuMois() * 1000
+  const joursDuMois = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
+  const joursRestants = Math.max(1, Math.ceil((ancrageMs - Date.now()) / 86400000))
+  const prorata = Math.round((facturation.montantMensuel * joursRestants) / joursDuMois)
 
   // On lit tout depuis la base (rempli à la création + par le webhook) → instantané
   const details = client.stripeSubId ? {
@@ -85,6 +93,9 @@ export default async function AbonnementPage({ searchParams }) {
         createdAt={client.createdAt}
         facturation={facturation}
         changementProgramme={changementProgramme}
+        premierPrelevement={ancrageMs}
+        joursRestants={joursRestants}
+        prorata={prorata}
       />
     </>
   )

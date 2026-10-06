@@ -44,7 +44,7 @@ function euro(n) {
   return (n || 0).toLocaleString('fr-BE') + ' €'
 }
 
-export function AbonnementClient({ subStatus, formule = 'PRO', details, createdAt, facturation, changementProgramme = null }) {
+export function AbonnementClient({ subStatus, formule = 'PRO', details, createdAt, facturation, changementProgramme = null, premierPrelevement = null, joursRestants = 0, prorata = 0 }) {
   const router = useRouter()
   const [loading, setLoading] = useState('')
   const [error, setError] = useState('')
@@ -99,11 +99,18 @@ export function AbonnementClient({ subStatus, formule = 'PRO', details, createdA
     const coutMensuel = nbActifs * TARIF[cle]
 
     // Libellé du bouton selon la situation
+    // Sans abonnement, la formule « actuelle » n'est qu'une preselection : son bouton
+    // doit mener au paiement, sinon la carte est une impasse (bouton grise).
     let boutonLabel = null
-    if (!estActuelle) {
-      if (!estActif) boutonLabel = `Choisir ${FORMULE_LABEL[cle]}`
-      else if (estUpgrade) boutonLabel = `Passer à ${FORMULE_LABEL[cle]}`
-      else boutonLabel = `Revenir à ${FORMULE_LABEL[cle]}`
+    let boutonAction = null
+    if (estActuelle) {
+      if (!estActif) { boutonLabel = `S'abonner en ${FORMULE_LABEL[cle]}`; boutonAction = souscrire }
+    } else if (!estActif) {
+      boutonLabel = `Choisir ${FORMULE_LABEL[cle]}`; boutonAction = () => changerFormule(cle)
+    } else if (estUpgrade) {
+      boutonLabel = `Passer à ${FORMULE_LABEL[cle]}`; boutonAction = () => changerFormule(cle)
+    } else {
+      boutonLabel = `Revenir à ${FORMULE_LABEL[cle]}`; boutonAction = () => changerFormule(cle)
     }
 
     return (
@@ -118,7 +125,7 @@ export function AbonnementClient({ subStatus, formule = 'PRO', details, createdA
           <span style={{ position: 'absolute', top: 18, right: 18, background: 'rgba(78,125,212,0.12)', color: '#4E7DD4', fontSize: 10.5, fontWeight: 700, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.04em' }}>PREMIUM</span>
         )}
         {estActuelle && (
-          <span style={{ position: 'absolute', top: 18, right: 18, background: 'rgba(124,184,168,0.2)', color: '#7CB8A8', fontSize: 10.5, fontWeight: 700, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.04em' }}>VOTRE FORMULE</span>
+          <span style={{ position: 'absolute', top: 18, right: 18, background: 'rgba(124,184,168,0.2)', color: '#7CB8A8', fontSize: 10.5, fontWeight: 700, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.04em' }}>{estActif ? 'VOTRE FORMULE' : 'FORMULE SÉLECTIONNÉE'}</span>
         )}
 
         <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.05em', color: estActuelle ? '#7CB8A8' : (proPlus ? '#4E7DD4' : '#8A92A6'), marginBottom: 10 }}>
@@ -148,7 +155,7 @@ export function AbonnementClient({ subStatus, formule = 'PRO', details, createdA
 
         {boutonLabel ? (
           <button
-            onClick={() => changerFormule(cle)}
+            onClick={boutonAction}
             disabled={loading === cle}
             style={{
               width: '100%', padding: '13px', borderRadius: 11, border: 'none',
@@ -216,13 +223,36 @@ export function AbonnementClient({ subStatus, formule = 'PRO', details, createdA
                 {statut.label}
               </span>
             </div>
+            {/* Sans abonnement, le montant est une projection : le dire, sinon le
+                promoteur croit qu'il doit deja cette somme. */}
+            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginBottom: 2, fontWeight: 600, letterSpacing: '0.02em' }}>
+              {estActif ? 'Montant prélevé chaque mois' : 'Ce que coûtera votre abonnement'}
+            </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
               <span style={{ fontSize: 46, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{euro(f.montantMensuel)}</span>
               <span style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)' }}>/ mois HTVA</span>
             </div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
-              {f.actifs} bien{f.actifs > 1 ? 's' : ''} actif{f.actifs > 1 ? 's' : ''} × {euro(f.unitaire)} / mois
+              {f.actifs} bien{f.actifs > 1 ? 's' : ''} en ligne × {euro(f.unitaire)} / mois
             </div>
+
+            {/* Quand et combien : la question que tout le monde se pose en premier. */}
+            {premierPrelevement && (
+              <div style={{ marginTop: 16, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '12px 15px', maxWidth: 460 }}>
+                {estActif ? (
+                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>
+                    Prochain prélèvement le <strong style={{ color: '#fff' }}>{formatDate(premierPrelevement)}</strong>, puis le 1er de chaque mois.
+                    Le montant suit le nombre de biens en ligne ce jour-là.
+                  </span>
+                ) : (
+                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>
+                    En activant aujourd'hui, vous payez <strong style={{ color: '#fff' }}>{euro(prorata)} HTVA</strong> pour
+                    {' '}les {joursRestants} jour{joursRestants > 1 ? 's' : ''} restant{joursRestants > 1 ? 's' : ''} du mois,
+                    puis <strong style={{ color: '#fff' }}>{euro(f.montantMensuel)}</strong> le {formatDate(premierPrelevement)} et le 1er de chaque mois.
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 200 }}>
@@ -232,7 +262,7 @@ export function AbonnementClient({ subStatus, formule = 'PRO', details, createdA
               </button>
             ) : (
               <button onClick={souscrire} style={{ padding: '13px 22px', borderRadius: 11, background: '#7CB8A8', color: '#0F2A22', border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
-                S'abonner maintenant
+                Activer mon abonnement
               </button>
             )}
           </div>
@@ -268,10 +298,11 @@ export function AbonnementClient({ subStatus, formule = 'PRO', details, createdA
             {[
               { label: 'Statut', node: <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 700, color: statut.color }}><span style={{ width: 7, height: 7, borderRadius: '50%', background: statut.dot }} />{statut.label}</span> },
               { label: 'Formule', value: f.formuleLabel },
-              { label: 'Biens facturés', value: `${f.actifs} / ${f.total}` },
+              { label: 'Biens facturés', value: `${f.actifs} sur ${f.total} biens` },
               { label: 'Tarif par bien', value: `${euro(f.unitaire)} / mois` },
               { label: 'Total mensuel', value: `${euro(f.montantMensuel)} HTVA`, strong: true },
               subStatus === 'trialing' && details?.trialEnd && { label: 'Fin de l\'essai', value: formatDate(details.trialEnd) },
+              !estActif && premierPrelevement && { label: 'Premier prélèvement complet', value: formatDate(premierPrelevement) },
               estActif && !resiliationProgrammee && { label: 'Prochain prélèvement', value: formatDate(details?.currentPeriodEnd) },
               resiliationProgrammee && { label: 'Fin d\'accès', value: formatDate(details?.cancelAt || details?.currentPeriodEnd), color: '#E5484D' },
               { label: 'Membre depuis', value: formatDate(new Date(createdAt).getTime()) },
@@ -309,7 +340,7 @@ export function AbonnementClient({ subStatus, formule = 'PRO', details, createdA
       </div>
 
       <p style={{ fontSize: 12, color: '#A9B0BE', margin: '22px 0 0', lineHeight: 1.5, textAlign: 'center' }}>
-        Vous ne payez que vos biens actifs — un bien vendu ou hors-ligne sort automatiquement du décompte. Paiement sécurisé via Stripe.
+        L'abonnement se paie le 1er de chaque mois, sur le nombre de biens en ligne à cette date. Un bien vendu ou passé hors ligne sort du décompte et n'est plus facturé le mois suivant. Paiement sécurisé via Stripe.
       </p>
     </div>
   )

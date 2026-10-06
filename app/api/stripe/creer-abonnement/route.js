@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe, priceForFormule } from '@/lib/stripe'
-import { STATUTS_FACTURABLES } from '@/lib/facturation'
+import { STATUTS_FACTURABLES, prochainPremierDuMois } from '@/lib/facturation'
 import { getSettings } from '@/lib/settings'
 
 export async function POST(req) {
@@ -39,14 +39,30 @@ export async function POST(req) {
     const settings = await getSettings()
     const avecEssai = settings.essaiActif && settings.essaiJours > 0
 
+    // Le cycle est ancre au 1er du mois pour tout le monde (dossier V9, partie 8.1).
+    // Le mois partiel entre l'inscription et ce 1er est facture au prorata.
+    const ancrage = prochainPremierDuMois()
+
     const subData = {
       customer: customerId,
       items: [{ price, quantity: quantite }],
       default_payment_method: paymentMethodId,
       payment_settings: { payment_method_types: ['card'] },
       metadata: { clientId: client.id, formule: client.formule },
+      billing_cycle_anchor: ancrage,
+      proration_behavior: 'create_prorations',
     }
-    if (avecEssai) subData.trial_period_days = settings.essaiJours
+    if (avecEssai) {
+      // Un essai et un ancrage ne se combinent pas : l'essai fixe lui-meme le debut
+      // du cycle. On fait donc tomber la fin d'essai sur un 1er du mois, en laissant
+      // au moins le nombre de jours accorde par l'admin.
+      const minimum = Date.now() + settings.essaiJours * 24 * 60 * 60 * 1000
+      let fin = ancrage
+      while (fin * 1000 < minimum) fin = prochainPremierDuMois(new Date(fin * 1000))
+      subData.trial_end = fin
+      delete subData.billing_cycle_anchor
+      delete subData.proration_behavior
+    }
 
     const sub = await stripe.subscriptions.create(subData)
 
