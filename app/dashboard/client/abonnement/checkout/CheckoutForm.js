@@ -22,26 +22,31 @@ function InnerForm() {
     if (!stripe || !elements) return
     setLoading(true); setError('')
 
-    // 1. Confirmer le SetupIntent (enregistre + valide la carte, sans débiter)
+    // 1. Confirmer le SetupIntent (enregistre le moyen de paiement, sans debiter)
     const { error: setupError, setupIntent } = await stripe.confirmSetup({
       elements,
       redirect: 'if_required',
+      confirmParams: {
+        // Exigee des qu'un moyen de paiement peut rediriger : certaines banques
+        // demandent une confirmation de leur cote pour un mandat SEPA.
+        return_url: `${window.location.origin}/dashboard/client/abonnement?success=1`,
+      },
     })
 
     if (setupError) {
-      setError(setupError.message || 'La carte n\'a pas pu être validée.')
+      setError(setupError.message || "Votre moyen de paiement n’a pas pu être validé.")
       setLoading(false)
       return
     }
 
     const paymentMethodId = setupIntent?.payment_method
     if (!paymentMethodId) {
-      setError('Carte non enregistrée. Réessayez.')
+      setError("Moyen de paiement non enregistré. Réessayez.")
       setLoading(false)
       return
     }
 
-    // 2. Créer l'abonnement avec cette carte
+    // 2. Creer l'abonnement avec ce moyen de paiement
     try {
       const res = await fetch('/api/stripe/creer-abonnement', {
         method: 'POST',
@@ -63,7 +68,15 @@ function InnerForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <PaymentElement options={{ layout: 'tabs', wallets: { applePay: 'never', googlePay: 'never', link: 'never' } }} />
+      {/* billingDetails en 'auto' : le PaymentElement reclame de lui-meme le nom,
+          l'e-mail et l'adresse, obligatoires pour un mandat SEPA. */}
+      <PaymentElement
+        options={{
+          layout: 'tabs',
+          wallets: { applePay: 'never', googlePay: 'never', link: 'never' },
+          fields: { billingDetails: 'auto' },
+        }}
+      />
 
       {error && (
         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#ef4444', fontSize: 13, borderRadius: 10, padding: '12px 14px', marginTop: 18 }}>
@@ -128,7 +141,7 @@ export function CheckoutForm({ facturation = null }) {
       {/* Paiement */}
       <div style={card}>
         <h2 style={{ fontSize: 18, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>Informations de paiement</h2>
-        <p style={{ fontSize: 13.5, color: '#8A92A6', margin: '0 0 24px' }}>Renseignez votre carte pour activer votre abonnement.</p>
+        <p style={{ fontSize: 13.5, color: '#8A92A6', margin: '0 0 24px' }}>Carte bancaire ou domiciliation SEPA. Rien n&rsquo;est prélevé aujourd&rsquo;hui : votre première facture tombe le 1er du mois.</p>
 
         {error && (
           <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#ef4444', fontSize: 13.5, borderRadius: 10, padding: '14px 16px' }}>{error}</div>

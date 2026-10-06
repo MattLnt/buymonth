@@ -29,10 +29,11 @@ export async function POST() {
       await prisma.client.update({ where: { id: client.id }, data: { stripeCustomerId: customerId } })
     }
 
-    // SetupIntent limité à la carte bancaire uniquement
+    // Carte bancaire et domiciliation SEPA. Le mandat SEPA est presente et signe
+    // par le PaymentElement cote navigateur, il n'y a pas de document a produire.
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
-      payment_method_types: ['card'],
+      payment_method_types: ['card', 'sepa_debit'],
       metadata: { clientId: client.id },
     })
 

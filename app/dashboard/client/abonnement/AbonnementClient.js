@@ -360,7 +360,7 @@ export function AbonnementClient({
         {estActif && (
           <button onClick={gerer} disabled={loading === 'portal'}
             style={{ width: '100%', marginTop: 16, padding: '12px', borderRadius: 10, background: '#F5F8FB', color: NAVY, border: '1px solid #E6EDF4', fontSize: 13.5, fontWeight: 600, cursor: loading === 'portal' ? 'wait' : 'pointer' }}>
-            {loading === 'portal' ? 'Ouverture…' : 'Carte bancaire, factures et résiliation'}
+            {loading === 'portal' ? 'Ouverture…' : 'Moyen de paiement, factures et résiliation'}
           </button>
         )}
       </div>

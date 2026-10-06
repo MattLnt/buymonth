@@ -79,7 +79,7 @@ export async function POST(req) {
       customer: customerId,
       items: [{ price, quantity: quantite }],
       default_payment_method: paymentMethodId,
-      payment_settings: { payment_method_types: ['card'] },
+      payment_settings: { payment_method_types: ['card', 'sepa_debit'] },
       metadata: { clientId: client.id, formule: client.formule },
       trial_end: finPeriodeSansFacture,
       proration_behavior: 'none',
