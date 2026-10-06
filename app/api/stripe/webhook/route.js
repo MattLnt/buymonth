@@ -16,7 +16,9 @@ export async function POST(req) {
   if (!stripe) return NextResponse.json({ error: 'Stripe non configuré.' }, { status: 500 })
 
   const sig = req.headers.get('stripe-signature')
-  const secret = process.env.STRIPE_WEBHOOK_SECRET
+  // Meme precaution que dans lib/stripe.js : une espace en trop ferait echouer
+  // la verification de signature, et la panne serait silencieuse.
+  const secret = process.env.STRIPE_WEBHOOK_SECRET?.trim()
   const body = await req.text()
 
   let event
