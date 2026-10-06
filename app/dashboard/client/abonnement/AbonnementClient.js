@@ -1,21 +1,26 @@
 'use client'
 
+/*
+ * Page Abonnement du promoteur — refonte du 06/10/2026.
+ *
+ * L'ancienne version ouvrait sur un gros montant mensuel. Le promoteur voyait
+ * « 135 € / mois » juste a cote de « Aucun abonnement » et ne faisait pas le lien
+ * avec le fait que ses biens n'etaient pas diffuses : il ne savait pas ce qu'on
+ * attendait de lui.
+ *
+ * Principe retenu : on ouvre sur la CONSEQUENCE (« vos biens ne sont pas encore
+ * visibles »), pas sur le prix. L'action devient evidente, le prix vient ensuite
+ * pour la justifier. Une seule action principale par etat.
+ */
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
-const STATUT_LABEL = {
-  active: { label: 'Actif', color: '#249E7C', bg: 'rgba(36,158,124,0.12)', dot: '#249E7C' },
-  trialing: { label: 'Période d\'essai', color: '#5B8DEF', bg: 'rgba(91,141,239,0.12)', dot: '#5B8DEF' },
-  past_due: { label: 'Paiement en retard', color: '#E89923', bg: 'rgba(232,153,35,0.12)', dot: '#E89923' },
-  canceled: { label: 'Annulé', color: '#E5484D', bg: 'rgba(229,72,77,0.12)', dot: '#E5484D' },
-  none: { label: 'Aucun abonnement', color: '#8A92A6', bg: '#F2F5FA', dot: '#8A92A6' },
-}
-
-// Tarifs (doivent rester alignés sur lib/facturation.js)
 const TARIF = { PRO: 39, PRO_PLUS: 45 }
 const RANG = { PRO: 0, PRO_PLUS: 1 }
+const FORMULE_LABEL = { PRO: 'BuyMonth Pro', PRO_PLUS: 'BuyMonth Pro+' }
 
-// Features par formule (source : dossier BLOC 8)
 const FEATURES = {
   PRO: [
     'Plateforme de gestion du portefeuille',
@@ -33,29 +38,74 @@ const FEATURES = {
   ],
 }
 
-const FORMULE_LABEL = { PRO: 'BuyMonth Pro', PRO_PLUS: 'BuyMonth Pro+' }
+// Statuts de bien, et si le statut entre dans la facturation
+const STATUTS = [
+  { cle: 'ACTIF', label: 'disponibles', facture: true, couleur: '#249E7C' },
+  { cle: 'OPTION', label: 'sous option', facture: true, couleur: '#E89923' },
+  { cle: 'HORS_LIGNE', label: 'hors ligne', facture: false, couleur: '#8A92A6' },
+  { cle: 'VENDU', label: 'vendus', facture: false, couleur: '#5A6B7D' },
+]
+
+const NAVY = '#193B5E'
 
 function formatDate(ms) {
   if (!ms) return '—'
-  return new Date(ms).toLocaleDateString('fr-BE', { day: '2-digit', month: 'long', year: 'numeric' })
+  return new Date(ms).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 function euro(n) {
   return (n || 0).toLocaleString('fr-BE') + ' €'
 }
 
-export function AbonnementClient({ subStatus, formule = 'PRO', details, createdAt, facturation, changementProgramme = null, premierPrelevement = null, joursRestants = 0, prorata = 0 }) {
+const carte = { background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 26 }
+
+function Check({ couleur = '#249E7C', fond = 'rgba(36,158,124,0.1)' }) {
+  return (
+    <span style={{ width: 18, height: 18, borderRadius: '50%', background: fond, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={couleur} strokeWidth="3.5"><polyline points="20 6 9 17 4 12" /></svg>
+    </span>
+  )
+}
+
+function Bandeau({ ton, children }) {
+  const tons = {
+    info: { bg: 'rgba(78,125,212,0.08)', bd: 'rgba(78,125,212,0.3)', fg: '#2E5AA8' },
+    succes: { bg: 'rgba(36,158,124,0.1)', bd: 'rgba(36,158,124,0.25)', fg: '#1B7A5E' },
+    alerte: { bg: '#FFF7ED', bd: '#FED7AA', fg: '#C2620C' },
+    erreur: { bg: 'rgba(229,72,77,0.08)', bd: 'rgba(229,72,77,0.2)', fg: '#E5484D' },
+  }
+  const t = tons[ton] || tons.info
+  return (
+    <div style={{ background: t.bg, border: `1px solid ${t.bd}`, borderRadius: 12, padding: '14px 18px', marginBottom: 18 }}>
+      <span style={{ fontSize: 13.5, fontWeight: 600, color: t.fg, lineHeight: 1.6 }}>{children}</span>
+    </div>
+  )
+}
+
+export function AbonnementClient({
+  subStatus,
+  formule = 'PRO',
+  details,
+  createdAt,
+  facturation,
+  changementProgramme = null,
+  premierPrelevement = null,
+  joursRestants = 0,
+  prorata = 0,
+}) {
   const router = useRouter()
   const [loading, setLoading] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
-  const statut = STATUT_LABEL[subStatus] || STATUT_LABEL.none
   const estActif = subStatus === 'active' || subStatus === 'trialing'
-  const resiliationProgrammee = details?.cancelAtPeriodEnd
+  const enRetard = subStatus === 'past_due'
+  const resiliation = details?.cancelAtPeriodEnd
 
-  const f = facturation || { formuleLabel: 'BuyMonth Pro', actifs: 0, total: 0, unitaire: 39, montantMensuel: 0, surMesure: false }
-  const nbActifs = f.actifs || 0
+  const f = facturation || { formuleLabel: 'BuyMonth Pro', actifs: 0, total: 0, unitaire: 39, montantMensuel: 0, surMesure: false, parStatut: {} }
+  const nbFactures = f.actifs || 0
+  const parStatut = f.parStatut || {}
+  const nbNonFactures = Math.max(0, (f.total || 0) - nbFactures)
 
   function souscrire() {
     window.location.href = '/dashboard/client/abonnement/checkout'
@@ -89,258 +139,345 @@ export function AbonnementClient({ subStatus, formule = 'PRO', details, createdA
     }
   }
 
-  const card = { background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 26 }
+  /* --------------------------------------------------------------- *
+   * Bloc principal — ce qu'il faut comprendre en trois secondes
+   * --------------------------------------------------------------- */
+  function BlocPrincipal() {
+    // Le titre parle toujours des BIENS, jamais de l'abonnement :
+    // c'est ce qui rend l'action a faire evidente.
+    let eyebrow, titre, sousTitre, bouton, action, tonBouton
 
-  // Rendu d'une carte de formule (comparaison)
-  function CarteFormule({ cle }) {
-    const estActuelle = formule === cle
-    const estUpgrade = RANG[cle] > RANG[formule]
-    const proPlus = cle === 'PRO_PLUS'
-    const coutMensuel = nbActifs * TARIF[cle]
-
-    // Libellé du bouton selon la situation
-    // Sans abonnement, la formule « actuelle » n'est qu'une preselection : son bouton
-    // doit mener au paiement, sinon la carte est une impasse (bouton grise).
-    let boutonLabel = null
-    let boutonAction = null
-    if (estActuelle) {
-      if (!estActif) { boutonLabel = `S'abonner en ${FORMULE_LABEL[cle]}`; boutonAction = souscrire }
-    } else if (!estActif) {
-      boutonLabel = `Choisir ${FORMULE_LABEL[cle]}`; boutonAction = () => changerFormule(cle)
-    } else if (estUpgrade) {
-      boutonLabel = `Passer à ${FORMULE_LABEL[cle]}`; boutonAction = () => changerFormule(cle)
+    if (estActif) {
+      eyebrow = subStatus === 'trialing' ? "PÉRIODE D'ESSAI" : 'ABONNEMENT ACTIF'
+      titre = nbFactures > 0
+        ? `Vos ${nbFactures} bien${nbFactures > 1 ? 's sont diffusés' : ' est diffusé'} sur BuyMonth`
+        : 'Votre abonnement est actif'
+      sousTitre = nbFactures > 0
+        ? 'Ils apparaissent sur la vitrine, dans les résultats de recherche et dans vos widgets.'
+        : "Mettez un bien en ligne pour qu'il soit diffusé. Sans bien en ligne, rien ne vous est facturé."
+      bouton = loading === 'portal' ? 'Ouverture…' : 'Gérer mon abonnement'
+      action = gerer
+      tonBouton = 'clair'
+    } else if (enRetard) {
+      eyebrow = 'PAIEMENT EN ÉCHEC'
+      titre = 'Vos biens ne sont plus diffusés'
+      sousTitre = "Le dernier prélèvement n'a pas abouti. Mettez votre moyen de paiement à jour pour les remettre en ligne."
+      bouton = loading === 'portal' ? 'Ouverture…' : 'Mettre à jour mon paiement'
+      action = gerer
+      tonBouton = 'alerte'
+    } else if (nbFactures > 0) {
+      eyebrow = 'ACTIVATION REQUISE'
+      titre = `Vos ${nbFactures} bien${nbFactures > 1 ? 's ne sont pas encore visibles' : " n'est pas encore visible"}`
+      sousTitre = 'Activez votre abonnement pour les publier sur la vitrine BuyMonth et commencer à recevoir des leads.'
+      bouton = 'Activer mon abonnement'
+      action = souscrire
+      tonBouton = 'vert'
     } else {
-      boutonLabel = `Revenir à ${FORMULE_LABEL[cle]}`; boutonAction = () => changerFormule(cle)
+      eyebrow = 'AUCUN BIEN EN LIGNE'
+      titre = 'Ajoutez un bien pour commencer'
+      sousTitre = "L'abonnement se calcule sur vos biens en ligne. Tant que vous n'en avez aucun, il n'y a rien à payer et rien à activer."
+      bouton = 'Ajouter un bien'
+      action = () => { window.location.href = '/dashboard/client/biens/nouveau' }
+      tonBouton = 'vert'
     }
 
+    const fondBouton = tonBouton === 'clair' ? '#fff' : tonBouton === 'alerte' ? '#E89923' : '#7CB8A8'
+    const texteBouton = tonBouton === 'clair' ? '#16324F' : tonBouton === 'alerte' ? '#fff' : '#0F2A22'
+
     return (
-      <div style={{
-        position: 'relative',
-        background: estActuelle ? 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)' : '#fff',
-        border: estActuelle ? 'none' : `1.5px solid ${proPlus ? 'rgba(78,125,212,0.35)' : '#EEF2F7'}`,
-        borderRadius: 18, padding: 26, overflow: 'hidden',
-        display: 'flex', flexDirection: 'column',
-      }}>
-        {proPlus && !estActuelle && (
-          <span style={{ position: 'absolute', top: 18, right: 18, background: 'rgba(78,125,212,0.12)', color: '#4E7DD4', fontSize: 10.5, fontWeight: 700, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.04em' }}>PREMIUM</span>
-        )}
-        {estActuelle && (
-          <span style={{ position: 'absolute', top: 18, right: 18, background: 'rgba(124,184,168,0.2)', color: '#7CB8A8', fontSize: 10.5, fontWeight: 700, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.04em' }}>{estActif ? 'VOTRE FORMULE' : 'FORMULE SÉLECTIONNÉE'}</span>
-        )}
+      <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 18, padding: 30, position: 'relative', overflow: 'hidden', marginBottom: 20 }}>
+        <div style={{ position: 'absolute', top: -60, right: -50, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.2) 0%, transparent 65%)', pointerEvents: 'none' }} />
 
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.05em', color: estActuelle ? '#7CB8A8' : (proPlus ? '#4E7DD4' : '#8A92A6'), marginBottom: 10 }}>
-          {FORMULE_LABEL[cle].toUpperCase()}
-        </div>
+        <div className="abo-hero" style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 28, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 250 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#7CB8A8', letterSpacing: '0.09em', marginBottom: 10 }}>{eyebrow}</div>
+            <h2 style={{ fontSize: 26, fontWeight: 700, color: '#fff', margin: '0 0 8px', letterSpacing: '-0.02em', lineHeight: 1.25 }}>{titre}</h2>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.65, maxWidth: 520 }}>{sousTitre}</p>
+          </div>
 
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
-          <span style={{ fontSize: 34, fontWeight: 700, color: estActuelle ? '#fff' : '#193B5E', letterSpacing: '-0.02em' }}>{TARIF[cle]} €</span>
-          <span style={{ fontSize: 13, color: estActuelle ? 'rgba(255,255,255,0.6)' : '#8A92A6' }}>/ bien actif / mois HTVA</span>
-        </div>
-
-        {/* coût pour CE promoteur avec ses biens actifs */}
-        <div style={{ fontSize: 13, color: estActuelle ? 'rgba(255,255,255,0.75)' : '#5A6275', marginBottom: 18, fontWeight: 600 }}>
-          {nbActifs > 0 ? <>Avec vos {nbActifs} bien{nbActifs > 1 ? 's' : ''} actif{nbActifs > 1 ? 's' : ''} : {euro(coutMensuel)} / mois</> : 'Aucun bien actif pour le moment'}
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22, flex: 1 }}>
-          {FEATURES[cle].map((ft) => (
-            <div key={ft} style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
-              <span style={{ width: 18, height: 18, borderRadius: '50%', background: estActuelle ? 'rgba(124,184,168,0.22)' : (proPlus ? 'rgba(78,125,212,0.12)' : 'rgba(36,158,124,0.1)'), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={estActuelle ? '#7CB8A8' : (proPlus ? '#4E7DD4' : '#249E7C')} strokeWidth="3.5"><polyline points="20 6 9 17 4 12" /></svg>
-              </span>
-              <span style={{ fontSize: 13, color: estActuelle ? 'rgba(255,255,255,0.82)' : '#3D4759', lineHeight: 1.4 }}>{ft}</span>
-            </div>
-          ))}
-        </div>
-
-        {boutonLabel ? (
-          <button
-            onClick={boutonAction}
-            disabled={loading === cle}
+          <button onClick={action} disabled={loading === 'portal'}
             style={{
-              width: '100%', padding: '13px', borderRadius: 11, border: 'none',
-              background: proPlus ? '#4E7DD4' : '#193B5E', color: '#fff',
-              fontSize: 14, fontWeight: 700, cursor: loading === cle ? 'wait' : 'pointer',
-            }}
-          >
-            {loading === cle ? 'Traitement...' : boutonLabel}
+              padding: '15px 26px', borderRadius: 12, background: fondBouton, color: texteBouton,
+              border: 'none', fontSize: 14.5, fontWeight: 700, cursor: loading === 'portal' ? 'wait' : 'pointer',
+              flexShrink: 0, whiteSpace: 'nowrap',
+            }}>
+            {bouton}
           </button>
-        ) : (
-          <div style={{ width: '100%', padding: '13px', borderRadius: 11, background: 'rgba(124,184,168,0.15)', color: '#7CB8A8', fontSize: 13.5, fontWeight: 700, textAlign: 'center' }}>
-            Formule actuelle
+        </div>
+
+        {/* Le prix et la date viennent en second : ils justifient l'action, ils ne la remplacent pas */}
+        {nbFactures > 0 && (
+          <div className="abo-chiffres" style={{ position: 'relative', marginTop: 24, paddingTop: 22, borderTop: '1px solid rgba(255,255,255,0.12)', display: 'flex', gap: 40, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.04em' }}>
+                {estActif ? 'PRÉLEVÉ CHAQUE MOIS' : 'COÛT MENSUEL'}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
+                <span style={{ fontSize: 32, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{euro(f.montantMensuel)}</span>
+                <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.55)' }}>HTVA</span>
+              </div>
+              <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginTop: 3 }}>
+                {nbFactures} bien{nbFactures > 1 ? 's' : ''} × {euro(f.unitaire)}
+              </div>
+            </div>
+
+            {premierPrelevement && !enRetard && (
+              <div>
+                <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.04em' }}>
+                  {estActif ? 'PROCHAIN PRÉLÈVEMENT' : "À L'ACTIVATION, AUJOURD'HUI"}
+                </div>
+                {estActif ? (
+                  <>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>{formatDate(details?.currentPeriodEnd || premierPrelevement)}</div>
+                    <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginTop: 4 }}>puis le 1er de chaque mois</div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
+                      <span style={{ fontSize: 32, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{euro(prorata)}</span>
+                      <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.55)' }}>HTVA</span>
+                    </div>
+                    <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginTop: 3, maxWidth: 300, lineHeight: 1.5 }}>
+                      {joursRestants} jour{joursRestants > 1 ? 's' : ''} restant{joursRestants > 1 ? 's' : ''} du mois, puis {euro(f.montantMensuel)} le {formatDate(premierPrelevement)}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {f.surMesure && (
+          <div style={{ position: 'relative', marginTop: 18, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, padding: '10px 14px', fontSize: 12.5, color: 'rgba(255,255,255,0.8)' }}>
+            Au-delà de 125 biens en ligne, une offre sur mesure s&rsquo;applique — contactez-nous.
           </div>
         )}
       </div>
     )
   }
 
-  return (
-    <div>
-      {/* Bandeau changement de formule programmé (downgrade) */}
-      {changementProgramme && (
-        <div style={{ background: 'rgba(78,125,212,0.08)', border: '1px solid rgba(78,125,212,0.3)', borderRadius: 12, padding: '14px 18px', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4E7DD4" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-          <span style={{ fontSize: 13.5, fontWeight: 600, color: '#2E5AA8' }}>
-            Changement programmé : vous passerez en {changementProgramme.formuleCibleLabel}
-            {changementProgramme.dateEffet ? ` le ${formatDate(changementProgramme.dateEffet)}` : ' à la fin de votre période en cours'}.
-            D'ici là, vous conservez votre formule actuelle.
-          </span>
-        </div>
-      )}
+  /* --------------------------------------------------------------- *
+   * D'ou vient le montant — la question n°2 de tout promoteur
+   * --------------------------------------------------------------- */
+  function Decompte() {
+    const lignes = STATUTS.map((st) => ({ ...st, nb: parStatut[st.cle] || 0 })).filter((l) => l.nb > 0)
 
-      {/* Bandeau résiliation programmée */}
-      {resiliationProgrammee && (
-        <div style={{ background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 12, padding: '14px 18px', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C2620C" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-          <span style={{ fontSize: 13.5, fontWeight: 600, color: '#C2620C' }}>
-            Votre abonnement est résilié et prendra fin le {formatDate(details.cancelAt || details.currentPeriodEnd)}. Vous gardez l'accès jusqu'à cette date.
-          </span>
-        </div>
-      )}
+    return (
+      <div style={carte}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: NAVY, margin: '0 0 4px' }}>D&rsquo;où vient ce montant</h3>
+        <p style={{ fontSize: 12.5, color: '#8A92A6', margin: '0 0 18px', lineHeight: 1.6 }}>
+          Seuls les biens <strong style={{ color: '#5A6275' }}>disponibles</strong> et <strong style={{ color: '#5A6275' }}>sous option</strong> sont facturés.
+        </p>
 
-      {/* Messages de retour changement de formule */}
-      {message && (
-        <div style={{ background: 'rgba(36,158,124,0.1)', border: '1px solid rgba(36,158,124,0.25)', borderRadius: 12, padding: '14px 18px', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#249E7C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
-          <span style={{ fontSize: 14, fontWeight: 600, color: '#1B7A5E' }}>{message}</span>
-        </div>
-      )}
-      {error && (
-        <div style={{ background: 'rgba(229,72,77,0.08)', border: '1px solid rgba(229,72,77,0.2)', borderRadius: 12, padding: '14px 18px', marginBottom: 22 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: '#E5484D' }}>{error}</span>
-        </div>
-      )}
-
-      {/* ZONE 1 — Récap coût actuel */}
-      <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 18, padding: 28, position: 'relative', overflow: 'hidden', marginBottom: 22 }}>
-        <div style={{ position: 'absolute', top: -50, right: -40, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.2) 0%, transparent 65%)' }} />
-        <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 20 }}>
+        {lignes.length === 0 ? (
+          <p style={{ fontSize: 13.5, color: '#8A92A6', margin: 0 }}>Vous n&rsquo;avez pas encore de bien.</p>
+        ) : (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <span style={{ display: 'inline-block', background: 'rgba(124,184,168,0.18)', color: '#7CB8A8', fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 20, letterSpacing: '0.05em' }}>{f.formuleLabel.toUpperCase()}</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, color: statut.color, background: '#fff' }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: statut.dot }} />
-                {statut.label}
+            {lignes.map((l) => (
+              <div key={l.cle} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 0', borderBottom: '1px solid #F2F5FA' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 9, fontSize: 13.5, color: '#3D4759' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: l.couleur, flexShrink: 0 }} />
+                  {l.nb} bien{l.nb > 1 ? 's' : ''} {l.label}
+                </span>
+                <span style={{ fontSize: 13.5, fontWeight: 600, color: l.facture ? NAVY : '#A9B0BE' }}>
+                  {l.facture ? euro(l.nb * f.unitaire) : 'non facturé'}
+                </span>
+              </div>
+            ))}
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 15 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: NAVY }}>Total mensuel</span>
+              <span style={{ fontSize: 19, fontWeight: 700, color: NAVY, letterSpacing: '-0.01em' }}>
+                {euro(f.montantMensuel)} <span style={{ fontSize: 12.5, fontWeight: 600, color: '#8A92A6' }}>HTVA</span>
               </span>
             </div>
-            {/* Sans abonnement, le montant est une projection : le dire, sinon le
-                promoteur croit qu'il doit deja cette somme. */}
-            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginBottom: 2, fontWeight: 600, letterSpacing: '0.02em' }}>
-              {estActif ? 'Montant prélevé chaque mois' : 'Ce que coûtera votre abonnement'}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
-              <span style={{ fontSize: 46, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{euro(f.montantMensuel)}</span>
-              <span style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)' }}>/ mois HTVA</span>
-            </div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
-              {f.actifs} bien{f.actifs > 1 ? 's' : ''} en ligne × {euro(f.unitaire)} / mois
-            </div>
-
-            {/* Quand et combien : la question que tout le monde se pose en premier. */}
-            {premierPrelevement && (
-              <div style={{ marginTop: 16, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '12px 15px', maxWidth: 460 }}>
-                {estActif ? (
-                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>
-                    Prochain prélèvement le <strong style={{ color: '#fff' }}>{formatDate(premierPrelevement)}</strong>, puis le 1er de chaque mois.
-                    Le montant suit le nombre de biens en ligne ce jour-là.
-                  </span>
-                ) : (
-                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>
-                    En activant aujourd'hui, vous payez <strong style={{ color: '#fff' }}>{euro(prorata)} HTVA</strong> pour
-                    {' '}les {joursRestants} jour{joursRestants > 1 ? 's' : ''} restant{joursRestants > 1 ? 's' : ''} du mois,
-                    puis <strong style={{ color: '#fff' }}>{euro(f.montantMensuel)}</strong> le {formatDate(premierPrelevement)} et le 1er de chaque mois.
-                  </span>
-                )}
-              </div>
-            )}
           </div>
+        )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 200 }}>
-            {estActif ? (
-              <button onClick={gerer} disabled={loading === 'portal'} style={{ padding: '13px 22px', borderRadius: 11, background: '#fff', color: '#16324F', border: 'none', fontSize: 14, fontWeight: 700, cursor: loading === 'portal' ? 'wait' : 'pointer' }}>
-                {loading === 'portal' ? 'Ouverture...' : 'Gérer mon abonnement'}
-              </button>
-            ) : (
-              <button onClick={souscrire} style={{ padding: '13px 22px', borderRadius: 11, background: '#7CB8A8', color: '#0F2A22', border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
-                Activer mon abonnement
-              </button>
-            )}
+        {nbNonFactures > 0 && (
+          <p style={{ fontSize: 12, color: '#A9B0BE', margin: '14px 0 0', lineHeight: 1.55 }}>
+            {nbNonFactures} bien{nbNonFactures > 1 ? 's' : ''} hors ligne ou vendu{nbNonFactures > 1 ? 's' : ''} — ils restent dans votre espace mais ne vous coûtent rien.
+          </p>
+        )}
+
+        <Link href="/dashboard/client/biens" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16, fontSize: 13, fontWeight: 600, color: '#249E7C', textDecoration: 'none' }}>
+          Gérer mes biens
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
+        </Link>
+      </div>
+    )
+  }
+
+  /* --------------------------------------------------------------- *
+   * Recapitulatif administratif
+   * --------------------------------------------------------------- */
+  function Recap() {
+    const lignes = [
+      { label: 'Formule', value: f.formuleLabel },
+      { label: 'Tarif par bien', value: `${euro(f.unitaire)} / mois` },
+      subStatus === 'trialing' && details?.trialEnd && { label: "Fin de l'essai", value: formatDate(details.trialEnd) },
+      !estActif && !enRetard && premierPrelevement && { label: 'Premier mois complet', value: formatDate(premierPrelevement) },
+      estActif && !resiliation && { label: 'Prochain prélèvement', value: formatDate(details?.currentPeriodEnd || premierPrelevement) },
+      resiliation && { label: "Fin d'accès", value: formatDate(details?.cancelAt || details?.currentPeriodEnd), couleur: '#E5484D' },
+      { label: 'Client depuis', value: formatDate(new Date(createdAt).getTime()) },
+    ].filter(Boolean)
+
+    return (
+      <div style={carte}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: NAVY, margin: '0 0 18px' }}>Votre contrat</h3>
+        {lignes.map((l, i) => (
+          <div key={l.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: i < lignes.length - 1 ? '1px solid #F2F5FA' : 'none' }}>
+            <span style={{ fontSize: 13, color: '#8A92A6' }}>{l.label}</span>
+            <span style={{ fontSize: 13.5, fontWeight: 600, color: l.couleur || NAVY }}>{l.value}</span>
           </div>
+        ))}
+
+        <div style={{ marginTop: 16, padding: '12px 14px', background: '#FAFBFE', borderRadius: 10, border: '1px solid #F2F5FA' }}>
+          <p style={{ fontSize: 12, color: '#8A92A6', margin: 0, lineHeight: 1.6 }}>
+            L&rsquo;abonnement se paie le <strong style={{ color: '#5A6275' }}>1er de chaque mois</strong>, sur le nombre de biens en ligne à cette date.
+            Les frais de mise en service (1 490 € HTVA, une seule fois) sont facturés séparément, hors plateforme.
+          </p>
         </div>
 
-        {f.surMesure && (
-          <div style={{ position: 'relative', marginTop: 18, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, padding: '10px 14px', fontSize: 12.5, color: 'rgba(255,255,255,0.8)' }}>
-            Au-delà de 125 biens actifs, une offre sur mesure s'applique — contactez-nous.
+        {estActif && (
+          <button onClick={gerer} disabled={loading === 'portal'}
+            style={{ width: '100%', marginTop: 16, padding: '12px', borderRadius: 10, background: '#F5F8FB', color: NAVY, border: '1px solid #E6EDF4', fontSize: 13.5, fontWeight: 600, cursor: loading === 'portal' ? 'wait' : 'pointer' }}>
+            {loading === 'portal' ? 'Ouverture…' : 'Carte bancaire, factures et résiliation'}
+          </button>
+        )}
+      </div>
+    )
+  }
+
+  /* --------------------------------------------------------------- *
+   * Formules
+   * --------------------------------------------------------------- */
+  function CarteFormule({ cle }) {
+    const estLaSienne = formule === cle
+    const estUpgrade = RANG[cle] > RANG[formule]
+    const proPlus = cle === 'PRO_PLUS'
+    const cout = nbFactures * TARIF[cle]
+
+    // Sans abonnement, la formule « actuelle » n'est qu'une preselection :
+    // son bouton doit mener au paiement, sinon la carte est une impasse.
+    let label = null
+    let action = null
+    if (estLaSienne && !estActif) { label = `Activer avec ${FORMULE_LABEL[cle]}`; action = souscrire }
+    else if (!estLaSienne && !estActif) { label = `Choisir ${FORMULE_LABEL[cle]}`; action = () => changerFormule(cle) }
+    else if (!estLaSienne && estUpgrade) { label = `Passer à ${FORMULE_LABEL[cle]}`; action = () => changerFormule(cle) }
+    else if (!estLaSienne) { label = `Revenir à ${FORMULE_LABEL[cle]}`; action = () => changerFormule(cle) }
+
+    const badge = estLaSienne ? (estActif ? 'VOTRE FORMULE' : 'SÉLECTIONNÉE') : (proPlus ? 'PREMIUM' : null)
+
+    return (
+      <div style={{
+        position: 'relative', background: '#fff',
+        border: estLaSienne ? '2px solid #7CB8A8' : `1.5px solid ${proPlus ? 'rgba(78,125,212,0.3)' : '#EEF2F7'}`,
+        borderRadius: 18, padding: 26, display: 'flex', flexDirection: 'column',
+      }}>
+        {badge && (
+          <span style={{
+            position: 'absolute', top: 18, right: 18, fontSize: 10.5, fontWeight: 700, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.04em',
+            background: estLaSienne ? 'rgba(124,184,168,0.16)' : 'rgba(78,125,212,0.12)',
+            color: estLaSienne ? '#1B7A5E' : '#4E7DD4',
+          }}>{badge}</span>
+        )}
+
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.05em', color: proPlus ? '#4E7DD4' : '#8A92A6', marginBottom: 10 }}>
+          {FORMULE_LABEL[cle].toUpperCase()}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
+          <span style={{ fontSize: 34, fontWeight: 700, color: NAVY, letterSpacing: '-0.02em' }}>{TARIF[cle]} €</span>
+          <span style={{ fontSize: 13, color: '#8A92A6' }}>/ bien / mois HTVA</span>
+        </div>
+
+        <div style={{ fontSize: 13, color: '#5A6275', marginBottom: 20, fontWeight: 600, minHeight: 20 }}>
+          {nbFactures > 0
+            ? `Avec vos ${nbFactures} bien${nbFactures > 1 ? 's' : ''} en ligne : ${euro(cout)} / mois`
+            : 'Aucun bien en ligne pour le moment'}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22, flex: 1 }}>
+          {FEATURES[cle].map((ft) => (
+            <div key={ft} style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
+              <Check couleur={proPlus ? '#4E7DD4' : '#249E7C'} fond={proPlus ? 'rgba(78,125,212,0.12)' : 'rgba(36,158,124,0.1)'} />
+              <span style={{ fontSize: 13, color: '#3D4759', lineHeight: 1.45 }}>{ft}</span>
+            </div>
+          ))}
+        </div>
+
+        {label ? (
+          <button onClick={action} disabled={loading === cle}
+            style={{
+              width: '100%', padding: '13px', borderRadius: 11, border: 'none',
+              background: estLaSienne ? '#7CB8A8' : proPlus ? '#4E7DD4' : NAVY,
+              color: estLaSienne ? '#0F2A22' : '#fff',
+              fontSize: 14, fontWeight: 700, cursor: loading === cle ? 'wait' : 'pointer',
+            }}>
+            {loading === cle ? 'Traitement…' : label}
+          </button>
+        ) : (
+          <div style={{ width: '100%', padding: '13px', borderRadius: 11, background: 'rgba(124,184,168,0.12)', color: '#1B7A5E', fontSize: 13.5, fontWeight: 700, textAlign: 'center' }}>
+            Formule en cours
           </div>
         )}
       </div>
+    )
+  }
 
-      {/* ZONE 2 + 3 — Comparaison des deux formules (coût par formule intégré à chaque carte) */}
-      <div style={{ marginBottom: 8 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 4px' }}>Choisissez votre formule</h3>
-        <p style={{ fontSize: 13, color: '#8A92A6', margin: '0 0 18px' }}>
+  /* --------------------------------------------------------------- */
+
+  return (
+    <div>
+      <style>{`
+        @media (max-width: 900px){
+          .abo-colonnes { grid-template-columns: 1fr !important; }
+          .abo-formules { grid-template-columns: 1fr !important; }
+          .abo-hero > button { width: 100%; }
+          .abo-chiffres { gap: 22px !important; }
+        }
+      `}</style>
+
+      {changementProgramme && (
+        <Bandeau ton="info">
+          Changement programmé : vous passerez en {changementProgramme.formuleCibleLabel}
+          {changementProgramme.dateEffet ? ` le ${formatDate(changementProgramme.dateEffet)}` : ' à la fin de votre période en cours'}.
+          D&rsquo;ici là, vous conservez votre formule actuelle.
+        </Bandeau>
+      )}
+      {resiliation && (
+        <Bandeau ton="alerte">
+          Votre abonnement est résilié et prendra fin le {formatDate(details.cancelAt || details.currentPeriodEnd)}. Vous gardez l&rsquo;accès jusqu&rsquo;à cette date.
+        </Bandeau>
+      )}
+      {message && <Bandeau ton="succes">{message}</Bandeau>}
+      {error && <Bandeau ton="erreur">{error}</Bandeau>}
+
+      <BlocPrincipal />
+
+      <div className="abo-colonnes" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'start', marginBottom: 26 }}>
+        <Decompte />
+        <Recap />
+      </div>
+
+      <div>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: NAVY, margin: '0 0 4px' }}>
+          {estActif ? 'Changer de formule' : 'Choisissez votre formule'}
+        </h3>
+        <p style={{ fontSize: 13, color: '#8A92A6', margin: '0 0 18px', lineHeight: 1.6 }}>
           {estActif
-            ? 'Le passage à une formule supérieure est immédiat (au prorata). Un passage à une formule inférieure prend effet à la fin de votre période en cours.'
-            : 'Sélectionnez la formule qui vous convient, puis abonnez-vous.'}
+            ? 'Le passage à la formule supérieure est immédiat et facturé au prorata. Le passage à la formule inférieure prend effet le 1er du mois suivant.'
+            : 'Les deux formules se facturent au bien en ligne. Vous pourrez en changer à tout moment.'}
         </p>
-        <div className="formules-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
-          <style>{`@media (max-width: 880px){ .formules-grid { grid-template-columns: 1fr !important; } .abo-grid { grid-template-columns: 1fr !important; } }`}</style>
+        <div className="abo-formules" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
           <CarteFormule cle="PRO" />
           <CarteFormule cle="PRO_PLUS" />
         </div>
       </div>
 
-      {/* ZONE 4 — Détails de facturation + gestion */}
-      <div className="abo-grid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 22, alignItems: 'start', marginTop: 22 }}>
-        <div style={card}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', margin: '0 0 18px' }}>Détails de facturation</h3>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {[
-              { label: 'Statut', node: <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 700, color: statut.color }}><span style={{ width: 7, height: 7, borderRadius: '50%', background: statut.dot }} />{statut.label}</span> },
-              { label: 'Formule', value: f.formuleLabel },
-              { label: 'Biens facturés', value: `${f.actifs} sur ${f.total} biens` },
-              { label: 'Tarif par bien', value: `${euro(f.unitaire)} / mois` },
-              { label: 'Total mensuel', value: `${euro(f.montantMensuel)} HTVA`, strong: true },
-              subStatus === 'trialing' && details?.trialEnd && { label: 'Fin de l\'essai', value: formatDate(details.trialEnd) },
-              !estActif && premierPrelevement && { label: 'Premier prélèvement complet', value: formatDate(premierPrelevement) },
-              estActif && !resiliationProgrammee && { label: 'Prochain prélèvement', value: formatDate(details?.currentPeriodEnd) },
-              resiliationProgrammee && { label: 'Fin d\'accès', value: formatDate(details?.cancelAt || details?.currentPeriodEnd), color: '#E5484D' },
-              { label: 'Membre depuis', value: formatDate(new Date(createdAt).getTime()) },
-            ].filter(Boolean).map((row, i, arr) => (
-              <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid #F2F5FA' : 'none' }}>
-                <span style={{ fontSize: 13, color: '#8A92A6' }}>{row.label}</span>
-                {row.node || <span style={{ fontSize: row.strong ? 15 : 13.5, fontWeight: row.strong ? 700 : 600, color: row.color || '#193B5E' }}>{row.value}</span>}
-              </div>
-            ))}
-          </div>
-          <p style={{ fontSize: 11.5, color: '#A9B0BE', margin: '14px 0 0', lineHeight: 1.5 }}>
-            Frais de mise en service (1 490 € HTVA, une seule fois) facturés séparément, hors plateforme.
-          </p>
-        </div>
-
-        {estActif && (
-          <div style={card}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', margin: '0 0 8px' }}>Gérer votre abonnement</h3>
-            <p style={{ fontSize: 13, color: '#8A92A6', margin: '0 0 16px', lineHeight: 1.6 }}>
-              Depuis l'espace de gestion sécurisé Stripe, vous pouvez modifier votre moyen de paiement, consulter vos factures et résilier votre abonnement.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {['Modifier la carte bancaire', 'Télécharger les factures', 'Résilier l\'abonnement'].map((item) => (
-                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: '#5A6275' }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
-                  {item}
-                </div>
-              ))}
-            </div>
-            <button onClick={gerer} disabled={loading === 'portal'} style={{ width: '100%', marginTop: 18, padding: '12px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 13.5, fontWeight: 600, cursor: loading === 'portal' ? 'wait' : 'pointer' }}>
-              {loading === 'portal' ? 'Ouverture...' : 'Ouvrir l\'espace de gestion'}
-            </button>
-          </div>
-        )}
-      </div>
-
-      <p style={{ fontSize: 12, color: '#A9B0BE', margin: '22px 0 0', lineHeight: 1.5, textAlign: 'center' }}>
-        L'abonnement se paie le 1er de chaque mois, sur le nombre de biens en ligne à cette date. Un bien vendu ou passé hors ligne sort du décompte et n'est plus facturé le mois suivant. Paiement sécurisé via Stripe.
+      <p style={{ fontSize: 12, color: '#A9B0BE', margin: '24px 0 0', lineHeight: 1.6, textAlign: 'center' }}>
+        Paiement sécurisé via Stripe. Aucune donnée bancaire n&rsquo;est conservée par BuyMonth.
       </p>
     </div>
   )
