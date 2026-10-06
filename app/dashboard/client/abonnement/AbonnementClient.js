@@ -40,10 +40,10 @@ const FEATURES = {
 
 // Statuts de bien, et si le statut entre dans la facturation
 const STATUTS = [
-  { cle: 'ACTIF', label: 'disponibles', facture: true, couleur: '#249E7C' },
-  { cle: 'OPTION', label: 'sous option', facture: true, couleur: '#E89923' },
-  { cle: 'HORS_LIGNE', label: 'hors ligne', facture: false, couleur: '#8A92A6' },
-  { cle: 'VENDU', label: 'vendus', facture: false, couleur: '#5A6B7D' },
+  { cle: 'ACTIF', un: 'disponible', plusieurs: 'disponibles', facture: true, couleur: '#249E7C' },
+  { cle: 'OPTION', un: 'sous option', plusieurs: 'sous option', facture: true, couleur: '#E89923' },
+  { cle: 'HORS_LIGNE', un: 'hors ligne', plusieurs: 'hors ligne', facture: false, couleur: '#8A92A6' },
+  { cle: 'VENDU', un: 'vendu', plusieurs: 'vendus', facture: false, couleur: '#5A6B7D' },
 ]
 
 const NAVY = '#193B5E'
@@ -149,11 +149,13 @@ export function AbonnementClient({
 
     if (estActif) {
       eyebrow = subStatus === 'trialing' ? "PÉRIODE D'ESSAI" : 'ABONNEMENT ACTIF'
-      titre = nbFactures > 0
-        ? `Vos ${nbFactures} bien${nbFactures > 1 ? 's sont diffusés' : ' est diffusé'} sur BuyMonth`
-        : 'Votre abonnement est actif'
+      titre = nbFactures > 1
+        ? `Vos ${nbFactures} biens sont diffusés sur BuyMonth`
+        : nbFactures === 1
+          ? 'Votre bien est diffusé sur BuyMonth'
+          : 'Votre abonnement est actif'
       sousTitre = nbFactures > 0
-        ? 'Ils apparaissent sur la vitrine, dans les résultats de recherche et dans vos widgets.'
+        ? `${nbFactures > 1 ? 'Ils apparaissent' : 'Il apparaît'} sur la vitrine, dans les résultats de recherche et dans vos widgets.`
         : "Mettez un bien en ligne pour qu'il soit diffusé. Sans bien en ligne, rien ne vous est facturé."
       bouton = loading === 'portal' ? 'Ouverture…' : 'Gérer mon abonnement'
       action = gerer
@@ -167,8 +169,10 @@ export function AbonnementClient({
       tonBouton = 'alerte'
     } else if (nbFactures > 0) {
       eyebrow = 'ACTIVATION REQUISE'
-      titre = `Vos ${nbFactures} bien${nbFactures > 1 ? 's ne sont pas encore visibles' : " n'est pas encore visible"}`
-      sousTitre = 'Activez votre abonnement pour les publier sur la vitrine BuyMonth et commencer à recevoir des leads.'
+      titre = nbFactures > 1
+        ? `Vos ${nbFactures} biens ne sont pas encore visibles`
+        : "Votre bien n'est pas encore visible"
+      sousTitre = `Activez votre abonnement pour ${nbFactures > 1 ? 'les publier' : 'le publier'} sur la vitrine BuyMonth et commencer à recevoir des leads.`
       bouton = 'Activer mon abonnement'
       action = souscrire
       tonBouton = 'vert'
@@ -277,7 +281,7 @@ export function AbonnementClient({
               <div key={l.cle} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 0', borderBottom: '1px solid #F2F5FA' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 9, fontSize: 13.5, color: '#3D4759' }}>
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: l.couleur, flexShrink: 0 }} />
-                  {l.nb} bien{l.nb > 1 ? 's' : ''} {l.label}
+                  {l.nb} bien{l.nb > 1 ? 's' : ''} {l.nb > 1 ? l.plusieurs : l.un}
                 </span>
                 <span style={{ fontSize: 13.5, fontWeight: 600, color: l.facture ? NAVY : '#A9B0BE' }}>
                   {l.facture ? euro(l.nb * f.unitaire) : 'non facturé'}
@@ -394,7 +398,7 @@ export function AbonnementClient({
 
         <div style={{ fontSize: 13, color: '#5A6275', marginBottom: 20, fontWeight: 600, minHeight: 20 }}>
           {nbFactures > 0
-            ? `Avec vos ${nbFactures} bien${nbFactures > 1 ? 's' : ''} en ligne : ${euro(cout)} / mois`
+            ? `Avec ${nbFactures > 1 ? `vos ${nbFactures} biens` : 'votre bien'} en ligne : ${euro(cout)} / mois`
             : 'Aucun bien en ligne pour le moment'}
         </div>
 
