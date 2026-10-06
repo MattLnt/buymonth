@@ -42,6 +42,10 @@ async function main() {
   await prisma.client.update({
     where: { id: client.id },
     data: {
+      // stripeCustomerId compris : un customer cree en mode test n'existe pas en
+      // mode live. Le laisser en base ferait echouer toute synchro de quantite ou
+      // ouverture du portail avec « No such customer » apres la bascule.
+      stripeCustomerId: null,
       subStatus: null,
       stripeSubId: null,
       subEndsAt: null,
@@ -49,7 +53,7 @@ async function main() {
       plan: 'CLASSIC',
     },
   })
-  console.log('✓ Compte remis à zéro en base.')
+  console.log('✓ Compte remis à zéro en base (client Stripe compris).')
   console.log('\n✅ Terminé. Déconnecte-toi puis reconnecte-toi, et refais un paiement propre.')
 }
 
