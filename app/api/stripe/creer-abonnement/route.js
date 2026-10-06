@@ -39,9 +39,41 @@ export async function POST(req) {
     const settings = await getSettings()
     const avecEssai = settings.essaiActif && settings.essaiJours > 0
 
-    // Le cycle est ancre au 1er du mois pour tout le monde (dossier V9, partie 8.1).
-    // Le mois partiel entre l'inscription et ce 1er est facture au prorata.
-    const ancrage = prochainPremierDuMois()
+    // « L'abonnement se paie le 1er du mois pour tout le monde » (dossier V9,
+    // partie 8.1). Rien n'est donc preleve a l'inscription, carte comprise : on
+    // ouvre une periode sans facturation jusqu'au prochain 1er, et le mois partiel
+    // est ajoute en ligne separee sur la facture de ce 1er.
+    let finPeriodeSansFacture = prochainPremierDuMois()
+    if (avecEssai) {
+      // Essai accorde par l'admin : on repousse jusqu'au 1er qui laisse au moins
+      // le nombre de jours prevu, pour que le prelevement tombe toujours un 1er.
+      const minimum = Date.now() + settings.essaiJours * 24 * 60 * 60 * 1000
+      while (finPeriodeSansFacture * 1000 < minimum) {
+        finPeriodeSansFacture = prochainPremierDuMois(new Date(finPeriodeSansFacture * 1000))
+      }
+    }
+
+    // Prorata du mois partiel, pose en element de facture : Stripe le joint
+    // automatiquement a la prochaine facture, donc a celle du 1er. Un essai
+    // accorde par l'admin est gratuit, on ne facture alors pas le partiel.
+    if (!avecEssai) {
+      const maintenant = new Date()
+      const joursDuMois = new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 0).getDate()
+      const joursRestants = Math.max(0, Math.ceil((finPeriodeSansFacture * 1000 - Date.now()) / 86400000))
+      // Montant unitaire lu chez Stripe, et non dans le code : c'est le prix
+      // reellement facture qui doit servir de base au prorata.
+      const prixStripe = await stripe.prices.retrieve(price)
+      const unitaire = prixStripe?.unit_amount || 0
+      const montant = Math.round((unitaire * quantite * joursRestants) / joursDuMois)
+      if (montant > 0 && joursRestants > 0) {
+        await stripe.invoiceItems.create({
+          customer: customerId,
+          amount: montant,
+          currency: prixStripe?.currency || 'eur',
+          description: `Abonnement du ${maintenant.toLocaleDateString('fr-BE')} au 1er du mois suivant — ${quantite} bien${quantite > 1 ? 's' : ''} au prorata (${joursRestants} jour${joursRestants > 1 ? 's' : ''})`,
+        })
+      }
+    }
 
     const subData = {
       customer: customerId,
@@ -49,19 +81,8 @@ export async function POST(req) {
       default_payment_method: paymentMethodId,
       payment_settings: { payment_method_types: ['card'] },
       metadata: { clientId: client.id, formule: client.formule },
-      billing_cycle_anchor: ancrage,
-      proration_behavior: 'create_prorations',
-    }
-    if (avecEssai) {
-      // Un essai et un ancrage ne se combinent pas : l'essai fixe lui-meme le debut
-      // du cycle. On fait donc tomber la fin d'essai sur un 1er du mois, en laissant
-      // au moins le nombre de jours accorde par l'admin.
-      const minimum = Date.now() + settings.essaiJours * 24 * 60 * 60 * 1000
-      let fin = ancrage
-      while (fin * 1000 < minimum) fin = prochainPremierDuMois(new Date(fin * 1000))
-      subData.trial_end = fin
-      delete subData.billing_cycle_anchor
-      delete subData.proration_behavior
+      trial_end: finPeriodeSansFacture,
+      proration_behavior: 'none',
     }
 
     const sub = await stripe.subscriptions.create(subData)

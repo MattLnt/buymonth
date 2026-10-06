@@ -92,6 +92,8 @@ export function AbonnementClient({
   premierPrelevement = null,
   joursRestants = 0,
   prorata = 0,
+  premiereFacture = 0,
+  essaiAdmin = false,
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState('')
@@ -148,7 +150,7 @@ export function AbonnementClient({
     let eyebrow, titre, sousTitre, bouton, action, tonBouton
 
     if (estActif) {
-      eyebrow = subStatus === 'trialing' ? "PÉRIODE D'ESSAI" : 'ABONNEMENT ACTIF'
+      eyebrow = subStatus === 'trialing' && essaiAdmin ? "PÉRIODE D'ESSAI" : 'ABONNEMENT ACTIF'
       titre = nbFactures > 1
         ? `Vos ${nbFactures} biens sont diffusés sur BuyMonth`
         : nbFactures === 1
@@ -228,7 +230,7 @@ export function AbonnementClient({
             {premierPrelevement && !enRetard && (
               <div>
                 <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.04em' }}>
-                  {estActif ? 'PROCHAIN PRÉLÈVEMENT' : "À L'ACTIVATION, AUJOURD'HUI"}
+                  {estActif ? 'PROCHAIN PRÉLÈVEMENT' : 'PREMIER PRÉLÈVEMENT'}
                 </div>
                 {estActif ? (
                   <>
@@ -237,17 +239,22 @@ export function AbonnementClient({
                   </>
                 ) : (
                   <>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
-                      <span style={{ fontSize: 32, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{euro(prorata)}</span>
-                      <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.55)' }}>HTVA</span>
-                    </div>
-                    <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginTop: 3, maxWidth: 300, lineHeight: 1.5 }}>
-                      {joursRestants} jour{joursRestants > 1 ? 's' : ''} restant{joursRestants > 1 ? 's' : ''} du mois, puis {euro(f.montantMensuel)} le {formatDate(premierPrelevement)}
+                    <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>{formatDate(premierPrelevement)}</div>
+                    <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginTop: 4, maxWidth: 330, lineHeight: 1.55 }}>
+                      {euro(premiereFacture)} HTVA : {euro(prorata)} pour les {joursRestants} jour{joursRestants > 1 ? 's' : ''} restant{joursRestants > 1 ? 's' : ''} du mois, puis {euro(f.montantMensuel)} pour le mois suivant.
                     </div>
                   </>
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {!estActif && !enRetard && nbFactures > 0 && (
+          <div style={{ position: 'relative', marginTop: 18, background: 'rgba(124,184,168,0.14)', border: '1px solid rgba(124,184,168,0.3)', borderRadius: 10, padding: '11px 15px' }}>
+            <span style={{ fontSize: 13, color: '#CFE6DC', fontWeight: 600 }}>
+              Rien n&rsquo;est prélevé aujourd&rsquo;hui. Vos biens sont publiés dès l&rsquo;activation, et la première facture tombe le {formatDate(premierPrelevement)}.
+            </span>
           </div>
         )}
 
@@ -319,7 +326,7 @@ export function AbonnementClient({
     const lignes = [
       { label: 'Formule', value: f.formuleLabel },
       { label: 'Tarif par bien', value: `${euro(f.unitaire)} / mois` },
-      subStatus === 'trialing' && details?.trialEnd && { label: "Fin de l'essai", value: formatDate(details.trialEnd) },
+      subStatus === 'trialing' && essaiAdmin && details?.trialEnd && { label: "Fin de l'essai", value: formatDate(details.trialEnd) },
       !estActif && !enRetard && premierPrelevement && { label: 'Premier mois complet', value: formatDate(premierPrelevement) },
       estActif && !resiliation && { label: 'Prochain prélèvement', value: formatDate(details?.currentPeriodEnd || premierPrelevement) },
       resiliation && { label: "Fin d'accès", value: formatDate(details?.cancelAt || details?.currentPeriodEnd), couleur: '#E5484D' },

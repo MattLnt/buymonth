@@ -4,6 +4,7 @@ import { PageHeader } from '@/app/components/dashboard/Ui'
 import { AbonnementClient } from './AbonnementClient'
 import { decompteFacturation, prochainPremierDuMois } from '@/lib/facturation'
 import { stripe, PRICE_PRO, PRICE_PRO_PLUS } from '@/lib/stripe'
+import { getSettings } from '@/lib/settings'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,6 +35,15 @@ export default async function AbonnementPage({ searchParams }) {
   const joursDuMois = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
   const joursRestants = Math.max(1, Math.ceil((ancrageMs - Date.now()) / 86400000))
   const prorata = Math.round((facturation.montantMensuel * joursRestants) / joursDuMois)
+  // Rien n'est preleve a l'inscription : la premiere facture, le 1er, cumule le
+  // mois partiel au prorata et le mois complet qui commence.
+  const premiereFacture = prorata + facturation.montantMensuel
+
+  // Un abonnement en attente du 1er est en statut « trialing » chez Stripe sans
+  // etre un essai gratuit : il ne faut l'annoncer comme un essai que si l'admin
+  // en a reellement accorde un.
+  const reglages = await getSettings()
+  const essaiAdmin = Boolean(reglages?.essaiActif && reglages?.essaiJours > 0)
 
   // On lit tout depuis la base (rempli à la création + par le webhook) → instantané
   const details = client.stripeSubId ? {
@@ -111,6 +121,8 @@ export default async function AbonnementPage({ searchParams }) {
         premierPrelevement={ancrageMs}
         joursRestants={joursRestants}
         prorata={prorata}
+        premiereFacture={premiereFacture}
+        essaiAdmin={essaiAdmin}
       />
     </>
   )
