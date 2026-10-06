@@ -24,6 +24,8 @@ export default async function AdminClientsPage() {
     formule: c.formule,
     nbBiens: c._count.biens,
     trialEndsAt: c.trialEndsAt,
+    subStatus: c.subStatus,
+    impayeDepuis: c.impayeDepuis,
     createdAt: c.createdAt,
   }))
 

@@ -94,6 +94,8 @@ export function AbonnementClient({
   prorata = 0,
   premiereFacture = 0,
   essaiAdmin = false,
+  finGrace = null,
+  dansGrace = false,
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState('')
@@ -163,10 +165,14 @@ export function AbonnementClient({
       action = gerer
       tonBouton = 'clair'
     } else if (enRetard) {
-      eyebrow = 'PAIEMENT EN ÉCHEC'
-      titre = 'Vos biens ne sont plus diffusés'
-      sousTitre = "Le dernier prélèvement n'a pas abouti. Mettez votre moyen de paiement à jour pour les remettre en ligne."
-      bouton = loading === 'portal' ? 'Ouverture…' : 'Mettre à jour mon paiement'
+      eyebrow = 'PRÉLÈVEMENT REFUSÉ'
+      // Pendant le delai de grace les biens restent en ligne : le dire, sinon le
+      // promoteur croit que son catalogue est deja coupe et panique pour rien.
+      titre = dansGrace ? 'Votre dernier prélèvement a échoué' : 'Vos biens ne sont plus diffusés'
+      sousTitre = dansGrace
+        ? `Vos biens restent en ligne jusqu'au ${formatDate(finGrace)}. Mettez votre moyen de paiement à jour avant cette date pour qu'ils y restent.`
+        : "Le délai de régularisation est dépassé et vos biens ont été retirés du site. Ils reviendront en ligne dès que le paiement sera régularisé."
+      bouton = loading === 'portal' ? 'Ouverture…' : 'Régulariser mon paiement'
       action = gerer
       tonBouton = 'alerte'
     } else if (nbFactures > 0) {
@@ -329,6 +335,7 @@ export function AbonnementClient({
       subStatus === 'trialing' && essaiAdmin && details?.trialEnd && { label: "Fin de l'essai", value: formatDate(details.trialEnd) },
       !estActif && !enRetard && premierPrelevement && { label: 'Premier mois complet', value: formatDate(premierPrelevement) },
       estActif && !resiliation && { label: 'Prochain prélèvement', value: formatDate(details?.currentPeriodEnd || premierPrelevement) },
+      enRetard && dansGrace && { label: 'Biens en ligne jusqu’au', value: formatDate(finGrace), couleur: '#C2620C' },
       resiliation && { label: "Fin d'accès", value: formatDate(details?.cancelAt || details?.currentPeriodEnd), couleur: '#E5484D' },
       { label: 'Client depuis', value: formatDate(new Date(createdAt).getTime()) },
     ].filter(Boolean)

@@ -56,6 +56,12 @@ model Client {
   subStatus          String?
   subEndsAt          DateTime?
   trialEndsAt        DateTime?
+  // Date du premier prelevement reste impaye. Tant qu'elle est dans le delai de
+  // grace, les biens restent diffuses malgre le statut past_due. Remise a null
+  // des qu'une facture est payee.
+  impayeDepuis       DateTime?
+  // Derniere relance envoyee au promoteur, pour ne pas le harceler.
+  impayeRelanceAt    DateTime?
   biens              Bien[]
   createdAt          DateTime   @default(now())
 

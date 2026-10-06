@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { BiensExplorer } from '@/app/components/public/BiensExplorer'
 import PublicNav from '@/app/components/PublicNav'
 import PublicFooter from '@/app/components/PublicFooter'
-import { STATUTS_ABONNEMENT_ACTIFS } from '@/lib/facturation'
+import { filtreClientDiffusable } from '@/lib/facturation'
 import { getConfigMensualite } from '@/lib/settings'
 
 export const dynamic = 'force-dynamic'
@@ -19,7 +19,8 @@ export default async function BiensPublicPage() {
   const tous = await prisma.bien.findMany({
     where: {
       published: true,
-      client: { subStatus: { in: STATUTS_ABONNEMENT_ACTIFS } },
+      // Abonnement actif, ou impaye encore dans le delai de grace
+      OR: filtreClientDiffusable(),
     },
     orderBy: { createdAt: 'desc' },
     select: {

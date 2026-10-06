@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }) {
   const { slug } = await params
-  const client = await prisma.client.findUnique({ where: { slug }, select: { societe: true, subStatus: true } })
+  const client = await prisma.client.findUnique({ where: { slug }, select: { societe: true, subStatus: true, impayeDepuis: true } })
   if (!client || !estPromoteurActif(client)) return { title: 'Agence introuvable — BuyMonth' }
   return {
     title: `${client.societe} — Biens en mensualités | BuyMonth`,
@@ -31,6 +31,7 @@ export default async function AgencePage({ params }) {
       telephone: true,
       adresse: true,
       subStatus: true,
+      impayeDepuis: true,
       biens: {
         where: { statut: { in: ['ACTIF', 'OPTION'] } },
         orderBy: { createdAt: 'desc' },

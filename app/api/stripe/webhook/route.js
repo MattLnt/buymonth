@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { stripe, PRICE_PRO, PRICE_PRO_PLUS } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { envoyerEmailImpaye } from '@/lib/email'
+import { finDelaiDeGrace } from '@/lib/facturation'
 
 // Déduit la formule ('PRO' | 'PRO_PLUS') à partir du price actif de l'abonnement.
 // Renvoie null si le price ne correspond à aucune formule connue (on ne touche alors pas la formule).
@@ -74,6 +76,52 @@ export async function POST(req) {
       }
 
       // Abonnement annulé
+      // Prelevement refuse. Jusqu'au 06/10/2026 aucun evenement de facture n'etait
+      // ecoute : un impaye etait totalement invisible, et les biens du promoteur
+      // disparaissaient du site sans que personne ne soit prevenu.
+      case 'invoice.payment_failed': {
+        const facture = event.data.object
+        const client = await prisma.client.findFirst({
+          where: { stripeCustomerId: facture.customer },
+          include: { user: { select: { email: true } } },
+        })
+        if (client) {
+          // On date le premier echec seulement : le delai de grace court a partir
+          // de la, meme si Stripe retente plusieurs fois.
+          const premier = !client.impayeDepuis
+          const maj = premier ? { impayeDepuis: new Date() } : {}
+          if (premier) await prisma.client.update({ where: { id: client.id }, data: maj })
+
+          try {
+            await envoyerEmailImpaye({
+              email: client.user?.email,
+              societe: client.societe,
+              montant: facture.amount_due,
+              devise: facture.currency,
+              urlFacture: facture.hosted_invoice_url || null,
+              finGrace: finDelaiDeGrace({ impayeDepuis: client.impayeDepuis || new Date() }),
+            })
+            await prisma.client.update({ where: { id: client.id }, data: { impayeRelanceAt: new Date() } })
+          } catch (e) {
+            console.error('[STRIPE] Relance impaye non envoyee :', e?.message)
+          }
+        }
+        break
+      }
+
+      // Facture payee : l'impaye est regularise, on efface la date.
+      case 'invoice.paid': {
+        const facture = event.data.object
+        const client = await prisma.client.findFirst({ where: { stripeCustomerId: facture.customer } })
+        if (client?.impayeDepuis) {
+          await prisma.client.update({
+            where: { id: client.id },
+            data: { impayeDepuis: null, impayeRelanceAt: null },
+          })
+        }
+        break
+      }
+
       case 'customer.subscription.deleted': {
         const sub = event.data.object
         const client = await prisma.client.findFirst({ where: { stripeCustomerId: sub.customer } })

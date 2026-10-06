@@ -68,7 +68,7 @@ export async function GET(req) {
   if (bienId) {
     const bien = await prisma.bien.findUnique({
       where: { id: bienId },
-      include: { client: { select: { subStatus: true } } },
+      include: { client: { select: { subStatus: true, impayeDepuis: true } } },
     })
     // Diffusable seulement si le bien est visible ET son promoteur abonné
     if (bien && bien.published && estPromoteurActif(bien.client)) {

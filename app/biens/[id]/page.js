@@ -13,7 +13,7 @@ export default async function BienDetailPage({ params }) {
 
   const bien = await prisma.bien.findUnique({
     where: { id },
-    include: { client: { select: { id: true, userId: true, societe: true, slug: true, logoUrl: true, telephone: true, subStatus: true } } },
+    include: { client: { select: { id: true, userId: true, societe: true, slug: true, logoUrl: true, telephone: true, subStatus: true, impayeDepuis: true } } },
   })
 
   // Le bien n'existe pas du tout → retour au catalogue

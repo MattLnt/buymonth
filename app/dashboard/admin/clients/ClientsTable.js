@@ -8,6 +8,21 @@ const formuleLabel = {
   PRO_PLUS: { label: 'Pro+', color: '#3B62A8', bg: 'rgba(78,125,212,0.12)' },
 }
 
+// Impaye en cours : l'admin doit le voir sans ouvrir la fiche, c'est ce qui
+// declenche une relance ou un recouvrement.
+function Impaye({ depuis }) {
+  if (!depuis) return null
+  const jours = Math.floor((Date.now() - new Date(depuis).getTime()) / 86400000)
+  return (
+    <span
+      title={`Prelevement refuse depuis ${jours} jour${jours > 1 ? 's' : ''}`}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 20, color: '#C2620C', background: '#FFF7ED', border: '1px solid #FED7AA', whiteSpace: 'nowrap', flexShrink: 0 }}
+    >
+      IMPAYÉ {jours > 0 ? `${jours} j` : ''}
+    </span>
+  )
+}
+
 export function ClientsTable({ clients }) {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('date') // 'date' | 'biens' | 'formule'
@@ -100,7 +115,10 @@ export function ClientsTable({ clients }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                   {avatar(c)}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.societe || 'Sans nom'}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.societe || 'Sans nom'}</div>
+                      <Impaye depuis={c.impayeDepuis} />
+                    </div>
                     {c.telephone && <div style={{ fontSize: 12.5, color: '#A9B0BE' }}>{c.telephone}</div>}
                   </div>
                   {formuleBadge(c)}
@@ -154,7 +172,10 @@ export function ClientsTable({ clients }) {
                             {c.logoUrl ? <img src={c.logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (c.societe?.[0]?.toUpperCase() || '?')}
                           </div>
                           <div>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: '#193B5E' }}>{c.societe || 'Sans nom'}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span style={{ fontSize: 14, fontWeight: 600, color: '#193B5E' }}>{c.societe || 'Sans nom'}</span>
+                              <Impaye depuis={c.impayeDepuis} />
+                            </div>
                             {c.telephone && <div style={{ fontSize: 12, color: '#A9B0BE' }}>{c.telephone}</div>}
                           </div>
                         </div>

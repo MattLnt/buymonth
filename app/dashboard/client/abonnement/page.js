@@ -2,7 +2,7 @@ import { getCurrentClient } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/app/components/dashboard/Ui'
 import { AbonnementClient } from './AbonnementClient'
-import { decompteFacturation, prochainPremierDuMois } from '@/lib/facturation'
+import { decompteFacturation, prochainPremierDuMois, finDelaiDeGrace, dansDelaiDeGrace } from '@/lib/facturation'
 import { stripe, PRICE_PRO, PRICE_PRO_PLUS } from '@/lib/stripe'
 import { getSettings } from '@/lib/settings'
 
@@ -123,6 +123,8 @@ export default async function AbonnementPage({ searchParams }) {
         prorata={prorata}
         premiereFacture={premiereFacture}
         essaiAdmin={essaiAdmin}
+        finGrace={finDelaiDeGrace(client)?.getTime() || null}
+        dansGrace={dansDelaiDeGrace(client)}
       />
     </>
   )
