@@ -1,18 +1,19 @@
 /*
  * Politique de confidentialité — texte de l'annexe 1 du dossier développeur du
- * 05/10/2026, rédigé par le client et intégré tel quel.
+ * 05/10/2026, rédigé par le client et intégré tel quel, à deux adaptations près
+ * validées par Valentino :
+ *   - 05/10 : la liste des sous-traitants (section 4) ne citait que Vercel.
+ *     Railway, Cloudinary, Mapbox, Resend et Stripe y ont été ajoutés.
+ *   - 06/10 : la section 8 décrivait un bandeau cookies et une catégorie
+ *     « mesure d'audience » inexistants. Elle décrit maintenant la réalité :
+ *     uniquement des cookies strictement nécessaires, donc pas de bandeau. La
+ *     ligne « Mesurer l'audience du site » a été retirée du tableau de la
+ *     section 3. Si un outil de suivi est ajouté un jour, il faudra remettre
+ *     un bandeau de consentement et réadapter cette page.
  *
- * Deux points du texte ne correspondent pas encore au site et ont été signalés au
- * client le 05/10/2026 : la section 8 décrit un bandeau cookies et une catégorie
- * « mesure d'audience » alors qu'aucun cookie non essentiel n'est déposé, et le
- * tableau de la section 3 annonce un effacement à 30 jours de l'adresse utilisée
- * pour l'envoi d'un lien de simulation, alors que cette adresse n'est pas
- * conservée du tout. Le texte reste publié tel qu'il a été transmis : c'est au
- * client de l'ajuster s'il le souhaite.
- *
- * Seul ajout valide avec le client (accord de Valentino, 05/10/2026) : la liste
- * des sous-traitants de la section 4 ne citait que Vercel. Railway, Cloudinary,
- * Mapbox, Resend et Stripe y ont ete ajoutes.
+ * Reste à trancher par le client : le tableau de la section 3 annonce un
+ * effacement à 30 jours de l'adresse utilisée pour envoyer un lien de
+ * simulation, alors que cette adresse n'est pas conservée du tout.
  */
 
 import Link from 'next/link'
@@ -54,29 +55,12 @@ const FINALITES = [
     '12 mois',
   ],
   [
-    'Mesurer l’audience du site',
-    'Votre consentement, donné via le bandeau cookies (art. 6.1.a)',
-    '13 mois',
-  ],
-  [
     'Respecter nos obligations légales (comptabilité, fiscalité)',
     'Obligation légale (art. 6.1.c)',
     'Jusqu’à 10 ans, selon les délais légaux de conservation comptable et fiscale',
   ],
 ]
 
-const COOKIES = [
-  [
-    'Cookies strictement nécessaires',
-    'Fonctionnement et sécurité du site, mémorisation de vos choix en matière de cookies',
-    'Non requis',
-  ],
-  [
-    'Cookies de mesure d’audience',
-    'Statistiques de fréquentation pour améliorer le site',
-    'Requis',
-  ],
-]
 
 export default function ConfidentialitePage() {
   return (
@@ -125,8 +109,8 @@ export default function ConfidentialitePage() {
           </li>
           <li>
             <Fort>Lorsque vous naviguez sur le site :</Fort> données techniques (adresse IP, type d&rsquo;appareil
-            et de navigateur, pages consultées, date et heure) et, selon vos choix, données issues des cookies
-            (voir point 8).
+            et de navigateur, pages consultées, date et heure) et les cookies strictement nécessaires au
+            fonctionnement du site (voir point 8).
           </li>
         </Liste>
         <P>
@@ -173,8 +157,7 @@ export default function ConfidentialitePage() {
             <Fort>Nos sous-traitants techniques</Fort>, qui agissent sur nos instructions : Vercel Inc.
             (hébergement du site), Railway (hébergement de la base de données, Pays-Bas), Cloudinary (stockage et
             diffusion des photos des biens), Mapbox (géocodage des adresses des biens), Resend (envoi des
-            e-mails) et Stripe (paiement des abonnements des promoteurs). Le cas échéant, notre prestataire de
-            mesure d&rsquo;audience.
+            e-mails) et Stripe (paiement des abonnements des promoteurs).
           </li>
           <li>
             <Fort>Les autorités</Fort>, lorsque la loi nous y oblige.
@@ -227,19 +210,24 @@ export default function ConfidentialitePage() {
       <div style={carte} className="lg-card">
         <H2>8. Cookies</H2>
         <P>
-          Un cookie est un petit fichier déposé sur votre appareil lors de votre visite. Le site utilise deux
-          catégories de cookies.
+          Un cookie est un petit fichier déposé sur votre appareil lors de votre visite. Le site n&rsquo;utilise
+          que des cookies <Fort>strictement nécessaires</Fort> à son fonctionnement : ils maintiennent la
+          connexion d&rsquo;un promoteur à son espace et assurent la sécurité du site.
         </P>
-        <Tableau entetes={['Catégorie', 'À quoi ils servent', 'Votre accord']} lignes={COOKIES} />
         <P>
-          La liste à jour des cookies utilisés (nom, fournisseur, durée) est accessible depuis le bandeau cookies
-          ou sur simple demande à <Lien href="mailto:info@buymonth.be">info@buymonth.be</Lien>.
+          Nous ne déposons aucun cookie publicitaire, aucun cookie de mesure d&rsquo;audience et aucun cookie de
+          suivi de votre navigation sur d&rsquo;autres sites.
+        </P>
+        <P>
+          Ces cookies étant indispensables au service que vous demandez, la loi ne requiert pas votre
+          consentement : il n&rsquo;y a donc pas de bandeau cookies sur ce site. Vous pouvez les supprimer ou les
+          bloquer dans les réglages de votre navigateur, mais la connexion à un espace promoteur ne fonctionnera
+          alors plus.
         </P>
         <P style={{ margin: 0 }}>
-          Lors de votre première visite, un bandeau vous permet d&rsquo;accepter ou de refuser les cookies non
-          nécessaires. Refuser est aussi simple qu&rsquo;accepter et n&rsquo;empêche pas d&rsquo;utiliser le site.
-          Vous pouvez modifier votre choix à tout moment via le lien « Gérer les cookies » en bas de page, ou dans
-          les réglages de votre navigateur.
+          Si nous ajoutons un jour un outil de mesure d&rsquo;audience ou tout autre cookie non essentiel, nous
+          mettrons en place un bandeau de consentement et nous adapterons cette page. Pour toute question sur les
+          cookies : <Lien href="mailto:info@buymonth.be">info@buymonth.be</Lien>.
         </P>
       </div>
 
