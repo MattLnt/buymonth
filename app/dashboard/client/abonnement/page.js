@@ -38,7 +38,7 @@ export default async function AbonnementPage({ searchParams }) {
   // On lit tout depuis la base (rempli à la création + par le webhook) → instantané
   const details = client.stripeSubId ? {
     currentPeriodEnd: client.subEndsAt ? new Date(client.subEndsAt).getTime() : null,
-    cancelAtPeriodEnd: false, // info détaillée disponible dans le portail Stripe
+    cancelAtPeriodEnd: false, // complété plus bas depuis Stripe
     cancelAt: null,
     trialEnd: client.trialEndsAt ? new Date(client.trialEndsAt).getTime() : null,
     montant: facturation.montantMensuel, // nb biens actifs × tarif formule
@@ -51,6 +51,17 @@ export default async function AbonnementPage({ searchParams }) {
   if (stripe && client.stripeSubId) {
     try {
       const sub = await stripe.subscriptions.retrieve(client.stripeSubId, { expand: ['schedule'] })
+
+      // Resiliation programmee : le portail Stripe annule par defaut « a la fin de la
+      // periode ». Sans cette lecture, l'espace promoteur affichait « abonnement actif »
+      // jusqu'au dernier jour, sans jamais annoncer l'arret. (Constate le 06/10/2026.)
+      if (details) {
+        details.cancelAtPeriodEnd = Boolean(sub.cancel_at_period_end)
+        details.cancelAt = sub.cancel_at ? sub.cancel_at * 1000 : null
+        const finPeriode = sub.current_period_end || sub.items?.data?.[0]?.current_period_end || null
+        if (finPeriode) details.currentPeriodEnd = finPeriode * 1000
+      }
+
       const schedule = sub.schedule && typeof sub.schedule === 'object' ? sub.schedule : null
       if (schedule && Array.isArray(schedule.phases) && schedule.phases.length > 1) {
         // La phase courante = phases[0], la suivante = phases[1]
