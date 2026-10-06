@@ -56,7 +56,11 @@ export default async function AbonnementPage({ searchParams }) {
       // periode ». Sans cette lecture, l'espace promoteur affichait « abonnement actif »
       // jusqu'au dernier jour, sans jamais annoncer l'arret. (Constate le 06/10/2026.)
       if (details) {
-        details.cancelAtPeriodEnd = Boolean(sub.cancel_at_period_end)
+        // Stripe a deux facons d'annoncer un arret programme : cancel_at_period_end
+        // (fin de periode) ou cancel_at (date precise). Le portail client utilise la
+        // seconde, avec cancel_at_period_end a false — ne tester que le drapeau
+        // laissait donc le bandeau muet. (Constate le 06/10/2026.)
+        details.cancelAtPeriodEnd = Boolean(sub.cancel_at_period_end || sub.cancel_at)
         details.cancelAt = sub.cancel_at ? sub.cancel_at * 1000 : null
         const finPeriode = sub.current_period_end || sub.items?.data?.[0]?.current_period_end || null
         if (finPeriode) details.currentPeriodEnd = finPeriode * 1000
