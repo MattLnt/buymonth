@@ -31,11 +31,26 @@ export async function POST() {
 
     // Carte bancaire et domiciliation SEPA. Le mandat SEPA est presente et signe
     // par le PaymentElement cote navigateur, il n'y a pas de document a produire.
-    const setupIntent = await stripe.setupIntents.create({
-      customer: customerId,
-      payment_method_types: ['card', 'sepa_debit'],
-      metadata: { clientId: client.id },
-    })
+    //
+    // Le SEPA s'active compte par compte chez Stripe, et separement en test et en
+    // live. Tant qu'il ne l'est pas, demander sepa_debit fait echouer l'appel —
+    // et plus personne ne peut s'abonner. On retombe donc sur la carte seule
+    // plutot que de bloquer tout le monde.
+    let setupIntent
+    try {
+      setupIntent = await stripe.setupIntents.create({
+        customer: customerId,
+        payment_method_types: ['card', 'sepa_debit'],
+        metadata: { clientId: client.id },
+      })
+    } catch (e) {
+      console.warn('[SETUP-INTENT] SEPA indisponible, repli sur la carte :', e?.message)
+      setupIntent = await stripe.setupIntents.create({
+        customer: customerId,
+        payment_method_types: ['card'],
+        metadata: { clientId: client.id },
+      })
+    }
 
     return NextResponse.json({ clientSecret: setupIntent.client_secret })
   } catch (e) {

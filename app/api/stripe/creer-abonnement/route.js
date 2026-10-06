@@ -85,7 +85,22 @@ export async function POST(req) {
       proration_behavior: 'none',
     }
 
-    const sub = await stripe.subscriptions.create(subData)
+    // Meme precaution que pour le SetupIntent : si le SEPA n'est pas active sur le
+    // compte, on cree l'abonnement avec la carte seule au lieu d'echouer.
+    let sub
+    try {
+      sub = await stripe.subscriptions.create(subData)
+    } catch (e) {
+      if (String(e?.message || '').toLowerCase().includes('sepa')) {
+        console.warn('[ABONNEMENT] SEPA indisponible, repli sur la carte :', e?.message)
+        sub = await stripe.subscriptions.create({
+          ...subData,
+          payment_settings: { payment_method_types: ['card'] },
+        })
+      } else {
+        throw e
+      }
+    }
 
     // Date de fin de période : sur l'item dans les versions récentes de l'API
     const periodEnd = sub.current_period_end || sub.items?.data?.[0]?.current_period_end || null
