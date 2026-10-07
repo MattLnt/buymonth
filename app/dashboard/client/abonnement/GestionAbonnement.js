@@ -30,6 +30,9 @@ function montant(centimes, devise = 'eur') {
   return `${((centimes || 0) / 100).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} ${String(devise).toUpperCase() === 'EUR' ? '€' : devise}`
 }
 
+// Au-dela, la liste pousse la page et noie les factures recentes
+const FACTURES_PAR_PAGE = 5
+
 const MARQUES = { visa: 'Visa', mastercard: 'Mastercard', amex: 'American Express', bancontact: 'Bancontact' }
 
 function IconeMoyen({ type }) {
@@ -130,6 +133,7 @@ export function GestionAbonnement({ actif }) {
   const [clientSecret, setClientSecret] = useState('')
   const [confirmation, setConfirmation] = useState(false)
   const [action, setAction] = useState('')
+  const [page, setPage] = useState(0)
 
   const charger = useCallback(async () => {
     try {
@@ -182,6 +186,9 @@ export function GestionAbonnement({ actif }) {
   const moyen = donnees?.moyen
   const factures = donnees?.factures || []
   const resiliation = donnees?.resiliation
+
+  const nbPages = Math.ceil(factures.length / FACTURES_PAR_PAGE)
+  const facturesVisibles = factures.slice(page * FACTURES_PAR_PAGE, (page + 1) * FACTURES_PAR_PAGE)
 
   return (
     <div style={{ marginTop: 26 }}>
@@ -263,8 +270,8 @@ export function GestionAbonnement({ actif }) {
               Aucune facture pour le moment. La première sera émise le 1er du mois.
             </p>
           ) : (
-            <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-              {factures.map((f, i) => {
+            <div>
+              {facturesVisibles.map((f, i) => {
                 const p = PASTILLE[f.statut] || PASTILLE.void
                 return (
                   <div key={f.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderBottom: i < factures.length - 1 ? '1px solid #F2F5FA' : 'none' }}>
@@ -296,6 +303,42 @@ export function GestionAbonnement({ actif }) {
                   </div>
                 )
               })}
+
+              {nbPages > 1 && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 16, paddingTop: 14, borderTop: '1px solid #F2F5FA' }}>
+                  <button
+                    onClick={() => setPage((n) => Math.max(0, n - 1))}
+                    disabled={page === 0}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 13px', borderRadius: 9,
+                      background: page === 0 ? '#FAFBFE' : '#F5F8FB', color: page === 0 ? '#C2C8D4' : NAVY,
+                      border: '1px solid #E6EDF4', fontSize: 12.5, fontWeight: 600,
+                      cursor: page === 0 ? 'default' : 'pointer',
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
+                    Précédentes
+                  </button>
+
+                  <span style={{ fontSize: 12.5, color: '#8A92A6', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    {page + 1} / {nbPages}
+                  </span>
+
+                  <button
+                    onClick={() => setPage((n) => Math.min(nbPages - 1, n + 1))}
+                    disabled={page >= nbPages - 1}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 13px', borderRadius: 9,
+                      background: page >= nbPages - 1 ? '#FAFBFE' : '#F5F8FB', color: page >= nbPages - 1 ? '#C2C8D4' : NAVY,
+                      border: '1px solid #E6EDF4', fontSize: 12.5, fontWeight: 600,
+                      cursor: page >= nbPages - 1 ? 'default' : 'pointer',
+                    }}
+                  >
+                    Suivantes
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
