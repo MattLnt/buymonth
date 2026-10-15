@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { resoudreCustomer } from '@/lib/stripe-customer'
 
 export async function POST() {
   try {
@@ -17,17 +18,11 @@ export async function POST() {
     })
     if (!client) return NextResponse.json({ error: 'Profil introuvable.' }, { status: 404 })
 
-    // Customer Stripe
-    let customerId = client.stripeCustomerId
-    if (!customerId || customerId === 'NULL') {
-      const customer = await stripe.customers.create({
-        email: client.user?.email || undefined,
-        name: client.societe || undefined,
-        metadata: { clientId: client.id },
-      })
-      customerId = customer.id
-      await prisma.client.update({ where: { id: client.id }, data: { stripeCustomerId: customerId } })
-    }
+    // Customer Stripe : cree s'il n'existe pas, recree si l'identifiant en base
+    // est perime — un customer du mode test n'existe pas en mode live, et sans ce
+    // rattrapage le promoteur ne pouvait plus s'abonner du tout.
+    const customer = await resoudreCustomer(client)
+    const customerId = customer.id
 
     // Carte bancaire et domiciliation SEPA. Le mandat SEPA est presente et signe
     // par le PaymentElement cote navigateur, il n'y a pas de document a produire.

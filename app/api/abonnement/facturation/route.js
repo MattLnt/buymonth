@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { resoudreCustomer } from '@/lib/stripe-customer'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,11 +59,15 @@ export async function GET() {
     if (!session) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
 
     const client = await prisma.client.findUnique({ where: { userId: session.user.id } })
-    if (!client?.stripeCustomerId || client.stripeCustomerId === 'NULL') {
+
+    // Pas (ou plus) de client Stripe : il n'y a rien a facturer, et surtout rien
+    // d'anormal. On renvoie un dossier vide plutot qu'une erreur, sinon la page
+    // Abonnement entiere tombe alors que le promoteur n'a simplement jamais paye.
+    const customer = await resoudreCustomer(client, { creer: false })
+    if (!customer) {
       return NextResponse.json({ moyen: null, factures: [], resiliation: null })
     }
 
-    const customer = await stripe.customers.retrieve(client.stripeCustomerId)
     const defautId = customer?.invoice_settings?.default_payment_method || null
 
     let moyen = null
@@ -73,7 +78,7 @@ export async function GET() {
       moyen = moyenLisible(pm)
     }
 
-    const liste = await stripe.invoices.list({ customer: client.stripeCustomerId, limit: 24 })
+    const liste = await stripe.invoices.list({ customer: customer.id, limit: 24 })
     const factures = (liste?.data || [])
       // Les brouillons ne concernent pas le promoteur : ils ne sont pas encore dus.
       .filter((f) => f.status !== 'draft')
