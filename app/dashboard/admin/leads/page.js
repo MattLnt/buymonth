@@ -36,7 +36,7 @@ export default async function AdminLeadsPage() {
     consentFinance: l.consentFinance,
     createdAt: l.createdAt,
     bienId: l.bien?.id || null,
-    bienTitre: l.bien?.titre || null,
+    bienTitre: l.bien?.titre || l.bienExterne || null,
     bienVille: l.bien?.ville || null,
     projet: l.bien?.projet && l.bien.projet !== 'Hors projet' ? l.bien.projet : null,
     unite: l.bien?.unite || null,

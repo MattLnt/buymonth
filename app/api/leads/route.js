@@ -29,6 +29,7 @@ export async function POST(req) {
     const lead = await prisma.lead.create({
       data: {
         bienId: bien?.id || null,
+        bienExterne: bien ? null : (typeof b.bienExterne === 'string' ? b.bienExterne.slice(0, 200) : null),
         nom: b.nom || null,
         societe: b.societe || null,
         email: b.email || null,
@@ -57,7 +58,9 @@ export async function POST(req) {
       // dédoublonnage
       const uniques = [...new Set(destinataires.filter(Boolean))]
 
-      await envoyerEmailLead({ lead, bien, destinataires: uniques })
+      // Bien d'un partenaire : pas de fiche en base, on alimente l'email avec le libelle recu
+      const bienEmail = bien || (lead.bienExterne ? { titre: lead.bienExterne } : null)
+      await envoyerEmailLead({ lead, bien: bienEmail, destinataires: uniques })
     } catch (e) {
       // on n'échoue jamais la requête si l'email plante
     }

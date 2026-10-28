@@ -12,6 +12,8 @@ const sourceLabel = {
   SIMULATEUR: { label: 'Simulateur', color: '#1C6B52', bg: 'rgba(124,184,168,0.16)' },
   WIDGET: { label: 'Widget', color: '#3B62A8', bg: 'rgba(91,141,239,0.14)' },
   CONTACT: { label: 'Contact', color: '#8A6D1B', bg: 'rgba(232,153,35,0.14)' },
+  VIZION: { label: 'Vizion', color: '#6B4BA8', bg: 'rgba(124,91,200,0.14)' },
+  PARTENAIRE: { label: 'Partenaire', color: '#6B4BA8', bg: 'rgba(124,91,200,0.14)' },
 }
 
 // Statuts internes ADMIN (jeu distinct du promoteur)

@@ -4,6 +4,7 @@ import { Simulateur } from '@/app/components/public/Simulateur'
 import Link from 'next/link'
 import { getConfigMensualite } from '@/lib/settings'
 import { prixDecaisse, libellePrixPublic } from '@/lib/regime'
+import { lireBienExterne } from '@/lib/bienExterne'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,10 +20,34 @@ export default async function SimulateurPage({ searchParams }) {
     })
     if (bien) bien = { ...bien, prixDecaisse: prixDecaisse(bien.prixTotal, bien.regime) }
   }
-  const cfg = await getConfigMensualite()
+
+  // Pas de bien en base : le visiteur arrive peut-être du configurateur d'un partenaire,
+  // avec sa configuration dans l'URL (accord Vizion du 07/07/2026, cf. lib/bienExterne.js).
+  if (!bien) bien = lireBienExterne(sp)
+
+  // Le partenaire peut imposer la durée de crédit de sa simulation ; sinon, paramètres admin.
+  const cfgBase = await getConfigMensualite()
+  const cfg = bien?.dureeMois ? { ...cfgBase, dureeMois: bien.dureeMois } : cfgBase
 
   const WRAP = { maxWidth: 1040, margin: '0 auto', padding: '0 24px' }
   const card = { background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 28 }
+
+  // Récap du bien, cliquable vers la fiche BuyMonth ou vers la page du partenaire
+  const recap = bien && (
+    <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, overflow: 'hidden' }}>
+      {!bien.externe && (
+        <div style={{ height: 150, background: bien.images?.[0] ? `url(${bien.images[0]}) center/cover` : 'linear-gradient(135deg, #EEF3FA, #E3ECF5)' }} />
+      )}
+      <div style={{ padding: 18 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 4px' }}>{bien.titre}</h3>
+        <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 12 }}>
+          {[bien.ville, bien.province, bien.reference && `réf. ${bien.reference}`].filter(Boolean).join(', ') || 'Belgique'}
+        </div>
+        <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="card" prefix="À partir de" showExemple={false} />
+        <div style={{ fontSize: 13, color: '#A9B0BE', marginTop: 8 }}>Prix du bien : {libellePrixPublic(bien.prixTotal, bien.regime)}</div>
+      </div>
+    </div>
+  )
 
   return (
     <div style={{ minHeight: '100vh', background: '#EEF1F6' }}>
@@ -52,17 +77,13 @@ export default async function SimulateurPage({ searchParams }) {
           {/* Récap du bien */}
           {bien && (
             <div style={{ position: 'sticky', top: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <Link href={`/biens/${bien.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, overflow: 'hidden' }}>
-                  <div style={{ height: 150, background: bien.images?.[0] ? `url(${bien.images[0]}) center/cover` : 'linear-gradient(135deg, #EEF3FA, #E3ECF5)' }} />
-                  <div style={{ padding: 18 }}>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 4px' }}>{bien.titre}</h3>
-                    <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 12 }}>{[bien.ville, bien.province].filter(Boolean).join(', ') || 'Belgique'}</div>
-                    <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="card" prefix="À partir de" showExemple={false} />
-                    <div style={{ fontSize: 13, color: '#A9B0BE', marginTop: 8 }}>Prix du bien : {libellePrixPublic(bien.prixTotal, bien.regime)}</div>
-                  </div>
-                </div>
-              </Link>
+              {bien.externe ? (
+                bien.retour ? (
+                  <a href={bien.retour} target="_blank" rel="noopener noreferrer nofollow" style={{ textDecoration: 'none' }}>{recap}</a>
+                ) : recap
+              ) : (
+                <Link href={`/biens/${bien.id}`} style={{ textDecoration: 'none' }}>{recap}</Link>
+              )}
             </div>
           )}
         </div>

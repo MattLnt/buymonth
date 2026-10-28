@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { evalueBien } from '@/lib/capacite'
 import { MENSUALITE_CONFIG, AVERTISSEMENT_LEGAL, IDENTIFICATION_FINANCE } from '@/lib/mensualiteConfig'
+import { libelleBienExterne } from '@/lib/bienExterne'
 
 const labelStyle = { display: 'block', fontSize: 11.5, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }
 const inputStyle = { width: '100%', padding: '11px 13px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14.5, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
@@ -16,7 +17,8 @@ const euro = (n) => (n || 0).toLocaleString('fr-BE') + ' €'
 
 export function Simulateur({ bien, cfg, onStepChange }) {
   const [step, setStep] = useState(1)
-  const [sim, setSim] = useState({ revenus: '', apport: '', creditsEnCours: '' })
+  // L'apport peut arriver pré-rempli du configurateur d'un partenaire (cf. lib/bienExterne.js)
+  const [sim, setSim] = useState({ revenus: '', apport: bien?.apport ? String(bien.apport) : '', creditsEnCours: '' })
   const [contact, setContact] = useState({ nom: '', societe: '', email: '', telephone: '' })
   const [consentPromoteur, setConsentPromoteur] = useState(false)
   const [consentFinance, setConsentFinance] = useState(false)
@@ -43,6 +45,7 @@ export function Simulateur({ bien, cfg, onStepChange }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bienId: bien?.id || null,
+          bienExterne: libelleBienExterne(bien),
           nom: contact.nom,
           societe: contact.societe,
           email: contact.email,
@@ -51,7 +54,7 @@ export function Simulateur({ bien, cfg, onStepChange }) {
           apport: sim.apport,
           consentPromoteur,
           consentFinance,
-          source: 'SIMULATEUR',
+          source: bien?.externe ? bien.source : 'SIMULATEUR',
         }),
       })
       const data = await res.json()

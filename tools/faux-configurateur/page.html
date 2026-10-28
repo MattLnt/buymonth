@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configurateur de test</title>
+<style>
+  :root { --encre:#1A1D23; --gris:#6B7280; --trait:#E5E7EB; --accent:#C2410C; }
+  * { box-sizing:border-box }
+  body { margin:0; font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif; color:var(--encre); background:#F6F6F4 }
+  header { background:#1A1D23; color:#fff; padding:14px 24px; display:flex; align-items:center; gap:14px; flex-wrap:wrap }
+  .marque { font-weight:800; letter-spacing:-.02em; font-size:17px }
+  .essai { font-size:11px; background:rgba(255,255,255,.14); padding:3px 9px; border-radius:20px; color:#D7D9DD }
+  .wrap { max-width:960px; margin:0 auto; padding:28px 24px 60px; display:grid; grid-template-columns:1fr 330px; gap:28px; align-items:start }
+  @media (max-width:860px){ .wrap { grid-template-columns:1fr } }
+  .carte { background:#fff; border:1px solid var(--trait); border-radius:12px; padding:22px }
+  h1 { font-size:21px; margin:0 0 4px; letter-spacing:-.02em }
+  .sous { color:var(--gris); font-size:13.5px; margin:0 0 20px }
+  fieldset { border:0; padding:0; margin:0 0 20px }
+  legend { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--gris); margin-bottom:10px }
+  .opt { display:flex; align-items:center; gap:11px; padding:9px 0; border-bottom:1px solid #F3F4F6 }
+  .opt:last-child { border-bottom:0 }
+  .opt label { flex:1; cursor:pointer }
+  .opt .prix { color:var(--gris); font-size:13px; font-variant-numeric:tabular-nums }
+  input[type=checkbox] { width:17px; height:17px; accent-color:var(--accent); cursor:pointer }
+  select, input[type=number] { width:100%; padding:9px 11px; border:1px solid var(--trait); border-radius:8px; font-size:14px; background:#fff }
+  .champ { margin-bottom:12px }
+  .champ label { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--gris); margin-bottom:5px }
+  .total { display:flex; justify-content:space-between; align-items:baseline; padding:14px 0; border-top:2px solid var(--encre); margin-top:4px }
+  .total b { font-size:23px; font-variant-numeric:tabular-nums }
+  .mens { background:#1A1D23; color:#fff; border-radius:12px; padding:18px }
+  .mens .val { font-size:27px; font-weight:800; letter-spacing:-.02em }
+  .mens .val small { font-size:14px; font-weight:600; opacity:.7 }
+  .mens .lab { font-size:12px; opacity:.65; margin-bottom:2px }
+  .mens .legal { font-size:10px; opacity:.55; line-height:1.4; margin-top:10px }
+  .mens.err { background:#7F1D1D }
+  .cta { display:block; width:100%; text-align:center; margin-top:14px; padding:14px; background:var(--accent); color:#fff; font-weight:700; text-decoration:none; border-radius:9px; font-size:15px }
+  .cta:hover { filter:brightness(1.08) }
+  .debug { margin-top:14px; font:11.5px/1.5 ui-monospace,Menlo,Consolas,monospace; color:var(--gris); word-break:break-all }
+  .debug b { color:var(--encre); display:block; margin:9px 0 3px; font-family:inherit }
+  .pastille { display:inline-block; padding:2px 7px; border-radius:4px; font-size:10.5px; font-weight:700 }
+  .ok { background:#DCFCE7; color:#166534 } .ko { background:#FEE2E2; color:#991B1B }
+</style>
+</head>
+<body>
+<header>
+  <span class="marque">Résidence Les Tilleuls</span>
+  <span class="essai">configurateur — maquette de test BuyMonth</span>
+</header>
+
+<div class="wrap">
+  <div class="carte">
+    <h1>Lot B12 — appartement 2 chambres</h1>
+    <p class="sous">Namur · 94 m² · livraison 2027. Composez votre bien, le prix se met à jour.</p>
+
+    <fieldset>
+      <legend>Base</legend>
+      <div class="champ">
+        <label for="base">Prix de base du lot (hors TVA)</label>
+        <input type="number" id="base" value="315000" step="1000">
+      </div>
+      <div class="champ">
+        <label for="regime">Régime fiscal</label>
+        <select id="regime">
+          <option value="TVA_21">Neuf — TVA 21 %</option>
+          <option value="TVA_6">Neuf — TVA 6 %</option>
+          <option value="ENREGISTREMENT">Existant — droits d'enregistrement</option>
+          <option value="">Non précisé (prix déjà TVAC)</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Options</legend>
+      <div id="options"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Financement du client</legend>
+      <div class="champ">
+        <label for="apport">Apport annoncé</label>
+        <input type="number" id="apport" value="50000" step="5000">
+      </div>
+      <div class="champ">
+        <label for="duree">Durée souhaitée</label>
+        <select id="duree">
+          <option value="">Conditions BuyMonth par défaut</option>
+          <option value="20">20 ans</option>
+          <option value="25" selected>25 ans</option>
+          <option value="30">30 ans</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <div class="total"><span>Prix total de votre configuration</span><b id="total">—</b></div>
+  </div>
+
+  <div>
+    <div class="carte">
+      <div class="mens" id="bloc">
+        <div class="lab">Votre mensualité estimée</div>
+        <div class="val" id="mensualite">…</div>
+        <div class="legal" id="legal"></div>
+      </div>
+      <a class="cta" id="cta" href="#" target="_blank" rel="noopener">Simuler mon financement →</a>
+      <div class="debug">
+        <b>Appel API</b><span id="dbgApi">—</span>
+        <b>URL de renvoi</b><span id="dbgUrl">—</span>
+        <b>Banc de test</b><span id="dbgCtx">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const OPTIONS = [
+  { id:'cuisine',   nom:'Cuisine équipée haut de gamme', prix:14500, coche:true },
+  { id:'carrelage', nom:'Carrelage grand format',        prix:4200,  coche:false },
+  { id:'terrasse',  nom:'Terrasse aménagée 12 m²',       prix:9800,  coche:true },
+  { id:'parking',   nom:'Emplacement de parking',        prix:22000, coche:false },
+  { id:'domotique', nom:'Pack domotique',                prix:6300,  coche:false },
+]
+
+const euro = (n) => (n || 0).toLocaleString('fr-BE') + ' €'
+const $ = (id) => document.getElementById(id)
+let CTX = { buymonth:'', cleChargee:false }
+
+$('options').innerHTML = OPTIONS.map(function (o) {
+  return '<div class="opt">'
+    + '<input type="checkbox" id="' + o.id + '"' + (o.coche ? ' checked' : '') + '>'
+    + '<label for="' + o.id + '">' + o.nom + '</label>'
+    + '<span class="prix">+ ' + euro(o.prix) + '</span>'
+    + '</div>'
+}).join('')
+
+function prixTotal() {
+  const base = Number($('base').value) || 0
+  return OPTIONS.reduce(function (s, o) { return s + ($(o.id).checked ? o.prix : 0) }, base)
+}
+
+// Etape 2 de l'integration : lien de fin de parcours vers le simulateur BuyMonth
+function construireUrl(prix) {
+  const p = new URLSearchParams({
+    prix: prix,
+    titre: 'Résidence Les Tilleuls — lot B12',
+    ref: 'B12',
+    ville: 'Namur',
+    src: 'VIZION',
+  })
+  const regime = $('regime').value
+  if (regime) p.set('regime', regime)
+  const apport = Number($('apport').value) || 0
+  if (apport > 0) p.set('apport', apport)
+  const duree = $('duree').value
+  if (duree) p.set('duree', duree)
+  p.set('retour', 'https://example.org/les-tilleuls/B12')
+  return CTX.buymonth + '/simulateur?' + p.toString()
+}
+
+// Etape 1 de l'integration : la mensualite suit le prix configure, en temps reel
+let n = 0
+async function rafraichir() {
+  const prix = prixTotal()
+  $('total').textContent = euro(prix)
+  const url = construireUrl(prix)
+  $('cta').href = url
+  $('dbgUrl').textContent = url
+
+  const moi = ++n
+  const q = new URLSearchParams({ prix: prix })
+  if ($('regime').value) q.set('regime', $('regime').value)
+  if ($('duree').value) q.set('duree', $('duree').value)
+  const t0 = performance.now()
+  try {
+    const r = await fetch('/api/mensualite?' + q.toString())
+    const d = await r.json()
+    if (moi !== n) return // reponse perimee : le visiteur a deja rechange sa config
+    const ms = Math.round(performance.now() - t0)
+    if (!r.ok || d.error) {
+      $('bloc').classList.add('err')
+      $('mensualite').textContent = 'erreur'
+      $('legal').textContent = d.error || ''
+      $('dbgApi').innerHTML = '<span class="pastille ko">HTTP ' + (d._http || r.status) + '</span> ' + ms + ' ms'
+      return
+    }
+    $('bloc').classList.remove('err')
+    $('mensualite').innerHTML = euro(d.monthlyPrice) + '<small> /mois</small>'
+    $('legal').textContent = d.legalNotice || ''
+    $('dbgApi').innerHTML = '<span class="pastille ok">HTTP 200</span> ' + ms + ' ms'
+      + ' · envoyé ' + euro(prix) + ' · financé ' + euro(d.financedPrice)
+      + ' · ' + d.duration + ' ans · ' + d.rate + ' % · TAEG ' + d.aprc + ' %'
+  } catch (e) {
+    $('bloc').classList.add('err')
+    $('mensualite').textContent = 'injoignable'
+    $('legal').textContent = e.message
+  }
+}
+
+fetch('/api/contexte').then(function (r) { return r.json() }).then(function (c) {
+  CTX = c
+  $('dbgCtx').innerHTML = 'cible ' + c.buymonth + ' · clé '
+    + (c.cleChargee ? '<span class="pastille ok">chargée</span>' : '<span class="pastille ko">absente</span>')
+  rafraichir()
+})
+
+document.addEventListener('input', rafraichir)
+document.addEventListener('change', rafraichir)
+</script>
+</body>
+</html>

@@ -133,6 +133,9 @@ model Lead {
   id              String    @id @default(cuid())
   bienId          String?
   bien            Bien?     @relation(fields: [bienId], references: [id], onDelete: SetNull)
+  // Lead venu du configurateur d'un partenaire : le bien n'existe pas en base,
+  // on conserve son libelle tel que transmis dans l'URL (cf. lib/bienExterne.js)
+  bienExterne     String?
   nom             String?
   societe         String?
   email           String?
