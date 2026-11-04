@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { PageHeader, StatCard } from '@/app/components/dashboard/Ui'
 import { EssaiCard } from './EssaiCard'
 import { ClientEditForm } from './ClientEditForm'
+import { RoutageLeadsForm } from './RoutageLeadsForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,6 +16,7 @@ export default async function AdminClientDetailPage({ params }) {
     include: {
       user: { select: { email: true } },
       biens: { orderBy: { createdAt: 'desc' } },
+      routages: { orderBy: [{ projet: 'asc' }, { createdAt: 'asc' }] },
       _count: { select: { biens: true } },
     },
   })
@@ -23,6 +25,9 @@ export default async function AdminClientDetailPage({ params }) {
 
   const nbLeads = await prisma.lead.count({ where: { bien: { clientId: client.id }, deletedAt: null } })
   const nbBiensActifs = client.biens.filter((b) => b.statut === 'ACTIF' || b.statut === 'OPTION').length
+
+  // Projets du portefeuille, proposes dans le routage des leads
+  const projets = [...new Set(client.biens.map((b) => b.projet).filter((p) => p && p !== 'Hors projet'))].sort()
 
   // Données passées au formulaire d'édition
   const editable = {
@@ -63,6 +68,13 @@ export default async function AdminClientDetailPage({ params }) {
         <div>
           {/* Formulaire d'édition (remplace le bloc lecture seule) */}
           <ClientEditForm client={editable} />
+
+          {/* Routage des leads vers les commerciaux (promoteur partenaire) */}
+          <RoutageLeadsForm
+            clientId={client.id}
+            regles={client.routages.map((r) => ({ projet: r.projet, email1: r.email1, email2: r.email2, actif: r.actif }))}
+            projets={projets}
+          />
 
           {/* Grille des biens */}
           <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 24 }}>

@@ -63,6 +63,7 @@ model Client {
   // Derniere relance envoyee au promoteur, pour ne pas le harceler.
   impayeRelanceAt    DateTime?
   biens              Bien[]
+  routages           RoutageLead[]
   createdAt          DateTime   @default(now())
 
   // --- déprécié (ancien modèle : abo fixe + widget payant). Conservé le temps de la migration. ---
@@ -153,6 +154,24 @@ model Lead {
   statutAdmin     String    @default("À contacter")
   deletedAt       DateTime?
   createdAt       DateTime  @default(now())
+}
+
+// Routage des leads vers les commerciaux d'un promoteur partenaire (lot Matexi du
+// 03/11/2026). Une regle couvre soit tout le portefeuille du promoteur (projet
+// null), soit un seul projet ; la regle la plus precise gagne. Deux adresses =
+// tournante stricte, un lead chez l'un, le suivant chez l'autre.
+model RoutageLead {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projet    String?
+  email1    String
+  email2    String?
+  actif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
 }
 
 model Settings {

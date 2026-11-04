@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSettings } from '@/lib/settings'
-import { envoyerEmailLead } from '@/lib/email'
+import { envoyerEmailLead, envoyerEmailLeadCommercial } from '@/lib/email'
+import { destinataireRoutage } from '@/lib/routage'
 
 export async function POST(req) {
   try {
@@ -13,6 +14,7 @@ export async function POST(req) {
         where: { id: b.bienId },
         select: {
           id: true,
+          clientId: true,
           titre: true,
           ville: true,
           projet: true,
@@ -63,6 +65,20 @@ export async function POST(req) {
       await envoyerEmailLead({ lead, bien: bienEmail, destinataires: uniques })
     } catch (e) {
       // on n'échoue jamais la requête si l'email plante
+    }
+
+    // Routage vers le commercial d'un promoteur partenaire, s'il en a un
+    // (lot Matexi). Meme condition que l'e-mail au promoteur : rien ne part
+    // sans la case de transmission au promoteur.
+    try {
+      if (bien && lead.consentPromoteur) {
+        const destinataire = await destinataireRoutage({ lead, bien })
+        if (destinataire) {
+          await envoyerEmailLeadCommercial({ lead, bien, destinataire })
+        }
+      }
+    } catch (e) {
+      // idem : un routage qui plante ne fait pas perdre le lead
     }
 
     return NextResponse.json({ ok: true, leadId: lead.id })
