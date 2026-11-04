@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { PageHeader, StatCard } from '@/app/components/dashboard/Ui'
 import { EssaiCard } from './EssaiCard'
 import { ClientEditForm } from './ClientEditForm'
-import { RoutageLeadsForm } from './RoutageLeadsForm'
+import { RoutageLeadsForm } from '@/app/components/dashboard/RoutageLeadsForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,7 +71,9 @@ export default async function AdminClientDetailPage({ params }) {
 
           {/* Routage des leads vers les commerciaux (promoteur partenaire) */}
           <RoutageLeadsForm
-            clientId={client.id}
+            admin
+            endpoint={`/api/admin/clients/${client.id}/routage`}
+            routageActif={client.routageActif}
             regles={client.routages.map((r) => ({ projet: r.projet, email1: r.email1, email2: r.email2, actif: r.actif }))}
             projets={projets}
           />

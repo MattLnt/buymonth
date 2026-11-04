@@ -62,6 +62,9 @@ model Client {
   impayeDepuis       DateTime?
   // Derniere relance envoyee au promoteur, pour ne pas le harceler.
   impayeRelanceAt    DateTime?
+  // Routage des leads vers les commerciaux : l'admin BuyMonth ouvre la fonction,
+  // le promoteur saisit ensuite ses adresses depuis son propre compte.
+  routageActif       Boolean    @default(false)
   biens              Bien[]
   routages           RoutageLead[]
   createdAt          DateTime   @default(now())

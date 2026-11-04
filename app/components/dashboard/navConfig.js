@@ -29,6 +29,16 @@ export const CLIENT_NAV = [
   },
 ];
 
+// Ajoute au menu promoteur les entrees que BuyMonth a ouvertes sur son compte
+export const NAV_COMMERCIAUX = { href: "/dashboard/client/commerciaux", label: "Mes commerciaux", short: "Commerciaux", icon: "users" };
+
+export function navPromoteur({ routageActif } = {}) {
+  if (!routageActif) return CLIENT_NAV;
+  return CLIENT_NAV.map((s) =>
+    s.section === "Mon compte" ? { ...s, items: [NAV_COMMERCIAUX, ...s.items] } : s,
+  );
+}
+
 export const ADMIN_NAV = [
   {
     section: "Pilotage",
