@@ -31,7 +31,7 @@ export default async function ClientCommerciauxPage() {
 
       <RoutageLeadsForm
         endpoint="/api/client/routage"
-        regles={regles.map((r) => ({ projet: r.projet, email1: r.email1, email2: r.email2, actif: r.actif }))}
+        regles={regles.map((r) => ({ projet: r.projet, emails: r.emails, actif: r.actif }))}
         projets={projets}
       />
     </>

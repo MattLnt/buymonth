@@ -161,15 +161,16 @@ model Lead {
 
 // Routage des leads vers les commerciaux d'un promoteur partenaire (lot Matexi du
 // 03/11/2026). Une regle couvre soit tout le portefeuille du promoteur (projet
-// null), soit un seul projet ; la regle la plus precise gagne. Deux adresses =
-// tournante stricte, un lead chez l'un, le suivant chez l'autre.
+// null), soit un seul projet ; la regle la plus precise gagne. Les adresses se
+// relaient en tournante stricte, un lead chacune a tour de role.
 model RoutageLead {
   id        String   @id @default(cuid())
   clientId  String
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   projet    String?
-  email1    String
-  email2    String?
+  // Adresses des commerciaux, dans l'ordre de la tournante : un lead chacun,
+  // a tour de role. Autant d'adresses que le promoteur en declare.
+  emails    String[]
   actif     Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

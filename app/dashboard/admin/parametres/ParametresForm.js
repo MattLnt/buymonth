@@ -92,7 +92,7 @@ export function ParametresForm({ initial }) {
   }
 
   return (
-    <div style={{ maxWidth: 880 }}>
+    <div>
       {/* Calcul de mensualité */}
       <div style={card}>
         <SectionHeader icon="euro" title="Calcul de la mensualité" desc="Hypothèses fournies par BuyMonth Finance. Elles pilotent le calcul ET la mention légale affichée sous chaque montant (fiche, cartes, badge, widget, simulateur). Le calcul se fait sur le prix TVA comprise pour le neuf. Après modification, enregistrez puis recalculez les biens." />

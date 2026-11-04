@@ -74,7 +74,7 @@ export default async function AdminClientDetailPage({ params }) {
             admin
             endpoint={`/api/admin/clients/${client.id}/routage`}
             routageActif={client.routageActif}
-            regles={client.routages.map((r) => ({ projet: r.projet, email1: r.email1, email2: r.email2, actif: r.actif }))}
+            regles={client.routages.map((r) => ({ projet: r.projet, emails: r.emails, actif: r.actif }))}
             projets={projets}
           />
 
