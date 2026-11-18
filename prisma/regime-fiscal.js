@@ -21,7 +21,7 @@ function calculMensualite(prix, { apportPct, tauxAnnuel, dureeMois }) {
   const capital = prix * (1 - apportPct)
   const i = Math.pow(1 + tauxAnnuel, 1 / 12) - 1
   const m = capital * i / (1 - Math.pow(1 + i, -dureeMois))
-  return Math.ceil(m / 10) * 10
+  return Math.ceil(m)
 }
 
 async function main() {

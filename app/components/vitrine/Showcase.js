@@ -49,7 +49,7 @@ export default function Showcase() {
               </div>
               <span className="vm">
                 <small>À partir de</small>
-                <b>1.290 €/mois*</b>
+                <b>1.282 €/mois*</b>
               </span>
             </div>
             <div className="vrow">
@@ -60,7 +60,7 @@ export default function Showcase() {
               </div>
               <span className="vm">
                 <small>À partir de</small>
-                <b>1.640 €/mois*</b>
+                <b>1.643 €/mois*</b>
               </span>
             </div>
             <div className="vrow">
@@ -71,14 +71,14 @@ export default function Showcase() {
               </div>
               <span className="vm">
                 <small>À partir de</small>
-                <b>1.980 €/mois*</b>
+                <b>1.977 €/mois*</b>
               </span>
             </div>
             <p className="vnote">
               * Attention, emprunter de l'argent coûte aussi de l'argent. Estimations indicatives, hors
               droits d'enregistrement et frais de notaire. Exemple représentatif : bien de 302.500 € TVA
               21 % comprise, apport de 10 %, durée de 30 ans, taux débiteur de 3,95 %, TAEG de 4,25 %,
-              mensualité de 1.290 €. Sous réserve d'acceptation du dossier. Hypothèses fournies par
+              mensualité de 1.282 €. Sous réserve d'acceptation du dossier. Hypothèses fournies par
               BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit.
             </p>
           </div>
