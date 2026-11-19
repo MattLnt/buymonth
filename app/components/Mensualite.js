@@ -43,6 +43,7 @@ export default function Mensualite({
   prefix = "À partir de",
   showExemple = true,
   exempleVisible = true,
+  avertissement = true,
 }) {
   const [open, setOpen] = useState(false);
 
@@ -74,9 +75,9 @@ export default function Mensualite({
         )}
       </span>
 
-      {/* Avertissement légal — toujours affiché avec le montant */}
+      {/* Avertissement légal affiché avec le montant (retiré sur /simulateur à la demande du client, test Vizion du 16/11, point 4) */}
       <span className="mens-warn">
-        * {AVERTISSEMENT_LEGAL} {NOTE_ESTIMATION}
+        * {avertissement && `${AVERTISSEMENT_LEGAL} `}{NOTE_ESTIMATION}
       </span>
 
       {/* Exemple représentatif — bloc distinct, visible en permanence (ordinateur et mobile) */}

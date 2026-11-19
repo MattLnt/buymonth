@@ -43,7 +43,7 @@ export default async function SimulateurPage({ searchParams }) {
         <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 12 }}>
           {[bien.ville, bien.province, bien.reference && `réf. ${bien.reference}`].filter(Boolean).join(', ') || 'Belgique'}
         </div>
-        <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="card" prefix="À partir de" showExemple={false} />
+        <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="card" prefix="À partir de" showExemple={false} avertissement={false} />
         <div style={{ fontSize: 13, color: '#A9B0BE', marginTop: 8 }}>Prix du bien : {libellePrixPublic(bien.prixTotal, bien.regime)}</div>
       </div>
     </div>

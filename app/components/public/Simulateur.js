@@ -123,7 +123,8 @@ export function Simulateur({ bien, cfg, onStepChange }) {
   return (
     <div className="sim-wrap" style={{ display: 'grid', gridTemplateColumns: '300px 1fr', overflow: 'hidden' }}>
       <style>{`
-        .sim-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        /* auto-fit : sur la page /simulateur (panneau étroit), les champs passent l'un sous l'autre au lieu d'être coupés (test Vizion du 16/11, point 7) */
+        .sim-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
         .sim-right-panel { padding: 28px 24px; }
         @media (max-width: 720px){
           .sim-wrap { grid-template-columns: 1fr !important; }
@@ -180,7 +181,7 @@ export function Simulateur({ bien, cfg, onStepChange }) {
 
           <div style={{ borderTop: '1px solid #F2F5FA', paddingTop: 14, marginBottom: 4 }}>
             <p style={{ fontSize: 12, color: '#5A6275', margin: '0 0 12px', lineHeight: 1.45 }}>
-              Vos coordonnées permettent à <strong style={{ color: '#193B5E' }}>BuyMonth Finance</strong> d'affiner votre estimation.
+              Recevez une étude de financement personnalisée, gratuite et sans engagement : laissez vos coordonnées et cochez les cases ci-dessous. C'est facultatif.
             </p>
             <div className="sim-row" style={{ marginBottom: 10 }}>
               <div>
@@ -231,11 +232,11 @@ export function Simulateur({ bien, cfg, onStepChange }) {
             {loading ? 'Envoi...' : 'Voir ma capacité'}
           </button>
 
-          {/* Écran précontractuel : identification complète de l'éditeur et du partenaire crédit (seul endroit du tunnel où le n° FSMA figure) */}
+          {/* Pas de n° FSMA ici : une publicité pour un crédit ne peut pas faire référence à l'inscription
+              de l'intermédiaire (art. VII.123 §2 CDE). Le numéro reste sur /mentions-legales (test Vizion du 16/11, point 4). */}
           <p style={{ fontSize: 9.5, color: '#A9B0BE', margin: '10px 0 0', lineHeight: 1.45, textAlign: 'center' }}>
             Simulation indicative, sans valeur contractuelle. Plateforme éditée par BuyMonth SRL (BCE 1041.967.664), qui n'est pas intermédiaire de crédit.
-            Partenaire crédit : BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit inscrit auprès de la FSMA sous le n° 1021.366.349
-            (<a href="https://www.fsma.be/fr/registres" target="_blank" rel="noopener noreferrer" style={{ color: '#A9B0BE' }}>registre FSMA</a>).
+            Partenaire crédit : BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit.
           </p>
         </form>
       </div>
