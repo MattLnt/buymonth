@@ -2,12 +2,15 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { sendResetPassword } from "@/lib/email";
+import { getT } from "@/lib/i18n/server";
+import { withLang } from "@/lib/i18n/config";
 
 export async function POST(req) {
+  const { t, lang } = await getT();
   try {
     const { email } = await req.json();
     if (!email) {
-      return NextResponse.json({ error: "Email requis" }, { status: 400 });
+      return NextResponse.json({ error: t("Email requis", "E-mail verplicht") }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
@@ -32,20 +35,23 @@ export async function POST(req) {
       });
 
       const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-      const resetUrl = `${baseUrl}/reinitialiser-mot-de-passe?token=${token}`;
+      const resetUrl = withLang(`${baseUrl}/reinitialiser-mot-de-passe?token=${token}`, lang);
 
       try {
-        await sendResetPassword(user.email, resetUrl);
+        await sendResetPassword(user.email, resetUrl, lang);
       } catch (e) {
         console.error("Erreur email reset:", e);
       }
     }
 
     return NextResponse.json({
-      message: "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.",
+      message: t(
+        "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.",
+        "Als er een account bestaat met dit e-mailadres, is er een link verstuurd om uw wachtwoord opnieuw in te stellen."
+      ),
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    return NextResponse.json({ error: t("Erreur serveur", "Serverfout") }, { status: 500 });
   }
 }

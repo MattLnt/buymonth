@@ -1,8 +1,11 @@
+"use client";
 import Link from "next/link";
+import { useLang } from "@/app/components/i18n/LangProvider";
 import LogoBuyMonth from "@/app/components/LogoBuyMonth";
-import { IDENTIFICATION_FINANCE, IDENTIFICATION_FINANCE_COURTE } from "@/lib/mensualiteConfig";
+import { identificationFinance, identificationFinanceCourte } from "@/lib/mensualiteConfig";
 
 export default function PublicFooter() {
+  const { lang, t } = useLang();
   return (
     <>
       <style>{`
@@ -25,12 +28,12 @@ export default function PublicFooter() {
           <div className="footer-brand">
             <span style={{ display: "block", marginBottom: 16 }}><LogoBuyMonth height={62} blanc /></span>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.8, margin: "0 0 20px", maxWidth: 300 }}>
-              Trouvez le bien qui correspond à votre budget mensuel, pas à un prix affiché.
+              {t("Trouvez le bien qui correspond à votre budget mensuel, pas à un prix affiché.", "Vind het pand dat past bij uw maandbudget, niet bij een vraagprijs.")}
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "5px 12px" }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#7CB8A8" }} />
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 600, letterSpacing: "0.06em" }}>BELGIQUE</span>
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 600, letterSpacing: "0.06em" }}>{t("BELGIQUE", "BELGIË")}</span>
               </div>
             </div>
             <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
@@ -47,15 +50,15 @@ export default function PublicFooter() {
           </div>
 
           <div>
-            <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 18px" }}>Navigation</p>
+            <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 18px" }}>{t("Navigation", "Navigatie")}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {[
-                { label: "Les biens", href: "/biens" },
-                { label: "Comment ça marche", href: "/#comment-ca-marche" },
+                { label: t("Les biens", "Het aanbod"), href: "/biens" },
+                { label: t("Comment ça marche", "Hoe werkt het"), href: "/#comment-ca-marche" },
                 { label: "FAQ", href: "/#faq" },
-                { label: "Contact", href: "/contact" },
+                { label: t("Contact", "Contact"), href: "/contact" },
               ].map(l => (
-                <Link key={l.label} href={l.href} style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
+                <Link key={l.href} href={l.href} style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(124,184,168,0.6)" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   {l.label}
                 </Link>
@@ -64,16 +67,18 @@ export default function PublicFooter() {
           </div>
 
           <div className="footer-fin">
-            <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 18px" }}>Votre financement</p>
+            <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 18px" }}>{t("Votre financement", "Uw financiering")}</p>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.7, margin: "0 0 14px" }}>
-              Votre estimation reste indicative. Pour connaître vos conditions réelles, un conseiller
-              BuyMonth Finance analyse votre situation.
+              {t(
+                "Votre estimation reste indicative. Pour connaître vos conditions réelles, un conseiller BuyMonth Finance analyse votre situation.",
+                "Uw raming blijft indicatief. Om uw reële voorwaarden te kennen, analyseert een medewerker van BuyMonth Finance uw situatie."
+              )}
             </p>
             <Link href="/contact" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(124,184,168,0.15)", border: "1px solid rgba(124,184,168,0.25)", color: "#7CB8A8", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: "none", marginBottom: 16 }}>
-              Demander une étude personnalisée →
+              {t("Demander une étude personnalisée →", "Persoonlijke studie aanvragen →")}
             </Link>
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, margin: 0 }}>
-              {IDENTIFICATION_FINANCE}
+              {identificationFinance(lang)}
             </p>
           </div>
         </div>
@@ -86,13 +91,13 @@ export default function PublicFooter() {
             display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16,
           }}>
             <div>
-              <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 6px" }}>Pas encore trouvé votre bien ?</p>
-              <p style={{ fontSize: 15, color: "#fff", margin: 0, fontWeight: 600 }}>Parcourez les biens disponibles</p>
-              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", margin: "4px 0 0" }}>Tous affichés avec leur mensualité estimée.</p>
+              <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 6px" }}>{t("Pas encore trouvé votre bien ?", "Nog niet het juiste pand gevonden?")}</p>
+              <p style={{ fontSize: 15, color: "#fff", margin: 0, fontWeight: 600 }}>{t("Parcourez les biens disponibles", "Bekijk de beschikbare panden")}</p>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", margin: "4px 0 0" }}>{t("Tous affichés avec leur mensualité estimée.", "Allemaal getoond met hun geraamde maandbedrag.")}</p>
             </div>
             <Link href="/biens"
               style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(124,184,168,0.15)", border: "1px solid rgba(124,184,168,0.25)", color: "#7CB8A8", padding: "12px 20px", borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>
-              Voir tous les biens →
+              {t("Voir tous les biens →", "Alle panden bekijken →")}
             </Link>
           </div>
         </div>
@@ -100,13 +105,13 @@ export default function PublicFooter() {
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="footer-bottom" style={{ maxWidth: 1100, margin: "0 auto", padding: "20px 48px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", margin: 0 }}>
-              © 2026 BuyMonth SRL · Partenaire crédit : {IDENTIFICATION_FINANCE_COURTE}
+              © 2026 BuyMonth SRL · {t("Partenaire crédit : ", "Kredietpartner: ")}{identificationFinanceCourte(lang)}
             </p>
             <div className="footer-bottom-links" style={{ display: "flex", gap: 20 }}>
-              <Link href="/cgv" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>CGV</Link>
-              <Link href="/confidentialite" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>Confidentialité</Link>
-              <Link href="/mentions-legales" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>Mentions légales</Link>
-              <Link href="/pro" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>Devenir partenaire</Link>
+              <Link href="/cgv" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>{t("CGV", "Algemene voorwaarden")}</Link>
+              <Link href="/confidentialite" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>{t("Confidentialité", "Privacy")}</Link>
+              <Link href="/mentions-legales" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>{t("Mentions légales", "Juridische vermeldingen")}</Link>
+              <Link href="/pro" style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>{t("Devenir partenaire", "Partner worden")}</Link>
             </div>
           </div>
         </div>

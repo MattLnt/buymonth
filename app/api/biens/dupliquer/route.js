@@ -2,21 +2,23 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getT } from '@/lib/i18n/server'
 
 export async function POST(req) {
+  const { t } = await getT()
   try {
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
 
     const client = await prisma.client.findUnique({ where: { userId: session.user.id } })
-    if (!client) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
+    if (!client) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
 
     const { id } = await req.json()
-    if (!id) return NextResponse.json({ error: 'ID manquant.' }, { status: 400 })
+    if (!id) return NextResponse.json({ error: t('ID manquant.', 'ID ontbreekt.') }, { status: 400 })
 
     const src = await prisma.bien.findUnique({ where: { id } })
     if (!src || src.clientId !== client.id) {
-      return NextResponse.json({ error: 'Bien introuvable.' }, { status: 404 })
+      return NextResponse.json({ error: t('Bien introuvable.', 'Pand niet gevonden.') }, { status: 404 })
     }
 
     // Copie : même contenu, mais HORS_LIGNE (hors décompte) + non publié + titre « (copie) »
@@ -52,6 +54,6 @@ export async function POST(req) {
     // Copie hors-ligne → non facturable, pas de synchro Stripe nécessaire
     return NextResponse.json({ ok: true, bien: copie })
   } catch (e) {
-    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
+    return NextResponse.json({ error: t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
   }
 }

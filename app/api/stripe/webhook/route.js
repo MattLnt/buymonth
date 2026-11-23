@@ -83,7 +83,7 @@ export async function POST(req) {
         const facture = event.data.object
         const client = await prisma.client.findFirst({
           where: { stripeCustomerId: facture.customer },
-          include: { user: { select: { email: true } } },
+          include: { user: { select: { email: true, langue: true } } },
         })
         if (client) {
           // On date le premier echec seulement : le delai de grace court a partir
@@ -100,6 +100,7 @@ export async function POST(req) {
               devise: facture.currency,
               urlFacture: facture.hosted_invoice_url || null,
               finGrace: finDelaiDeGrace({ impayeDepuis: client.impayeDepuis || new Date() }),
+              lang: client.user?.langue,
             })
             await prisma.client.update({ where: { id: client.id }, data: { impayeRelanceAt: new Date() } })
           } catch (e) {

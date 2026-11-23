@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,17 +16,18 @@ export const dynamic = 'force-dynamic'
  * l'ancien. L'ancien est detache pour ne pas accumuler des cartes mortes.
  */
 export async function POST(req) {
+  const { t } = await getT()
   try {
-    if (!stripe) return NextResponse.json({ error: 'Stripe non configuré.' }, { status: 500 })
+    if (!stripe) return NextResponse.json({ error: t('Stripe non configuré.', 'Stripe is niet geconfigureerd.') }, { status: 500 })
 
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
 
     const { paymentMethodId } = await req.json().catch(() => ({}))
-    if (!paymentMethodId) return NextResponse.json({ error: 'Moyen de paiement manquant.' }, { status: 400 })
+    if (!paymentMethodId) return NextResponse.json({ error: t('Moyen de paiement manquant.', 'Betaalmethode ontbreekt.') }, { status: 400 })
 
     const client = await prisma.client.findUnique({ where: { userId: session.user.id } })
-    if (!client?.stripeCustomerId) return NextResponse.json({ error: 'Client Stripe introuvable.' }, { status: 404 })
+    if (!client?.stripeCustomerId) return NextResponse.json({ error: t('Client Stripe introuvable.', 'Stripe-klant niet gevonden.') }, { status: 404 })
 
     const customer = await stripe.customers.retrieve(client.stripeCustomerId)
     const ancien = customer?.invoice_settings?.default_payment_method
@@ -52,6 +54,6 @@ export async function POST(req) {
     return NextResponse.json({ ok: true })
   } catch (e) {
     console.error('[MOYEN-PAIEMENT]', e?.message)
-    return NextResponse.json({ error: e?.message || 'Erreur serveur.' }, { status: 500 })
+    return NextResponse.json({ error: e?.message || t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
   }
 }

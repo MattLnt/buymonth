@@ -18,12 +18,27 @@
 
 import Link from 'next/link'
 import PageLegale, { carte, H2, P, Liste, Fort, Lien, Tableau } from '@/app/components/public/PageLegale'
+import { getT } from '@/lib/i18n/server'
 
-export const metadata = {
-  title: 'Politique de confidentialité — BuyMonth',
+export async function generateMetadata() {
+  const { t } = await getT()
+  return {
+    title: t('Politique de confidentialité — BuyMonth', 'Privacybeleid — BuyMonth'),
+  }
 }
 
-const FINALITES = [
+// Le texte français et sa traduction néerlandaise sont écrits en entier, côte à
+// côte (CorpsFR / CorpsNL), plutôt que phrase par phrase avec t().
+export default async function ConfidentialitePage() {
+  const { lang, t } = await getT()
+  return (
+    <PageLegale titre={t('Politique de confidentialité', 'Privacybeleid')} maj={t('5 octobre 2026', '5 oktober 2026')}>
+      {lang === 'nl' ? <CorpsNL /> : <CorpsFR />}
+    </PageLegale>
+  )
+}
+
+const FINALITES_FR = [
   [
     'Calculer et afficher votre simulation, répondre à votre demande',
     'Mesures précontractuelles prises à votre demande (art. 6.1.b)',
@@ -61,10 +76,9 @@ const FINALITES = [
   ],
 ]
 
-
-export default function ConfidentialitePage() {
+function CorpsFR() {
   return (
-    <PageLegale titre="Politique de confidentialité" maj="5 octobre 2026">
+    <>
       <div style={carte} className="lg-card">
         <P style={{ margin: 0 }}>
           BuyMonth SRL respecte votre vie privée. Cette politique explique quelles données personnelles nous
@@ -126,7 +140,7 @@ export default function ConfidentialitePage() {
 
       <div style={carte} className="lg-card">
         <H2>3. Pourquoi utilisons-nous vos données ?</H2>
-        <Tableau entetes={['Finalité', 'Base légale (RGPD)', 'Durée de conservation']} lignes={FINALITES} />
+        <Tableau entetes={['Finalité', 'Base légale (RGPD)', 'Durée de conservation']} lignes={FINALITES_FR} />
         <P>
           Chaque consentement est facultatif et indépendant des autres. Vous pouvez le retirer à tout moment en
           écrivant à <Lien href="mailto:info@buymonth.be">info@buymonth.be</Lien>, sans que cela ne remette en
@@ -263,6 +277,250 @@ export default function ConfidentialitePage() {
           Conditions générales
         </Link>
       </p>
-    </PageLegale>
+    </>
+  )
+}
+
+const FINALITES_NL = [
+  [
+    'Uw simulatie berekenen en tonen, uw aanvraag beantwoorden',
+    'Precontractuele maatregelen genomen op uw verzoek (art. 6.1.b)',
+    '12 maanden na het laatste contact',
+  ],
+  [
+    'Uw contactgegevens doorgeven aan de projectontwikkelaar van het geraadpleegde pand',
+    'Uw toestemming, gegeven via een specifiek vakje (art. 6.1.a)',
+    'Tot de intrekking van de toestemming, maximaal 24 maanden',
+  ],
+  [
+    'Uw contactgegevens doorgeven aan BuyMonth Finance voor een financieringsonderzoek',
+    'Uw toestemming, gegeven via een afzonderlijk vakje (art. 6.1.a)',
+    'Tot de intrekking van de toestemming, maximaal 24 maanden',
+  ],
+  [
+    'U, op verzoek van de projectontwikkelaar met wie u contact hebt opgenomen, een link naar de simulatie van een pand sturen',
+    'Gerechtvaardigd belang (art. 6.1.f)',
+    '30 dagen als u geen simulatie uitvoert',
+  ],
+  [
+    'Aanvragen van professionals beantwoorden en de handelsrelatie beheren',
+    'Precontractuele maatregelen of overeenkomst (art. 6.1.b), gerechtvaardigd belang (art. 6.1.f)',
+    'Duur van de relatie, daarna 3 jaar',
+  ],
+  [
+    'De veiligheid en de goede werking van de website verzekeren',
+    'Gerechtvaardigd belang (art. 6.1.f)',
+    '12 maanden',
+  ],
+  [
+    'Onze wettelijke verplichtingen nakomen (boekhouding, fiscaliteit)',
+    'Wettelijke verplichting (art. 6.1.c)',
+    'Tot 10 jaar, volgens de wettelijke bewaartermijnen op boekhoudkundig en fiscaal vlak',
+  ],
+]
+
+function CorpsNL() {
+  return (
+    <>
+      <div style={carte} className="lg-card">
+        <P style={{ margin: 0 }}>
+          BuyMonth SRL respecteert uw privacy. Dit beleid legt uit welke persoonsgegevens wij op buymonth.be
+          verzamelen, waarom, aan wie wij ze doorgeven en welke rechten u hebt.
+        </P>
+      </div>
+
+      <div style={carte} className="lg-card">
+        <H2>1. Wie is verantwoordelijk voor uw gegevens?</H2>
+        <P>
+          De verwerkingsverantwoordelijke is <Fort>BuyMonth SRL</Fort>, Rue Lucien Poncelet 58, 4520 Wanze,
+          België, ingeschreven in de KBO onder het ondernemingsnummer 1041.967.664.
+        </P>
+        <P>
+          Voor elke vraag over uw gegevens: <Lien href="mailto:info@buymonth.be">info@buymonth.be</Lien>.
+        </P>
+        <P style={{ margin: 0 }}>
+          BuyMonth SRL geeft een platform uit dat vastgoedpanden in maandbedragen toont en projectontwikkelaars en
+          kopers met elkaar in contact brengt. BuyMonth SRL is geen kredietbemiddelaar: zij verstrekt geen enkel
+          kredietadvies en voert geen enkele kredietwaardigheidsanalyse uit.
+        </P>
+      </div>
+
+      <div style={carte} className="lg-card">
+        <H2>2. Welke gegevens verzamelen wij?</H2>
+        <P>
+          Wij verzamelen uitsluitend de gegevens die u ons meedeelt en de gegevens die verband houden met uw
+          surfgedrag.
+        </P>
+        <Liste>
+          <li>
+            <Fort>Wanneer u een simulatie uitvoert of vraagt om gecontacteerd te worden:</Fort> naam, voornaam,
+            e-mailadres, telefoonnummer, geraadpleegd pand of project, parameters van uw simulatie (bijvoorbeeld
+            eigen inbreng en looptijd).
+          </li>
+          <li>
+            <Fort>Wanneer een projectontwikkelaar met wie u contact hebt opgenomen u via BuyMonth een simulatielink stuurt:</Fort>{' '}
+            uw e-mailadres, meegedeeld door die projectontwikkelaar.
+          </li>
+          <li>
+            <Fort>Wanneer u als professional contact met ons opneemt:</Fort> naam, voornaam, functie, bedrijf,
+            e-mailadres, telefoonnummer, inhoud van uw bericht.
+          </li>
+          <li>
+            <Fort>Wanneer u op de website surft:</Fort> technische gegevens (IP-adres, type toestel en browser,
+            geraadpleegde pagina&rsquo;s, datum en uur) en de cookies die strikt noodzakelijk zijn voor de werking
+            van de website (zie punt 8).
+          </li>
+        </Liste>
+        <P>
+          Wij verzamelen geen gevoelige gegevens (gezondheid, overtuigingen enz.) en de website is niet bestemd
+          voor minderjarigen.
+        </P>
+        <P style={{ margin: 0 }}>
+          Het resultaat van een simulatie wordt u in alle gevallen getoond. Het hangt niet af van uw toestemming
+          voor het doorgeven van uw gegevens aan derden. Het meedelen van uw contactgegevens is facultatief:
+          zonder die gegevens kunnen wij u eenvoudigweg niet contacteren.
+        </P>
+      </div>
+
+      <div style={carte} className="lg-card">
+        <H2>3. Waarom gebruiken wij uw gegevens?</H2>
+        <Tableau entetes={['Doeleinde', 'Rechtsgrond (AVG)', 'Bewaartermijn']} lignes={FINALITES_NL} />
+        <P>
+          Elke toestemming is facultatief en staat los van de andere. U kunt ze op elk moment intrekken door te
+          schrijven naar <Lien href="mailto:info@buymonth.be">info@buymonth.be</Lien>, zonder dat dit afbreuk doet
+          aan de verwerkingen die al zijn uitgevoerd.
+        </P>
+        <P style={{ margin: 0 }}>
+          Wij nemen geen enkele geautomatiseerde beslissing die rechtsgevolgen voor u heeft. De getoonde
+          maandbedragen zijn indicatieve ramingen en vormen geen kredietaanbod.
+        </P>
+      </div>
+
+      <div style={carte} className="lg-card">
+        <H2>4. Aan wie geven wij uw gegevens door?</H2>
+        <P>Wij verkopen uw gegevens nooit. Ze worden uitsluitend doorgegeven aan de volgende ontvangers.</P>
+        <Liste>
+          <li>
+            <Fort>De projectontwikkelaar van het pand dat u interesseert</Fort>, als u het betreffende vakje hebt
+            aangevinkt. Hij wordt dan verantwoordelijk voor het gebruik dat hij van uw gegevens maakt.
+          </li>
+          <li>
+            <Fort>BuyMonth Finance</Fort> (handelsnaam van JG Management SRL, Rue Lucien Poncelet 58, 4520
+            Antheit, kredietbemiddelaar), als u het betreffende vakje hebt aangevinkt. BuyMonth Finance verwerkt uw
+            gegevens als afzonderlijke verwerkingsverantwoordelijke, volgens haar eigen privacybeleid (contact:{' '}
+            <Lien href="mailto:info@buymonth-finance.be">info@buymonth-finance.be</Lien>).
+          </li>
+          <li>
+            <Fort>Onze technische verwerkers</Fort>, die volgens onze instructies handelen: Vercel Inc. (hosting
+            van de website), Railway (hosting van de database, Nederland), Cloudinary (opslag en weergave van de
+            foto&rsquo;s van de panden), Mapbox (geocodering van de adressen van de panden), Resend (verzending
+            van de e-mails) en Stripe (betaling van de abonnementen van de projectontwikkelaars).
+          </li>
+          <li>
+            <Fort>De autoriteiten</Fort>, wanneer de wet ons daartoe verplicht.
+          </li>
+        </Liste>
+      </div>
+
+      <div style={carte} className="lg-card">
+        <H2>5. Verlaten uw gegevens de Europese Unie?</H2>
+        <P style={{ margin: 0 }}>
+          De gegevens worden opgeslagen op servers in de Europese Unie. Onze hostingprovider, Vercel Inc., is
+          echter een vennootschap gevestigd in de Verenigde Staten. Elke eventuele toegang vanuit dat land valt
+          onder de waarborgen die de AVG voorziet: Vercel Inc. is gecertificeerd onder het EU-VS Data Privacy
+          Framework en gebonden door de modelcontractbepalingen van de Europese Commissie.
+        </P>
+      </div>
+
+      <div style={carte} className="lg-card">
+        <H2>6. Hoe beschermen wij uw gegevens?</H2>
+        <P style={{ margin: 0 }}>
+          Wij passen gepaste technische en organisatorische maatregelen toe: versleutelde verbinding (HTTPS),
+          toegang beperkt tot de personen die ze nodig hebben, verwerkers die contractueel gebonden zijn. Bij een
+          inbreuk in verband met persoonsgegevens die een risico voor u inhoudt, brengen wij u daarvan op de
+          hoogte overeenkomstig de wet.
+        </P>
+      </div>
+
+      <div style={carte} className="lg-card">
+        <H2>7. Welke rechten hebt u?</H2>
+        <P>U kunt op elk moment en kosteloos:</P>
+        <Liste>
+          <li>uw gegevens inzien en er een kopie van verkrijgen;</li>
+          <li>onjuiste gegevens laten verbeteren;</li>
+          <li>de wissing ervan vragen;</li>
+          <li>de beperking van de verwerking ervan vragen;</li>
+          <li>bezwaar maken tegen een verwerking op basis van ons gerechtvaardigd belang, en tegen elke vorm van direct marketing;</li>
+          <li>uw gegevens ontvangen in een herbruikbaar formaat (overdraagbaarheid);</li>
+          <li>een gegeven toestemming intrekken.</li>
+        </Liste>
+        <P>
+          Om uw rechten uit te oefenen, schrijft u naar <Lien href="mailto:info@buymonth.be">info@buymonth.be</Lien>.
+          Wij antwoorden binnen een termijn van één maand. Bij twijfel over uw identiteit kunnen wij u om een
+          bewijsstuk vragen.
+        </P>
+        <P style={{ margin: 0 }}>
+          Als uw gegevens werden doorgegeven aan een projectontwikkelaar of aan BuyMonth Finance, kunt u uw rechten
+          ook rechtstreeks bij hen uitoefenen.
+        </P>
+      </div>
+
+      <div style={carte} className="lg-card">
+        <H2>8. Cookies</H2>
+        <P>
+          Een cookie is een klein bestand dat tijdens uw bezoek op uw toestel wordt geplaatst. De website gebruikt
+          uitsluitend cookies die <Fort>strikt noodzakelijk</Fort> zijn voor de werking ervan: ze houden de
+          verbinding van een projectontwikkelaar met zijn account in stand en verzekeren de veiligheid van de
+          website.
+        </P>
+        <P>
+          Wij plaatsen geen advertentiecookies, geen cookies voor bezoekersstatistieken en geen cookies die uw
+          surfgedrag op andere websites volgen.
+        </P>
+        <P>
+          Omdat deze cookies onmisbaar zijn voor de dienst die u vraagt, vereist de wet uw toestemming niet: er is
+          op deze website dus geen cookiebanner. U kunt ze verwijderen of blokkeren in de instellingen van uw
+          browser, maar dan werkt het inloggen op een account voor projectontwikkelaars niet meer.
+        </P>
+        <P style={{ margin: 0 }}>
+          Als wij ooit een tool voor bezoekersstatistieken of een andere niet-essentiële cookie toevoegen, zullen
+          wij een toestemmingsbanner invoeren en deze pagina aanpassen. Voor elke vraag over cookies:{' '}
+          <Lien href="mailto:info@buymonth.be">info@buymonth.be</Lien>.
+        </P>
+      </div>
+
+      <div style={carte} className="lg-card">
+        <H2>9. Klacht</H2>
+        <P style={{ margin: 0 }}>
+          Als u van mening bent dat uw gegevens niet correct worden verwerkt, neem dan eerst contact met ons op via{' '}
+          <Lien href="mailto:info@buymonth.be">info@buymonth.be</Lien>. U kunt ook een klacht indienen bij de
+          Gegevensbeschermingsautoriteit: Drukpersstraat 35, 1000 Brussel,{' '}
+          <Lien href="mailto:contact@apd-gba.be">contact@apd-gba.be</Lien>,{' '}
+          <Lien href="https://www.gegevensbeschermingsautoriteit.be" externe>
+            www.gegevensbeschermingsautoriteit.be
+          </Lien>
+          .
+        </P>
+      </div>
+
+      <div style={carte} className="lg-card">
+        <H2>10. Wijzigingen</H2>
+        <P style={{ margin: 0 }}>
+          Wij kunnen dit beleid aanpassen, met name als de website of de wet verandert. De geldende versie is die
+          welke op deze pagina is gepubliceerd, met de datum van de laatste bijwerking.
+        </P>
+      </div>
+
+      <p style={{ textAlign: 'center', fontSize: 13, color: '#8A92A6', marginTop: 8, lineHeight: 1.7 }}>
+        Zie ook:{' '}
+        <Link href="/mentions-legales" style={{ color: '#249E7C', fontWeight: 600 }}>
+          Juridische vermeldingen
+        </Link>
+        {' · '}
+        <Link href="/cgv" style={{ color: '#249E7C', fontWeight: 600 }}>
+          Algemene voorwaarden
+        </Link>
+      </p>
+    </>
   )
 }

@@ -29,6 +29,7 @@ model User {
   email       String   @unique
   password    String
   role        Role     @default(CLIENT)
+  langue      String   @default("fr") // langue de l'interface et des e-mails : fr ou nl
   createdAt   DateTime @default(now())
   client      Client?
   resetTokens PasswordResetToken[]

@@ -2,11 +2,13 @@ import { getCurrentClient } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
 import { PageHeader, Card } from '@/app/components/dashboard/Ui'
 import { MesLeadsClient } from '@/app/components/dashboard/MesLeadsClient'
+import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ClientLeadsPage() {
   const client = await getCurrentClient()
+  const { t } = await getT()
 
   // Conformité : on ne requête JAMAIS revenu/apport côté promoteur (réservés à l'admin).
   // Et un lead n'est visible par le promoteur que si le visiteur a coché la case
@@ -27,13 +29,13 @@ export default async function ClientLeadsPage() {
 
   return (
     <>
-      <PageHeader title="Mes leads" subtitle="Les demandes reçues sur vos biens via le simulateur." />
+      <PageHeader title={t('Mes leads', 'Mijn leads')} subtitle={t('Les demandes reçues sur vos biens via le simulateur.', 'De aanvragen voor uw panden via de simulator.')} />
 
       {leads.length === 0 ? (
         <Card>
           <div style={{ padding: '40px 0', textAlign: 'center' }}>
-            <p style={{ fontSize: 15, fontWeight: 600, color: '#193B5E', margin: '0 0 6px' }}>Aucun lead pour l'instant</p>
-            <p style={{ fontSize: 13.5, color: '#8A92A6', margin: 0 }}>Les visiteurs qui simulent leur capacité sur vos biens apparaîtront ici.</p>
+            <p style={{ fontSize: 15, fontWeight: 600, color: '#193B5E', margin: '0 0 6px' }}>{t("Aucun lead pour l'instant", 'Nog geen leads')}</p>
+            <p style={{ fontSize: 13.5, color: '#8A92A6', margin: 0 }}>{t('Les visiteurs qui simulent leur capacité sur vos biens apparaîtront ici.', 'Bezoekers die hun leencapaciteit berekenen voor uw panden, verschijnen hier.')}</p>
           </div>
         </Card>
       ) : (

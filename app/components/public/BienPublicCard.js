@@ -1,14 +1,19 @@
+'use client'
+
 import Link from 'next/link'
 import Mensualite from '@/app/components/Mensualite'
 import { libellePrixPublic } from '@/lib/regime'
+import { useLang } from '@/app/components/i18n/LangProvider'
+import { libelleType, libelleProvince } from '@/app/components/dashboard/libelles'
 
-const STATUT_PASTILLE = {
-  ACTIF: { label: 'Disponible', bg: 'rgba(36,158,124,0.95)' },
-  OPTION: { label: 'Sous option', bg: 'rgba(232,153,35,0.95)' },
-}
+const statutPastilles = (t) => ({
+  ACTIF: { label: t('Disponible', 'Beschikbaar'), bg: 'rgba(36,158,124,0.95)' },
+  OPTION: { label: t('Sous option', 'In optie'), bg: 'rgba(232,153,35,0.95)' },
+})
 
 export function BienPublicCard({ bien, cfg }) {
-  const pastille = STATUT_PASTILLE[bien.statut]
+  const { lang, t } = useLang()
+  const pastille = statutPastilles(t)[bien.statut]
 
   return (
     <Link href={`/biens/${bien.id}`} style={{ textDecoration: 'none', display: 'block' }}>
@@ -22,14 +27,14 @@ export function BienPublicCard({ bien, cfg }) {
 
           {bien.type && (
             <span style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(255,255,255,0.95)', color: '#193B5E', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20 }}>
-              {bien.type}
+              {libelleType(bien.type, lang)}
             </span>
           )}
 
           {/* Bien de démonstration : mention obligatoire */}
           {bien.demo && (
             <span style={{ position: 'absolute', bottom: 12, left: 12, background: 'rgba(25,59,94,0.88)', color: '#fff', fontSize: 10.5, fontWeight: 600, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.02em' }}>
-              Bien fictif, à titre d'illustration
+              {t("Bien fictif, à titre d'illustration", 'Fictief pand, ter illustratie')}
             </span>
           )}
 
@@ -45,17 +50,17 @@ export function BienPublicCard({ bien, cfg }) {
         <div style={{ padding: 18, flex: 1, display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 4px', lineHeight: 1.3 }}>{bien.titre}</h3>
           <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 14 }}>
-            {[bien.ville, bien.province].filter(Boolean).join(', ') || 'Belgique'}
+            {[bien.ville, libelleProvince(bien.province, lang)].filter(Boolean).join(', ') || t('Belgique', 'België')}
           </div>
 
           <div style={{ marginTop: 'auto' }}>
             <div style={{ marginBottom: 12 }}>
-              <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="card" showExemple={false} prefix="À partir de" />
+              <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="card" showExemple={false} prefix={t('À partir de', 'Vanaf')} />
             </div>
             <div style={{ display: 'flex', gap: 14, fontSize: 12.5, color: '#5A6275', flexWrap: 'wrap' }}>
-              {bien.chambres != null && <span>{bien.chambres} ch.</span>}
+              {bien.chambres != null && <span>{bien.chambres} {t('ch.', 'slpk.')}</span>}
               {bien.surface != null && <span>{bien.surface} m²</span>}
-              <span style={{ marginLeft: 'auto', color: '#A9B0BE', textAlign: 'right' }}>{libellePrixPublic(bien.prixTotal, bien.regime)}</span>
+              <span style={{ marginLeft: 'auto', color: '#A9B0BE', textAlign: 'right' }}>{libellePrixPublic(bien.prixTotal, bien.regime, lang)}</span>
             </div>
           </div>
         </div>

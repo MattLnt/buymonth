@@ -3,6 +3,7 @@ import { getCurrentClient } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/app/components/dashboard/Ui'
 import { RoutageLeadsForm } from '@/app/components/dashboard/RoutageLeadsForm'
+import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,6 +11,7 @@ export const dynamic = 'force-dynamic'
 // fonction sur son compte (lot Matexi du 03/11/2026).
 export default async function ClientCommerciauxPage() {
   const client = await getCurrentClient()
+  const { t } = await getT()
   if (!client.routageActif) redirect('/dashboard/client')
 
   const [regles, biens] = await Promise.all([
@@ -25,8 +27,8 @@ export default async function ClientCommerciauxPage() {
   return (
     <>
       <PageHeader
-        title="Mes commerciaux"
-        subtitle="Qui reçoit les demandes des acheteurs sur vos biens."
+        title={t('Mes commerciaux', 'Mijn verkopers')}
+        subtitle={t('Qui reçoit les demandes des acheteurs sur vos biens.', 'Wie de aanvragen van kopers voor uw panden ontvangt.')}
       />
 
       <RoutageLeadsForm

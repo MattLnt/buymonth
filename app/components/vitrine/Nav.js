@@ -3,9 +3,12 @@ import Link from "next/link";
 import LogoBuyMonth from "@/app/components/LogoBuyMonth";
 import { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
+import { useLang } from "@/app/components/i18n/LangProvider";
+import LangSwitcher from "@/app/components/i18n/LangSwitcher";
 
 export default function Nav() {
   const { status } = useSession();
+  const { t } = useLang();
   const isLoggedIn = status === "authenticated";
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -54,15 +57,16 @@ export default function Nav() {
 
           {/* Liens desktop */}
           <div className="nav-links">
-            <a href="/#solution">Solution</a>
-            <a href="/#vitrine">Les biens</a>
-            <a href="/#process">Process</a>
-            <a href="/#tarif">Tarifs</a>
-            <a href="/#contact">Contact</a>
+            <a href="/#solution">{t("Solution", "Oplossing")}</a>
+            <a href="/#vitrine">{t("Les biens", "Het aanbod")}</a>
+            <a href="/#process">{t("Process", "Werkwijze")}</a>
+            <a href="/#tarif">{t("Tarifs", "Tarieven")}</a>
+            <a href="/#contact">{t("Contact", "Contact")}</a>
           </div>
 
           {/* Actions desktop */}
           <div className="nav-actions">
+            <LangSwitcher color="#16324F" />
             {isLoggedIn ? (
               <>
                 <button
@@ -70,19 +74,19 @@ export default function Nav() {
                   onClick={() => signOut({ callbackUrl: "/" })}
                   style={{ background: "none", border: "none", cursor: "pointer", font: "inherit" }}
                 >
-                  Déconnexion
+                  {t("Déconnexion", "Uitloggen")}
                 </button>
                 <Link className="btn btn-primary" href="/dashboard">
-                  Mon espace →
+                  {t("Mon espace →", "Mijn account →")}
                 </Link>
               </>
             ) : (
               <>
                 <Link className="nav-login" href="/login">
-                  Connexion
+                  {t("Connexion", "Inloggen")}
                 </Link>
                 <Link className="btn btn-primary" href="/pro/contact">
-                  Réserver une démo
+                  {t("Réserver une démo", "Demo aanvragen")}
                 </Link>
               </>
             )}
@@ -92,7 +96,7 @@ export default function Nav() {
           <button
             type="button"
             className={`bm-burger${open ? " is-open" : ""}`}
-            aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-label={open ? t("Fermer le menu", "Menu sluiten") : t("Ouvrir le menu", "Menu openen")}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
           >
@@ -105,20 +109,22 @@ export default function Nav() {
         {/* Overlay + panneau mobile */}
         <div className={`bm-overlay${open ? " is-open" : ""}`} onClick={close} />
         <aside className={`bm-sheet${open ? " is-open" : ""}`} role="dialog" aria-modal="true">
-          <button type="button" className="bm-sheet-close" aria-label="Fermer le menu" onClick={close}>
+          <button type="button" className="bm-sheet-close" aria-label={t("Fermer le menu", "Menu sluiten")} onClick={close}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
               <line x1="6" y1="6" x2="18" y2="18" />
               <line x1="18" y1="6" x2="6" y2="18" />
             </svg>
           </button>
 
-          <a className="bm-sheet-link" href="/#solution" onClick={close}>Solution</a>
-          <a className="bm-sheet-link" href="/#vitrine" onClick={close}>Les biens</a>
-          <a className="bm-sheet-link" href="/#process" onClick={close}>Process</a>
-          <a className="bm-sheet-link" href="/#tarif" onClick={close}>Tarifs</a>
-          <a className="bm-sheet-link" href="/#contact" onClick={close}>Contact</a>
+          <a className="bm-sheet-link" href="/#solution" onClick={close}>{t("Solution", "Oplossing")}</a>
+          <a className="bm-sheet-link" href="/#vitrine" onClick={close}>{t("Les biens", "Het aanbod")}</a>
+          <a className="bm-sheet-link" href="/#process" onClick={close}>{t("Process", "Werkwijze")}</a>
+          <a className="bm-sheet-link" href="/#tarif" onClick={close}>{t("Tarifs", "Tarieven")}</a>
+          <a className="bm-sheet-link" href="/#contact" onClick={close}>{t("Contact", "Contact")}</a>
 
           <div className="bm-sheet-sep" />
+
+          <LangSwitcher color="#16324F" size={14} style={{ alignSelf: "center", margin: "0 0 8px" }} />
 
           {isLoggedIn ? (
             <>
@@ -130,19 +136,19 @@ export default function Nav() {
                   signOut({ callbackUrl: "/" });
                 }}
               >
-                Déconnexion
+                {t("Déconnexion", "Uitloggen")}
               </button>
               <Link className="bm-sheet-cta" href="/dashboard" onClick={close}>
-                Mon espace →
+                {t("Mon espace →", "Mijn account →")}
               </Link>
             </>
           ) : (
             <>
               <Link className="bm-sheet-login" href="/login" onClick={close}>
-                Connexion
+                {t("Connexion", "Inloggen")}
               </Link>
               <Link className="bm-sheet-cta" href="/pro/contact" onClick={close}>
-                Réserver une démo
+                {t("Réserver une démo", "Demo aanvragen")}
               </Link>
             </>
           )}

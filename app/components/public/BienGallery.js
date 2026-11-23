@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useLang } from '@/app/components/i18n/LangProvider'
 
 export function BienGallery({ images = [], titre }) {
   const [active, setActive] = useState(0)
   const [lightbox, setLightbox] = useState(false)
+  const { t } = useLang()
 
   function openAt(i) { setActive(i); setLightbox(true) }
 
@@ -53,19 +55,19 @@ export function BienGallery({ images = [], titre }) {
         {/* bouton "voir toutes les photos" */}
         <button onClick={() => openAt(0)} style={{ position: 'absolute', bottom: 16, right: 16, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.95)', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#193B5E', boxShadow: '0 4px 14px rgba(0,0,0,0.15)' }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
-          {images.length} photo{images.length > 1 ? 's' : ''}
+          {images.length} {images.length > 1 ? t('photos', "foto's") : t('photo', 'foto')}
         </button>
       </div>
 
       {/* Lightbox */}
       {lightbox && (
         <div onClick={() => setLightbox(false)} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(15,36,56,0.94)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <button onClick={() => setLightbox(false)} style={{ position: 'absolute', top: 24, right: 24, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+          <button onClick={() => setLightbox(false)} aria-label={t('Fermer', 'Sluiten')} style={{ position: 'absolute', top: 24, right: 24, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
           </button>
 
           {images.length > 1 && (
-            <button onClick={(e) => { e.stopPropagation(); setActive((active - 1 + images.length) % images.length) }} style={{ position: 'absolute', left: 24, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+            <button onClick={(e) => { e.stopPropagation(); setActive((active - 1 + images.length) % images.length) }} aria-label={t('Photo précédente', 'Vorige foto')} style={{ position: 'absolute', left: 24, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
             </button>
           )}
@@ -73,7 +75,7 @@ export function BienGallery({ images = [], titre }) {
           <img src={images[active]} alt={titre} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '90%', maxHeight: '88%', borderRadius: 12, objectFit: 'contain' }} />
 
           {images.length > 1 && (
-            <button onClick={(e) => { e.stopPropagation(); setActive((active + 1) % images.length) }} style={{ position: 'absolute', right: 24, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+            <button onClick={(e) => { e.stopPropagation(); setActive((active + 1) % images.length) }} aria-label={t('Photo suivante', 'Volgende foto')} style={{ position: 'absolute', right: 24, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
             </button>
           )}

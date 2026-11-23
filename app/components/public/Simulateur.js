@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { evalueBien } from '@/lib/capacite'
-import { MENSUALITE_CONFIG, AVERTISSEMENT_LEGAL, IDENTIFICATION_FINANCE } from '@/lib/mensualiteConfig'
+import { MENSUALITE_CONFIG, avertissementLegal, identificationFinance } from '@/lib/mensualiteConfig'
 import { libelleBienExterne } from '@/lib/bienExterne'
+import { useLang } from '@/app/components/i18n/LangProvider'
+import { locale } from '@/lib/i18n/config'
 
 const labelStyle = { display: 'block', fontSize: 11.5, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }
 const inputStyle = { width: '100%', padding: '11px 13px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14.5, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
@@ -12,10 +14,11 @@ function Euro({ children }) {
   return <div style={{ position: 'relative' }}>{children}<span style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', fontSize: 13.5, color: '#9AA2B4', pointerEvents: 'none' }}>€</span></div>
 }
 
-const pct = (t) => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(t * 100) + ' %'
-const euro = (n) => (n || 0).toLocaleString('fr-BE') + ' €'
+const pct = (v, lang) => new Intl.NumberFormat(locale(lang), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v * 100) + ' %'
+const euro = (n, lang) => (n || 0).toLocaleString(locale(lang)) + ' €'
 
 export function Simulateur({ bien, cfg, onStepChange }) {
+  const { lang, t } = useLang()
   const [step, setStep] = useState(1)
   // L'apport peut arriver pré-rempli du configurateur d'un partenaire (cf. lib/bienExterne.js)
   const [sim, setSim] = useState({ revenus: '', apport: bien?.apport ? String(bien.apport) : '', creditsEnCours: '' })
@@ -36,8 +39,8 @@ export function Simulateur({ bien, cfg, onStepChange }) {
 
   async function soumettre(e) {
     e.preventDefault()
-    if (!sim.revenus) { setError('Indiquez vos revenus.'); return }
-    if (!contact.email && !contact.telephone) { setError('Un email ou un téléphone est requis.'); return }
+    if (!sim.revenus) { setError(t('Indiquez vos revenus.', 'Vul uw inkomen in.')); return }
+    if (!contact.email && !contact.telephone) { setError(t('Un email ou un téléphone est requis.', 'Een e-mailadres of telefoonnummer is verplicht.')); return }
     setError(''); setLoading(true)
     try {
       const res = await fetch('/api/leads', {
@@ -58,14 +61,14 @@ export function Simulateur({ bien, cfg, onStepChange }) {
         }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Erreur.'); setLoading(false); return }
+      if (!res.ok) { setError(data.error || t('Erreur.', 'Fout.')); setLoading(false); return }
 
       const r = evalueBien({ revenus: sim.revenus, apport: sim.apport, creditsEnCours: sim.creditsEnCours, prixBien: bien?.prixDecaisse || bien?.prixTotal || 0 }, cfgM)
       setResult(r)
       setLoading(false)
       setStep(2)
     } catch {
-      setError('Erreur réseau.'); setLoading(false)
+      setError(t('Erreur réseau.', 'Netwerkfout.')); setLoading(false)
     }
   }
 
@@ -85,18 +88,21 @@ export function Simulateur({ bien, cfg, onStepChange }) {
           <span style={{ display: 'inline-flex', width: 48, height: 48, borderRadius: '50%', background: 'rgba(36,158,124,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#249E7C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
           </span>
-          <h2 style={{ fontSize: 19, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>Votre demande est enregistrée</h2>
+          <h2 style={{ fontSize: 19, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>{t('Votre demande est enregistrée', 'Uw aanvraag is geregistreerd')}</h2>
           <p style={{ fontSize: 13.5, color: '#5A6275', margin: 0, lineHeight: 1.5, maxWidth: 420, marginLeft: 'auto', marginRight: 'auto' }}>
-            Voici votre capacité d'emprunt estimée. Un conseiller BuyMonth Finance vous recontactera pour l'affiner.
+            {t(
+              "Voici votre capacité d'emprunt estimée. Un conseiller BuyMonth Finance vous recontactera pour l'affiner.",
+              'Dit is uw geschatte leencapaciteit. Een medewerker van BuyMonth Finance neemt contact met u op om ze te verfijnen.'
+            )}
           </p>
         </div>
 
         <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 14, padding: '16px 14px' }}>
           {[
-            { label: 'Mensualité maximale', value: euro(result.mensualiteMax) },
-            { label: 'Capital empruntable max', value: euro(result.capitalEmpruntable) },
-            { label: 'Apport pris en compte', value: euro(apportPrisEnCompte) },
-            { label: 'Budget total maximum', value: euro(budgetTotalMax), strong: true },
+            { label: t('Mensualité maximale', 'Maximaal maandbedrag'), value: euro(result.mensualiteMax, lang) },
+            { label: t('Capital empruntable max', 'Maximaal leenbaar kapitaal'), value: euro(result.capitalEmpruntable, lang) },
+            { label: t('Apport pris en compte', 'Eigen inbreng in rekening gebracht'), value: euro(apportPrisEnCompte, lang) },
+            { label: t('Budget total maximum', 'Maximaal totaalbudget'), value: euro(budgetTotalMax, lang), strong: true },
           ].map((row, i, arr) => (
             <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
               <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.7)' }}>{row.label}</span>
@@ -106,15 +112,18 @@ export function Simulateur({ bien, cfg, onStepChange }) {
         </div>
 
         <p style={{ fontSize: 10.5, color: '#8A92A6', margin: '12px 0 0', lineHeight: 1.45 }}>
-          Estimation indicative, hors droits d'enregistrement et frais de notaire, sur base d'un crédit à {dureeAns} ans, taux débiteur {pct(cfgM.tauxAnnuel)}, TAEG {pct(cfgM.taegAnnuel)}. Le budget total maximum additionne le capital empruntable et votre apport. Indicatif uniquement.
+          {t(
+            `Estimation indicative, hors droits d'enregistrement et frais de notaire, sur base d'un crédit à ${dureeAns} ans, taux débiteur ${pct(cfgM.tauxAnnuel, lang)}, TAEG ${pct(cfgM.taegAnnuel, lang)}. Le budget total maximum additionne le capital empruntable et votre apport. Indicatif uniquement.`,
+            `Indicatieve raming, exclusief registratierechten en notariskosten, op basis van een krediet op ${dureeAns} jaar, debetrentevoet ${pct(cfgM.tauxAnnuel, lang)}, JKP ${pct(cfgM.taegAnnuel, lang)}. Het maximale totaalbudget telt het leenbare kapitaal en uw eigen inbreng op. Uitsluitend indicatief.`
+          )}
         </p>
 
         <button type="button" onClick={() => setStep(1)} style={{ width: '100%', padding: '11px', marginTop: 12, borderRadius: 10, background: 'transparent', color: '#5A6275', border: '1.5px solid #E8EDF2', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-          ← Modifier mes informations
+          {t('← Modifier mes informations', '← Mijn gegevens wijzigen')}
         </button>
 
         <p style={{ fontSize: 10, color: '#A9B0BE', margin: '12px 0 0', lineHeight: 1.4, textAlign: 'center' }}>
-          {AVERTISSEMENT_LEGAL} {IDENTIFICATION_FINANCE}
+          {avertissementLegal(lang)} {identificationFinance(lang)}
         </p>
       </div>
     )
@@ -140,21 +149,21 @@ export function Simulateur({ bien, cfg, onStepChange }) {
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(124,184,168,0.16)', border: '1px solid rgba(124,184,168,0.3)', borderRadius: 20, padding: '5px 12px', marginBottom: 18, alignSelf: 'flex-start' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#7CB8A8' }} />
-            <span style={{ fontSize: 10.5, fontWeight: 700, color: '#7CB8A8', letterSpacing: '0.05em' }}>SIMULATION GRATUITE</span>
+            <span style={{ fontSize: 10.5, fontWeight: 700, color: '#7CB8A8', letterSpacing: '0.05em' }}>{t('SIMULATION GRATUITE', 'GRATIS SIMULATIE')}</span>
           </div>
 
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>Votre capacité d'emprunt</h2>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{t("Votre capacité d'emprunt", 'Uw leencapaciteit')}</h2>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.55 }}>
-            {bien?.titre ? `Pour « ${bien.titre} ». ` : ''}Estimez en une minute ce que vous pouvez emprunter, sans engagement.
+            {bien?.titre ? t(`Pour « ${bien.titre} ». `, `Voor “${bien.titre}”. `) : ''}{t('Estimez en une minute ce que vous pouvez emprunter, sans engagement.', 'Bereken in een minuut hoeveel u kunt lenen, vrijblijvend.')}
           </p>
 
           <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 24 }}>
-            {['Réponse immédiate', 'Sans engagement', 'Étude par un conseiller BuyMonth Finance'].map((t) => (
-              <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {[t('Réponse immédiate', 'Onmiddellijk antwoord'), t('Sans engagement', 'Vrijblijvend'), t('Étude par un conseiller BuyMonth Finance', 'Studie door een medewerker van BuyMonth Finance')].map((txt) => (
+              <div key={txt} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(124,184,168,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
                 </span>
-                <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.82)' }}>{t}</span>
+                <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.82)' }}>{txt}</span>
               </div>
             ))}
           </div>
@@ -166,40 +175,43 @@ export function Simulateur({ bien, cfg, onStepChange }) {
         <form onSubmit={soumettre}>
           <div className="sim-row" style={{ marginBottom: 10 }}>
             <div>
-              <label style={labelStyle}>Revenus nets mensuels</label>
+              <label style={labelStyle}>{t('Revenus nets mensuels', 'Maandelijks netto-inkomen')}</label>
               <Euro><input type="number" value={sim.revenus} onChange={setS('revenus')} placeholder="3500" style={{ ...inputStyle, paddingRight: 34 }} /></Euro>
             </div>
             <div>
-              <label style={labelStyle}>Apport disponible</label>
+              <label style={labelStyle}>{t('Apport disponible', 'Beschikbare eigen inbreng')}</label>
               <Euro><input type="number" value={sim.apport} onChange={setS('apport')} placeholder="30000" style={{ ...inputStyle, paddingRight: 34 }} /></Euro>
             </div>
           </div>
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>Crédits en cours (mensualités)</label>
+            <label style={labelStyle}>{t('Crédits en cours (mensualités)', 'Lopende kredieten (maandbedragen)')}</label>
             <Euro><input type="number" value={sim.creditsEnCours} onChange={setS('creditsEnCours')} placeholder="0" style={{ ...inputStyle, paddingRight: 34 }} /></Euro>
           </div>
 
           <div style={{ borderTop: '1px solid #F2F5FA', paddingTop: 14, marginBottom: 4 }}>
             <p style={{ fontSize: 12, color: '#5A6275', margin: '0 0 12px', lineHeight: 1.45 }}>
-              Recevez une étude de financement personnalisée, gratuite et sans engagement : laissez vos coordonnées et cochez les cases ci-dessous. C'est facultatif.
+              {t(
+                "Recevez une étude de financement personnalisée, gratuite et sans engagement : laissez vos coordonnées et cochez les cases ci-dessous. C'est facultatif.",
+                'Ontvang een gepersonaliseerde financieringsstudie, gratis en vrijblijvend: laat uw gegevens achter en vink de vakjes hieronder aan. Dit is optioneel.'
+              )}
             </p>
             <div className="sim-row" style={{ marginBottom: 10 }}>
               <div>
-                <label style={labelStyle}>Nom complet</label>
-                <input value={contact.nom} onChange={setC('nom')} placeholder="Votre nom" style={inputStyle} />
+                <label style={labelStyle}>{t('Nom complet', 'Volledige naam')}</label>
+                <input value={contact.nom} onChange={setC('nom')} placeholder={t('Votre nom', 'Uw naam')} style={inputStyle} />
               </div>
               <div>
-                <label style={labelStyle}>Entreprise <span style={{ textTransform: 'none', fontWeight: 500, color: '#A9B0BE' }}>(opt.)</span></label>
-                <input value={contact.societe} onChange={setC('societe')} placeholder="Via une société" style={inputStyle} />
+                <label style={labelStyle}>{t('Entreprise', 'Bedrijf')} <span style={{ textTransform: 'none', fontWeight: 500, color: '#A9B0BE' }}>{t('(opt.)', '(opt.)')}</span></label>
+                <input value={contact.societe} onChange={setC('societe')} placeholder={t('Via une société', 'Via een vennootschap')} style={inputStyle} />
               </div>
             </div>
             <div className="sim-row" style={{ marginBottom: 14 }}>
               <div>
-                <label style={labelStyle}>Email</label>
-                <input type="email" value={contact.email} onChange={setC('email')} placeholder="vous@email.com" style={inputStyle} />
+                <label style={labelStyle}>{t('Email', 'E-mail')}</label>
+                <input type="email" value={contact.email} onChange={setC('email')} placeholder={t('vous@email.com', 'u@email.com')} style={inputStyle} />
               </div>
               <div>
-                <label style={labelStyle}>Téléphone</label>
+                <label style={labelStyle}>{t('Téléphone', 'Telefoon')}</label>
                 <input value={contact.telephone} onChange={setC('telephone')} placeholder="+32 ..." style={inputStyle} />
               </div>
             </div>
@@ -211,32 +223,44 @@ export function Simulateur({ bien, cfg, onStepChange }) {
             <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', cursor: 'pointer' }}>
               <input type="checkbox" checked={consentPromoteur} onChange={(e) => setConsentPromoteur(e.target.checked)} style={{ marginTop: 2, width: 15, height: 15, flexShrink: 0, cursor: 'pointer', accentColor: '#7CB8A8' }} />
               <span style={{ fontSize: 11, color: '#5A6275', lineHeight: 1.4 }}>
-                J'accepte que mes coordonnées soient transmises au promoteur du bien consulté, afin qu'il puisse me recontacter.
+                {t(
+                  "J'accepte que mes coordonnées soient transmises au promoteur du bien consulté, afin qu'il puisse me recontacter.",
+                  'Ik ga ermee akkoord dat mijn gegevens worden doorgegeven aan de projectontwikkelaar van het bekeken pand, zodat die contact met mij kan opnemen.'
+                )}
               </span>
             </label>
             <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', cursor: 'pointer' }}>
               <input type="checkbox" checked={consentFinance} onChange={(e) => setConsentFinance(e.target.checked)} style={{ marginTop: 2, width: 15, height: 15, flexShrink: 0, cursor: 'pointer', accentColor: '#7CB8A8' }} />
               <span style={{ fontSize: 11, color: '#5A6275', lineHeight: 1.4 }}>
-                J'accepte que mes coordonnées soient transmises à BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit, pour une étude de financement.
+                {t(
+                  "J'accepte que mes coordonnées soient transmises à BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit, pour une étude de financement.",
+                  'Ik ga ermee akkoord dat mijn gegevens worden doorgegeven aan BuyMonth Finance, handelsnaam van JG Management SRL, kredietbemiddelaar, voor een financieringsstudie.'
+                )}
               </span>
             </label>
             <p style={{ fontSize: 10.5, color: '#A9B0BE', margin: 0, lineHeight: 1.45 }}>
-              Les deux cases sont facultatives et indépendantes : votre résultat s'affiche dans tous les cas.{' '}
-              <a href="/confidentialite" target="_blank" rel="noopener noreferrer" style={{ color: '#7CB8A8', fontWeight: 600 }}>Confidentialité</a>.
+              {t("Les deux cases sont facultatives et indépendantes : votre résultat s'affiche dans tous les cas.", 'Beide vakjes zijn optioneel en onafhankelijk van elkaar: uw resultaat wordt hoe dan ook getoond.')}{' '}
+              <a href="/confidentialite" target="_blank" rel="noopener noreferrer" style={{ color: '#7CB8A8', fontWeight: 600 }}>{t('Confidentialité', 'Privacy')}</a>.
             </p>
           </div>
 
           {error && <p style={{ color: '#E5484D', fontSize: 12.5, margin: '0 0 12px' }}>{error}</p>}
 
           <button type="submit" disabled={loading} style={{ width: '100%', padding: '13px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 14.5, fontWeight: 700, cursor: loading ? 'wait' : 'pointer' }}>
-            {loading ? 'Envoi...' : 'Voir ma capacité'}
+            {loading ? t('Envoi...', 'Versturen...') : t('Voir ma capacité', 'Mijn leencapaciteit bekijken')}
           </button>
 
           {/* Pas de n° FSMA ici : une publicité pour un crédit ne peut pas faire référence à l'inscription
               de l'intermédiaire (art. VII.123 §2 CDE). Le numéro reste sur /mentions-legales (test Vizion du 16/11, point 4). */}
           <p style={{ fontSize: 9.5, color: '#A9B0BE', margin: '10px 0 0', lineHeight: 1.45, textAlign: 'center' }}>
-            Simulation indicative, sans valeur contractuelle. Plateforme éditée par BuyMonth SRL (BCE 1041.967.664), qui n'est pas intermédiaire de crédit.
-            Partenaire crédit : BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit.
+            {t(
+              "Simulation indicative, sans valeur contractuelle. Plateforme éditée par BuyMonth SRL (BCE 1041.967.664), qui n'est pas intermédiaire de crédit.",
+              'Indicatieve simulatie, zonder contractuele waarde. Platform uitgegeven door BuyMonth SRL (KBO 1041.967.664), die geen kredietbemiddelaar is.'
+            )}{' '}
+            {t(
+              'Partenaire crédit : BuyMonth Finance, nom commercial de JG Management SRL, intermédiaire de crédit.',
+              'Kredietpartner: BuyMonth Finance, handelsnaam van JG Management SRL, kredietbemiddelaar.'
+            )}
           </p>
         </form>
       </div>

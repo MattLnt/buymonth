@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getT } from '@/lib/i18n/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
@@ -17,17 +18,18 @@ const STATUTS_PROMOTEUR = [
 ]
 
 export async function POST(req) {
+  const { t } = await getT()
   try {
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
 
     const client = await prisma.client.findUnique({ where: { userId: session.user.id } })
-    if (!client) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
+    if (!client) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
 
     const { leadId, statut } = await req.json()
-    if (!leadId || !statut) return NextResponse.json({ error: 'Paramètres manquants.' }, { status: 400 })
+    if (!leadId || !statut) return NextResponse.json({ error: t('Paramètres manquants.', 'Ontbrekende parameters.') }, { status: 400 })
     if (!STATUTS_PROMOTEUR.includes(statut)) {
-      return NextResponse.json({ error: 'Statut invalide.' }, { status: 400 })
+      return NextResponse.json({ error: t('Statut invalide.', 'Ongeldige status.') }, { status: 400 })
     }
 
     // Sécurité : le lead doit porter sur un bien du promoteur connecté
@@ -36,7 +38,7 @@ export async function POST(req) {
       include: { bien: { select: { clientId: true } } },
     })
     if (!lead || lead.bien?.clientId !== client.id) {
-      return NextResponse.json({ error: 'Lead introuvable.' }, { status: 404 })
+      return NextResponse.json({ error: t('Lead introuvable.', 'Lead niet gevonden.') }, { status: 404 })
     }
 
     await prisma.lead.update({
@@ -46,6 +48,6 @@ export async function POST(req) {
 
     return NextResponse.json({ ok: true })
   } catch (e) {
-    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
+    return NextResponse.json({ error: t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
   }
 }

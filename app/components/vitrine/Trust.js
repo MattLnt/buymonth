@@ -1,18 +1,22 @@
+"use client";
+import { useLang } from "@/app/components/i18n/LangProvider";
+
 export default function Trust() {
+  const { t } = useLang();
   return (
     <div className="trust">
       <div className="wrap trust-in">
         <span>
           <i className="dot" />
-          Sans refonte de votre site
+          {t("Sans refonte de votre site", "Zonder uw website te herwerken")}
         </span>
         <span>
           <i className="dot" />
-          Mentions légales &amp; RGPD intégrés
+          {t("Mentions légales & RGPD intégrés", "Wettelijke vermeldingen & AVG inbegrepen")}
         </span>
         <span>
           <i className="dot" />
-          Partenaire crédit : BuyMonth Finance
+          {t("Partenaire crédit : BuyMonth Finance", "Kredietpartner: BuyMonth Finance")}
         </span>
       </div>
     </div>
