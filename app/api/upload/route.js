@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { v2 as cloudinary } from 'cloudinary'
-import { getT } from '@/lib/i18n/server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -16,29 +15,28 @@ cloudinary.config({
 const MAX_BYTES = 10 * 1024 * 1024 // 10 Mo
 
 export async function POST(req) {
-  const { t } = await getT()
   try {
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
 
     // La config Cloudinary est-elle bien présente ? (cause n°1 d'un upload « impossible »)
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
       console.error('[UPLOAD] Config Cloudinary manquante (vérifier le .env)')
-      return NextResponse.json({ error: t("Service d'upload non configuré (Cloudinary).", 'Uploadservice niet geconfigureerd (Cloudinary).') }, { status: 500 })
+      return NextResponse.json({ error: "Service d'upload non configuré (Cloudinary)." }, { status: 500 })
     }
 
     const formData = await req.formData()
     const file = formData.get('file')
     if (!file || typeof file === 'string') {
-      return NextResponse.json({ error: t('Aucun fichier reçu.', 'Geen bestand ontvangen.') }, { status: 400 })
+      return NextResponse.json({ error: 'Aucun fichier reçu.' }, { status: 400 })
     }
 
     // Validation type + taille (messages clairs plutôt qu'une erreur muette)
     if (!file.type?.startsWith('image/')) {
-      return NextResponse.json({ error: t('Le fichier doit être une image.', 'Het bestand moet een afbeelding zijn.') }, { status: 400 })
+      return NextResponse.json({ error: 'Le fichier doit être une image.' }, { status: 400 })
     }
     if (file.size > MAX_BYTES) {
-      return NextResponse.json({ error: t('Image trop lourde (10 Mo maximum).', 'Afbeelding te groot (maximaal 10 MB).') }, { status: 400 })
+      return NextResponse.json({ error: 'Image trop lourde (10 Mo maximum).' }, { status: 400 })
     }
 
     const bytes = await file.arrayBuffer()
@@ -57,6 +55,6 @@ export async function POST(req) {
   } catch (e) {
     // On loggue ET on renvoie la vraie cause pour pouvoir diagnostiquer
     console.error('[UPLOAD]', e?.message || e)
-    return NextResponse.json({ error: e?.message || t("Erreur lors de l'upload.", 'Fout bij het uploaden.') }, { status: 500 })
+    return NextResponse.json({ error: e?.message || "Erreur lors de l'upload." }, { status: 500 })
   }
 }

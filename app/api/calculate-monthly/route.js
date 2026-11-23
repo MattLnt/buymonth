@@ -2,7 +2,7 @@ import { postMensualite, optionsMensualite, getMensualite } from '@/lib/vizionAp
 
 /*
  * POST /api/calculate-monthly — route du brief Vizion (docs/Specification_API_Buymonth.pdf)
- *   entrée  : { "price": 315000 }            (+ "regime", "duration", "lang": "nl" optionnels)
+ *   entrée  : { "price": 315000 }            (+ "regime" optionnel)
  *   sortie  : { "monthlyPrice", "totalPrice", "duration", "rate", … }
  *   en-tête : x-api-key
  */

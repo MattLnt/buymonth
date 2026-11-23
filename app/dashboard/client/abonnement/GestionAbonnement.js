@@ -15,21 +15,19 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
-import { useLang } from '@/app/components/i18n/LangProvider'
-import { locale } from '@/lib/i18n/config'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY)
 
 const NAVY = '#193B5E'
 const carte = { background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 26 }
 
-function formatDate(ms, lang) {
+function formatDate(ms) {
   if (!ms) return '—'
-  return new Date(ms).toLocaleDateString(locale(lang), { day: 'numeric', month: 'long', year: 'numeric' })
+  return new Date(ms).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-function montant(centimes, devise = 'eur', lang) {
-  return `${((centimes || 0) / 100).toLocaleString(locale(lang), { minimumFractionDigits: 2 })} ${String(devise).toUpperCase() === 'EUR' ? '€' : devise}`
+function montant(centimes, devise = 'eur') {
+  return `${((centimes || 0) / 100).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} ${String(devise).toUpperCase() === 'EUR' ? '€' : devise}`
 }
 
 // Au-dela, la liste pousse la page et noie les factures recentes
@@ -61,7 +59,6 @@ const PASTILLE = {
 function FormulaireMoyen({ onFini, onAnnuler }) {
   const stripe = useStripe()
   const elements = useElements()
-  const { t } = useLang()
   const [loading, setLoading] = useState(false)
   const [erreur, setErreur] = useState('')
 
@@ -75,10 +72,10 @@ function FormulaireMoyen({ onFini, onAnnuler }) {
       redirect: 'if_required',
       confirmParams: { return_url: `${window.location.origin}/dashboard/client/abonnement` },
     })
-    if (error) { setErreur(error.message || t('Moyen de paiement refusé.', 'Betaalmethode geweigerd.')); setLoading(false); return }
+    if (error) { setErreur(error.message || 'Moyen de paiement refusé.'); setLoading(false); return }
 
     const pm = setupIntent?.payment_method
-    if (!pm) { setErreur(t('Moyen de paiement non enregistré.', 'Betaalmethode niet opgeslagen.')); setLoading(false); return }
+    if (!pm) { setErreur('Moyen de paiement non enregistré.'); setLoading(false); return }
 
     try {
       const res = await fetch('/api/abonnement/moyen-paiement', {
@@ -87,10 +84,10 @@ function FormulaireMoyen({ onFini, onAnnuler }) {
         body: JSON.stringify({ paymentMethodId: pm }),
       })
       const data = await res.json()
-      if (!res.ok) { setErreur(data.error || t('Erreur.', 'Fout.')); setLoading(false); return }
+      if (!res.ok) { setErreur(data.error || 'Erreur.'); setLoading(false); return }
       onFini()
     } catch {
-      setErreur(t('Erreur réseau.', 'Netwerkfout.')); setLoading(false)
+      setErreur('Erreur réseau.'); setLoading(false)
     }
   }
 
@@ -109,15 +106,15 @@ function FormulaireMoyen({ onFini, onAnnuler }) {
       <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
         <button type="submit" disabled={!stripe || loading}
           style={{ flex: 1, padding: '13px', borderRadius: 10, background: NAVY, color: '#fff', border: 'none', fontSize: 14, fontWeight: 700, cursor: loading ? 'wait' : 'pointer' }}>
-          {loading ? t('Enregistrement…', 'Opslaan…') : t('Enregistrer ce moyen de paiement', 'Deze betaalmethode opslaan')}
+          {loading ? 'Enregistrement…' : 'Enregistrer ce moyen de paiement'}
         </button>
         <button type="button" onClick={onAnnuler} disabled={loading}
           style={{ padding: '13px 18px', borderRadius: 10, background: '#F5F8FB', color: '#5A6275', border: '1px solid #E6EDF4', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-          {t('Annuler', 'Annuleren')}
+          Annuler
         </button>
       </div>
       <p style={{ fontSize: 11.5, color: '#A9B0BE', margin: '12px 0 0', textAlign: 'center' }}>
-        {t('Vos coordonnées bancaires sont transmises directement à notre prestataire de paiement. BuyMonth ne les voit ni ne les conserve.', 'Uw bankgegevens gaan rechtstreeks naar onze betaalprovider. BuyMonth ziet ze niet en bewaart ze niet.')}
+        Vos coordonnées bancaires sont transmises directement à notre prestataire de paiement. BuyMonth ne les voit ni ne les conserve.
       </p>
     </form>
   )
@@ -127,7 +124,6 @@ function FormulaireMoyen({ onFini, onAnnuler }) {
 
 export function GestionAbonnement({ actif }) {
   const router = useRouter()
-  const { lang, t } = useLang()
   const [donnees, setDonnees] = useState(null)
   const [chargement, setChargement] = useState(true)
   const [erreur, setErreur] = useState('')
@@ -143,14 +139,14 @@ export function GestionAbonnement({ actif }) {
     try {
       const res = await fetch('/api/abonnement/facturation')
       const data = await res.json()
-      if (!res.ok) { setErreur(data.error || t('Erreur.', 'Fout.')); return }
+      if (!res.ok) { setErreur(data.error || 'Erreur.'); return }
       setDonnees(data)
     } catch {
-      setErreur(t('Impossible de charger vos informations de facturation.', 'Uw factuurgegevens konden niet worden geladen.'))
+      setErreur('Impossible de charger vos informations de facturation.')
     } finally {
       setChargement(false)
     }
-  }, [t])
+  }, [])
 
   useEffect(() => { charger() }, [charger])
 
@@ -159,10 +155,10 @@ export function GestionAbonnement({ actif }) {
     try {
       const res = await fetch('/api/stripe/setup-intent', { method: 'POST' })
       const data = await res.json()
-      if (!res.ok || !data.clientSecret) { setErreur(data.error || t('Erreur.', 'Fout.')); return }
+      if (!res.ok || !data.clientSecret) { setErreur(data.error || 'Erreur.'); return }
       setClientSecret(data.clientSecret)
       setModeEdition(true)
-    } catch { setErreur(t('Erreur réseau.', 'Netwerkfout.')) }
+    } catch { setErreur('Erreur réseau.') }
   }
 
   async function basculerResiliation(annuler) {
@@ -174,12 +170,12 @@ export function GestionAbonnement({ actif }) {
         body: JSON.stringify({ annuler }),
       })
       const data = await res.json()
-      if (!res.ok) { setErreur(data.error || t('Erreur.', 'Fout.')); setAction(''); return }
+      if (!res.ok) { setErreur(data.error || 'Erreur.'); setAction(''); return }
       setMessage(data.message)
       setConfirmation(false)
       await charger()
       router.refresh()
-    } catch { setErreur(t('Erreur réseau.', 'Netwerkfout.')) } finally { setAction('') }
+    } catch { setErreur('Erreur réseau.') } finally { setAction('') }
   }
 
   const apparence = {
@@ -196,9 +192,9 @@ export function GestionAbonnement({ actif }) {
 
   return (
     <div style={{ marginTop: 26 }}>
-      <h3 style={{ fontSize: 16, fontWeight: 700, color: NAVY, margin: '0 0 4px' }}>{t('Gérer mon abonnement', 'Mijn abonnement beheren')}</h3>
+      <h3 style={{ fontSize: 16, fontWeight: 700, color: NAVY, margin: '0 0 4px' }}>Gérer mon abonnement</h3>
       <p style={{ fontSize: 13, color: '#8A92A6', margin: '0 0 18px' }}>
-        {t('Moyen de paiement, factures et résiliation.', 'Betaalmethode, facturen en opzegging.')}
+        Moyen de paiement, factures et résiliation.
       </p>
 
       {message && (
@@ -217,21 +213,21 @@ export function GestionAbonnement({ actif }) {
 
         {/* Moyen de paiement */}
         <div style={carte}>
-          <h4 style={{ fontSize: 14.5, fontWeight: 700, color: NAVY, margin: '0 0 16px' }}>{t('Moyen de paiement', 'Betaalmethode')}</h4>
+          <h4 style={{ fontSize: 14.5, fontWeight: 700, color: NAVY, margin: '0 0 16px' }}>Moyen de paiement</h4>
 
           {modeEdition && clientSecret ? (
-            <Elements stripe={stripePromise} options={{ clientSecret, appearance: apparence, locale: lang }}>
+            <Elements stripe={stripePromise} options={{ clientSecret, appearance: apparence }}>
               <FormulaireMoyen
                 onAnnuler={() => { setModeEdition(false); setClientSecret('') }}
                 onFini={async () => {
                   setModeEdition(false); setClientSecret('')
-                  setMessage(t('Votre moyen de paiement a été mis à jour.', 'Uw betaalmethode is bijgewerkt.'))
+                  setMessage('Votre moyen de paiement a été mis à jour.')
                   await charger()
                 }}
               />
             </Elements>
           ) : chargement ? (
-            <p style={{ fontSize: 13.5, color: '#8A92A6', margin: 0 }}>{t('Chargement…', 'Laden…')}</p>
+            <p style={{ fontSize: 13.5, color: '#8A92A6', margin: 0 }}>Chargement…</p>
           ) : moyen ? (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '14px 16px', background: '#FAFBFE', border: '1px solid #F2F5FA', borderRadius: 12 }}>
@@ -243,21 +239,21 @@ export function GestionAbonnement({ actif }) {
                   </div>
                   <div style={{ fontSize: 12.5, color: '#8A92A6', marginTop: 2 }}>
                     {moyen.fin ? `•••• ${moyen.fin}` : '—'}
-                    {moyen.expireLe ? ` · ${t('expire le', 'vervalt op')} ${moyen.expireLe}` : ''}
+                    {moyen.expireLe ? ` · expire le ${moyen.expireLe}` : ''}
                   </div>
                 </div>
               </div>
               <button onClick={ouvrirEdition}
                 style={{ width: '100%', marginTop: 14, padding: '12px', borderRadius: 10, background: '#F5F8FB', color: NAVY, border: '1px solid #E6EDF4', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>
-                {t('Changer de moyen de paiement', 'Betaalmethode wijzigen')}
+                Changer de moyen de paiement
               </button>
             </>
           ) : (
             <>
-              <p style={{ fontSize: 13.5, color: '#8A92A6', margin: '0 0 14px' }}>{t('Aucun moyen de paiement enregistré.', 'Geen betaalmethode opgeslagen.')}</p>
+              <p style={{ fontSize: 13.5, color: '#8A92A6', margin: '0 0 14px' }}>Aucun moyen de paiement enregistré.</p>
               <button onClick={ouvrirEdition}
                 style={{ width: '100%', padding: '12px', borderRadius: 10, background: NAVY, color: '#fff', border: 'none', fontSize: 13.5, fontWeight: 700, cursor: 'pointer' }}>
-                {t('Enregistrer un moyen de paiement', 'Een betaalmethode opslaan')}
+                Enregistrer un moyen de paiement
               </button>
             </>
           )}
@@ -265,13 +261,13 @@ export function GestionAbonnement({ actif }) {
 
         {/* Factures */}
         <div style={carte}>
-          <h4 style={{ fontSize: 14.5, fontWeight: 700, color: NAVY, margin: '0 0 16px' }}>{t('Factures', 'Facturen')}</h4>
+          <h4 style={{ fontSize: 14.5, fontWeight: 700, color: NAVY, margin: '0 0 16px' }}>Factures</h4>
 
           {chargement ? (
-            <p style={{ fontSize: 13.5, color: '#8A92A6', margin: 0 }}>{t('Chargement…', 'Laden…')}</p>
+            <p style={{ fontSize: 13.5, color: '#8A92A6', margin: 0 }}>Chargement…</p>
           ) : factures.length === 0 ? (
             <p style={{ fontSize: 13.5, color: '#8A92A6', margin: 0 }}>
-              {t('Aucune facture pour le moment. La première sera émise le 1er du mois.', 'Nog geen facturen. De eerste wordt opgemaakt op de 1e van de maand.')}
+              Aucune facture pour le moment. La première sera émise le 1er du mois.
             </p>
           ) : (
             <div>
@@ -280,9 +276,9 @@ export function GestionAbonnement({ actif }) {
                 return (
                   <div key={f.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderBottom: i < factures.length - 1 ? '1px solid #F2F5FA' : 'none' }}>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13.5, fontWeight: 600, color: NAVY }}>{montant(f.montant, f.devise, lang)}</div>
+                      <div style={{ fontSize: 13.5, fontWeight: 600, color: NAVY }}>{montant(f.montant, f.devise)}</div>
                       <div style={{ fontSize: 12, color: '#8A92A6', marginTop: 2 }}>
-                        {formatDate(f.date, lang)}{f.numero ? ` · ${f.numero}` : ''}
+                        {formatDate(f.date)}{f.numero ? ` · ${f.numero}` : ''}
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -292,11 +288,11 @@ export function GestionAbonnement({ actif }) {
                       {f.aRegler && (
                         <a href={f.aRegler} target="_blank" rel="noopener noreferrer"
                           style={{ fontSize: 12.5, fontWeight: 700, color: '#C2620C', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-                          {t('Régler', 'Betalen')}
+                          Régler
                         </a>
                       )}
                       {f.pdf && (
-                        <a href={f.pdf} target="_blank" rel="noopener noreferrer" title={t('Télécharger le PDF', 'PDF downloaden')}
+                        <a href={f.pdf} target="_blank" rel="noopener noreferrer" title="Télécharger le PDF"
                           style={{ display: 'inline-flex', color: '#249E7C' }}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
@@ -321,7 +317,7 @@ export function GestionAbonnement({ actif }) {
                     }}
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
-                    {t('Précédentes', 'Vorige')}
+                    Précédentes
                   </button>
 
                   <span style={{ fontSize: 12.5, color: '#8A92A6', fontWeight: 600, whiteSpace: 'nowrap' }}>
@@ -338,7 +334,7 @@ export function GestionAbonnement({ actif }) {
                       cursor: page >= nbPages - 1 ? 'default' : 'pointer',
                     }}
                   >
-                    {t('Suivantes', 'Volgende')}
+                    Suivantes
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
                   </button>
                 </div>
@@ -354,50 +350,45 @@ export function GestionAbonnement({ actif }) {
           {resiliation ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 18, flexWrap: 'wrap' }}>
               <div>
-                <h4 style={{ fontSize: 14.5, fontWeight: 700, color: '#C2620C', margin: '0 0 4px' }}>{t('Résiliation programmée', 'Geplande opzegging')}</h4>
+                <h4 style={{ fontSize: 14.5, fontWeight: 700, color: '#C2620C', margin: '0 0 4px' }}>Résiliation programmée</h4>
                 <p style={{ fontSize: 13, color: '#8A92A6', margin: 0, lineHeight: 1.6 }}>
-                  {t(
-                    `Votre abonnement prend fin le ${formatDate(resiliation.le, lang)}. Vos biens restent en ligne jusqu’à cette date.`,
-                    `Uw abonnement loopt af op ${formatDate(resiliation.le, lang)}. Uw panden blijven tot die datum online.`
-                  )}
+                  Votre abonnement prend fin le {formatDate(resiliation.le)}. Vos biens restent en ligne jusqu&rsquo;à cette date.
                 </p>
               </div>
               <button onClick={() => basculerResiliation(false)} disabled={action === 'resil'}
                 style={{ padding: '12px 20px', borderRadius: 10, background: '#7CB8A8', color: '#0F2A22', border: 'none', fontSize: 13.5, fontWeight: 700, cursor: action === 'resil' ? 'wait' : 'pointer', flexShrink: 0 }}>
-                {action === 'resil' ? t('Patientez…', 'Even geduld…') : t('Reprendre mon abonnement', 'Mijn abonnement hervatten')}
+                {action === 'resil' ? 'Patientez…' : 'Reprendre mon abonnement'}
               </button>
             </div>
           ) : confirmation ? (
             <div>
-              <h4 style={{ fontSize: 14.5, fontWeight: 700, color: NAVY, margin: '0 0 6px' }}>{t('Confirmer la résiliation', 'Opzegging bevestigen')}</h4>
+              <h4 style={{ fontSize: 14.5, fontWeight: 700, color: NAVY, margin: '0 0 6px' }}>Confirmer la résiliation</h4>
               <p style={{ fontSize: 13, color: '#5A6275', margin: '0 0 16px', lineHeight: 1.65 }}>
-                {t(
-                  'Vos biens resteront en ligne jusqu’à la fin de la période déjà payée. Passé cette date, ils sortiront de la vitrine, des pages agence et de vos widgets. Vous pourrez revenir en arrière à tout moment d’ici là.',
-                  'Uw panden blijven online tot het einde van de reeds betaalde periode. Daarna verdwijnen ze van de etalage, de kantoorpagina’s en uw widgets. Tot dan kunt u dit op elk moment ongedaan maken.'
-                )}
+                Vos biens resteront en ligne jusqu&rsquo;à la fin de la période déjà payée. Passé cette date, ils sortiront
+                de la vitrine, des pages agence et de vos widgets. Vous pourrez revenir en arrière à tout moment d&rsquo;ici là.
               </p>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 <button onClick={() => basculerResiliation(true)} disabled={action === 'resil'}
                   style={{ padding: '12px 20px', borderRadius: 10, background: '#E5484D', color: '#fff', border: 'none', fontSize: 13.5, fontWeight: 700, cursor: action === 'resil' ? 'wait' : 'pointer' }}>
-                  {action === 'resil' ? t('Patientez…', 'Even geduld…') : t('Oui, résilier', 'Ja, opzeggen')}
+                  {action === 'resil' ? 'Patientez…' : 'Oui, résilier'}
                 </button>
                 <button onClick={() => setConfirmation(false)} disabled={action === 'resil'}
                   style={{ padding: '12px 20px', borderRadius: 10, background: '#F5F8FB', color: '#5A6275', border: '1px solid #E6EDF4', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>
-                  {t('Garder mon abonnement', 'Mijn abonnement behouden')}
+                  Garder mon abonnement
                 </button>
               </div>
             </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 18, flexWrap: 'wrap' }}>
               <div>
-                <h4 style={{ fontSize: 14.5, fontWeight: 700, color: NAVY, margin: '0 0 4px' }}>{t('Résilier mon abonnement', 'Mijn abonnement opzeggen')}</h4>
+                <h4 style={{ fontSize: 14.5, fontWeight: 700, color: NAVY, margin: '0 0 4px' }}>Résilier mon abonnement</h4>
                 <p style={{ fontSize: 13, color: '#8A92A6', margin: 0 }}>
-                  {t('Sans engagement. L’arrêt prend effet à la fin de la période en cours.', 'Zonder verbintenis. De stopzetting gaat in aan het einde van de lopende periode.')}
+                  Sans engagement. L&rsquo;arrêt prend effet à la fin de la période en cours.
                 </p>
               </div>
               <button onClick={() => setConfirmation(true)}
                 style={{ padding: '12px 20px', borderRadius: 10, background: '#fff', color: '#E5484D', border: '1px solid #FBD5D5', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>
-                {t('Résilier', 'Opzeggen')}
+                Résilier
               </button>
             </div>
           )}

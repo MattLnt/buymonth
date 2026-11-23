@@ -6,7 +6,6 @@ import { calculMensualiteServeur } from '@/lib/settings'
 import { syncQuantiteAbonnement } from '@/lib/facturationSync'
 import { STATUTS_FACTURABLES } from '@/lib/facturation'
 import { estRegimeValide } from '@/lib/regime'
-import { getT } from '@/lib/i18n/server'
 
 const STATUTS = ['ACTIF', 'OPTION', 'HORS_LIGNE', 'VENDU']
 const normStatut = (s) => (STATUTS.includes(s) ? s : 'ACTIF')
@@ -21,19 +20,18 @@ async function getClient() {
 }
 
 export async function POST(req) {
-  const { t } = await getT()
   try {
     const client = await getClient()
-    if (!client) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
+    if (!client) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
 
     const b = await req.json()
     const prixTotal = parseInt(b.prixTotal, 10)
     if (!b.titre || !prixTotal || prixTotal <= 0) {
-      return NextResponse.json({ error: t('Titre et prix valides requis.', 'Geldige titel en prijs vereist.') }, { status: 400 })
+      return NextResponse.json({ error: 'Titre et prix valides requis.' }, { status: 400 })
     }
 
     if (!estRegimeValide(b.regime)) {
-      return NextResponse.json({ error: t('Choisissez le régime fiscal du bien (TVA 21 %, TVA 6 % ou droits d\'enregistrement).', 'Kies het fiscaal regime van het pand (btw 21 %, btw 6 % of registratierechten).') }, { status: 400 })
+      return NextResponse.json({ error: 'Choisissez le régime fiscal du bien (TVA 21 %, TVA 6 % ou droits d\'enregistrement).' }, { status: 400 })
     }
     const mensualite = await calculMensualiteServeur(prixTotal, b.regime)
     const statut = normStatut(b.statut)
@@ -72,31 +70,30 @@ export async function POST(req) {
 
     return NextResponse.json({ ok: true, bien })
   } catch (e) {
-    return NextResponse.json({ error: t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
   }
 }
 
 export async function PUT(req) {
-  const { t } = await getT()
   try {
     const client = await getClient()
-    if (!client) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
+    if (!client) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
 
     const b = await req.json()
-    if (!b.id) return NextResponse.json({ error: t('ID manquant.', 'ID ontbreekt.') }, { status: 400 })
+    if (!b.id) return NextResponse.json({ error: 'ID manquant.' }, { status: 400 })
 
     const existing = await prisma.bien.findUnique({ where: { id: b.id } })
     if (!existing || existing.clientId !== client.id) {
-      return NextResponse.json({ error: t('Bien introuvable.', 'Pand niet gevonden.') }, { status: 404 })
+      return NextResponse.json({ error: 'Bien introuvable.' }, { status: 404 })
     }
 
     const prixTotal = parseInt(b.prixTotal, 10)
     if (!b.titre || !prixTotal || prixTotal <= 0) {
-      return NextResponse.json({ error: t('Titre et prix valides requis.', 'Geldige titel en prijs vereist.') }, { status: 400 })
+      return NextResponse.json({ error: 'Titre et prix valides requis.' }, { status: 400 })
     }
 
     if (!estRegimeValide(b.regime)) {
-      return NextResponse.json({ error: t('Choisissez le régime fiscal du bien (TVA 21 %, TVA 6 % ou droits d\'enregistrement).', 'Kies het fiscaal regime van het pand (btw 21 %, btw 6 % of registratierechten).') }, { status: 400 })
+      return NextResponse.json({ error: 'Choisissez le régime fiscal du bien (TVA 21 %, TVA 6 % ou droits d\'enregistrement).' }, { status: 400 })
     }
     const mensualite = await calculMensualiteServeur(prixTotal, b.regime)
     const nouveauStatut = b.statut !== undefined ? normStatut(b.statut) : existing.statut
@@ -137,23 +134,22 @@ export async function PUT(req) {
 
     return NextResponse.json({ ok: true, bien })
   } catch (e) {
-    return NextResponse.json({ error: t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
   }
 }
 
 export async function DELETE(req) {
-  const { t } = await getT()
   try {
     const client = await getClient()
-    if (!client) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
+    if (!client) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
 
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')
-    if (!id) return NextResponse.json({ error: t('ID manquant.', 'ID ontbreekt.') }, { status: 400 })
+    if (!id) return NextResponse.json({ error: 'ID manquant.' }, { status: 400 })
 
     const existing = await prisma.bien.findUnique({ where: { id } })
     if (!existing || existing.clientId !== client.id) {
-      return NextResponse.json({ error: t('Bien introuvable.', 'Pand niet gevonden.') }, { status: 404 })
+      return NextResponse.json({ error: 'Bien introuvable.' }, { status: 404 })
     }
 
     await prisma.bien.delete({ where: { id } })
@@ -165,6 +161,6 @@ export async function DELETE(req) {
 
     return NextResponse.json({ ok: true })
   } catch (e) {
-    return NextResponse.json({ error: t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
   }
 }

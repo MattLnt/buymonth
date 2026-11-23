@@ -4,11 +4,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { Icon } from './Icon'
-import { useLang } from '@/app/components/i18n/LangProvider'
 
 export function Sidebar({ items, societe, email, collapsed = false }) {
   const pathname = usePathname()
-  const { t } = useLang()
 
   const flatItems = items.flatMap((it) => (it.section ? it.items : [it]))
 
@@ -95,10 +93,10 @@ export function Sidebar({ items, societe, email, collapsed = false }) {
         </nav>
 
         <div style={{ padding: collapsed ? '12px 8px' : '12px 12px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-          <button onClick={() => signOut({ callbackUrl: '/' })} className="bm-nav-item" title={collapsed ? t('Déconnexion', 'Uitloggen') : ''}
+          <button onClick={() => signOut({ callbackUrl: '/' })} className="bm-nav-item" title={collapsed ? 'Déconnexion' : ''}
             style={{ display: 'flex', alignItems: 'center', gap: collapsed ? 0 : 11, justifyContent: collapsed ? 'center' : 'flex-start', width: '100%', padding: collapsed ? '11px 0' : '10px 11px', borderRadius: 9, background: 'transparent', border: 'none', color: '#7C8AA0', fontSize: 13.5, cursor: 'pointer' }}>
             <Icon name="logout" size={18} />
-            {!collapsed && <span>{t('Déconnexion', 'Uitloggen')}</span>}
+            {!collapsed && <span>Déconnexion</span>}
           </button>
         </div>
       </aside>
@@ -120,7 +118,7 @@ export function Sidebar({ items, societe, email, collapsed = false }) {
           })}
           <button onClick={() => signOut({ callbackUrl: '/' })} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '6px 12px', flexShrink: 0, minWidth: 60 }}>
             <span style={{ color: 'rgba(255,255,255,0.38)', display: 'flex' }}><Icon name="logout" size={20} /></span>
-            <span style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.38)' }}>{t('Quitter', 'Uitloggen')}</span>
+            <span style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.38)' }}>Quitter</span>
           </button>
         </div>
       </div>

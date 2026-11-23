@@ -5,28 +5,22 @@ import PublicNav from '@/app/components/PublicNav'
 import PublicFooter from '@/app/components/PublicFooter'
 import { estPromoteurActif } from '@/lib/facturation'
 import { getConfigMensualite } from '@/lib/settings'
-import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }) {
   const { slug } = await params
-  const { t } = await getT()
   const client = await prisma.client.findUnique({ where: { slug }, select: { societe: true, subStatus: true, impayeDepuis: true } })
-  if (!client || !estPromoteurActif(client)) return { title: t('Agence introuvable — BuyMonth', 'Vastgoedkantoor niet gevonden — BuyMonth') }
+  if (!client || !estPromoteurActif(client)) return { title: 'Agence introuvable — BuyMonth' }
   return {
-    title: t(`${client.societe} — Biens en mensualités | BuyMonth`, `${client.societe} — Panden in maandbedragen | BuyMonth`),
-    description: t(
-      `Découvrez les biens proposés par ${client.societe}, affichés en budget mensuel clair.`,
-      `Ontdek de panden van ${client.societe}, getoond in een duidelijk maandbudget.`
-    ),
+    title: `${client.societe} — Biens en mensualités | BuyMonth`,
+    description: `Découvrez les biens proposés par ${client.societe}, affichés en budget mensuel clair.`,
     alternates: { canonical: `/agences/${slug}` },
   }
 }
 
 export default async function AgencePage({ params }) {
   const { slug } = await params
-  const { t } = await getT()
 
   const client = await prisma.client.findUnique({
     where: { slug },
@@ -80,14 +74,11 @@ export default async function AgencePage({ params }) {
             <div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(124,184,168,0.14)', border: '1px solid rgba(124,184,168,0.25)', borderRadius: 20, padding: '5px 12px', marginBottom: 12 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#7CB8A8' }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#7CB8A8', letterSpacing: '0.06em' }}>{t('PARTENAIRE BUYMONTH', 'BUYMONTH-PARTNER')}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#7CB8A8', letterSpacing: '0.06em' }}>PARTENAIRE BUYMONTH</span>
               </div>
               <h1 style={{ fontSize: 34, fontWeight: 700, color: '#fff', margin: '0 0 8px', letterSpacing: '-0.02em', lineHeight: 1.1 }}>{client.societe}</h1>
               <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', fontSize: 14, color: 'rgba(255,255,255,0.7)' }}>
-                <span>{t(
-                  `${nbBiens} bien${nbBiens > 1 ? 's' : ''} disponible${nbBiens > 1 ? 's' : ''}`,
-                  `${nbBiens} beschikba${nbBiens === 1 ? 'ar pand' : 're panden'}`
-                )}</span>
+                <span>{nbBiens} bien{nbBiens > 1 ? 's' : ''} disponible{nbBiens > 1 ? 's' : ''}</span>
                 {client.adresse && (
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
@@ -110,8 +101,8 @@ export default async function AgencePage({ params }) {
       <div style={{ ...WRAP, padding: '32px 24px 64px' }}>
         {nbBiens === 0 ? (
           <div style={{ background: '#fff', border: '1px dashed #D8DFE9', borderRadius: 16, padding: '64px 24px', textAlign: 'center' }}>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>{t('Aucun bien disponible pour le moment', 'Momenteel geen panden beschikbaar')}</h2>
-            <p style={{ fontSize: 14, color: '#5A6275', margin: 0 }}>{t("Cette agence n'a pas de bien en ligne actuellement.", 'Dit vastgoedkantoor heeft momenteel geen panden online.')}</p>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>Aucun bien disponible pour le moment</h2>
+            <p style={{ fontSize: 14, color: '#5A6275', margin: 0 }}>Cette agence n'a pas de bien en ligne actuellement.</p>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 22 }}>

@@ -1,30 +1,28 @@
 import { NextResponse } from 'next/server'
-import { getT } from '@/lib/i18n/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 
 export async function POST(req) {
-  const { t } = await getT()
   try {
-    if (!stripe) return NextResponse.json({ error: t('Stripe non configuré.', 'Stripe niet geconfigureerd.') }, { status: 500 })
+    if (!stripe) return NextResponse.json({ error: 'Stripe non configuré.' }, { status: 500 })
 
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
 
     const { bienId } = await req.json()
-    if (!bienId) return NextResponse.json({ error: t('bienId manquant.', 'bienId ontbreekt.') }, { status: 400 })
+    if (!bienId) return NextResponse.json({ error: 'bienId manquant.' }, { status: 400 })
 
     const client = await prisma.client.findUnique({
       where: { userId: session.user.id },
       include: { user: { select: { email: true } } },
     })
-    if (!client) return NextResponse.json({ error: t('Profil introuvable.', 'Profiel niet gevonden.') }, { status: 404 })
+    if (!client) return NextResponse.json({ error: 'Profil introuvable.' }, { status: 404 })
 
     const bien = await prisma.bien.findUnique({ where: { id: bienId } })
     if (!bien || bien.clientId !== client.id) {
-      return NextResponse.json({ error: t('Bien introuvable.', 'Pand niet gevonden.') }, { status: 404 })
+      return NextResponse.json({ error: 'Bien introuvable.' }, { status: 404 })
     }
 
     // Déjà payé/généré pour ce bien → rien à faire
@@ -78,6 +76,6 @@ export async function POST(req) {
     return NextResponse.json({ clientSecret: paymentIntent.client_secret })
   } catch (e) {
     console.error('[WIDGET-PAYER]', e?.message)
-    return NextResponse.json({ error: e?.message || t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
+    return NextResponse.json({ error: e?.message || 'Erreur serveur.' }, { status: 500 })
   }
 }

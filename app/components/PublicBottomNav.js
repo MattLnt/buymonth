@@ -1,32 +1,30 @@
 "use client";
 import Link from "next/link";
-import { useLang } from "@/app/components/i18n/LangProvider";
 
-const navItems = (t) => [
+const NAV_ITEMS = [
   {
-    key: "solution", href: "#solution", label: t("Solution", "Oplossing"),
+    key: "solution", href: "#solution", label: "Solution",
     icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>,
   },
   {
-    key: "process", href: "#process", label: t("Process", "Werkwijze"),
+    key: "process", href: "#process", label: "Process",
     icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>,
   },
   {
-    key: "commencer", href: "#contact", label: t("Commencer", "Starten"), primary: true,
+    key: "commencer", href: "#contact", label: "Commencer", primary: true,
     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#193B5E" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>,
   },
   {
-    key: "tarifs", href: "#tarifs", label: t("Tarifs", "Tarieven"),
+    key: "tarifs", href: "#tarifs", label: "Tarifs",
     icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h4.5a1.5 1.5 0 010 3H9m0 0h4.5a1.5 1.5 0 010 3H9"/></svg>,
   },
   {
-    key: "contact", href: "#contact", label: t("Contact", "Contact"),
+    key: "contact", href: "#contact", label: "Contact",
     icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
   },
 ];
 
 export default function PublicBottomNav() {
-  const { t } = useLang();
   return (
     <>
       <style>{`
@@ -50,7 +48,7 @@ export default function PublicBottomNav() {
         paddingBottom: "env(safe-area-inset-bottom)",
         boxShadow: "0 -4px 20px rgba(0,0,0,0.2)",
       }}>
-        {navItems(t).map(item => {
+        {NAV_ITEMS.map(item => {
           if (item.primary) {
             return (
               <Link key={item.key} href={item.href} style={{

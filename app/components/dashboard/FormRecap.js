@@ -2,13 +2,9 @@
 
 import { calculMensualite } from '@/lib/calcul'
 import { MENSUALITE_CONFIG } from '@/lib/mensualiteConfig'
-import { prixDecaisse, libellePrixPublic, texteRegime } from '@/lib/regime'
-import { locale } from '@/lib/i18n/config'
-import { libelleType, libelleProvince } from './libelles'
-import { useLang } from '@/app/components/i18n/LangProvider'
+import { prixDecaisse, libellePrixPublic, REGIMES } from '@/lib/regime'
 
 export function FormRecap({ form, cfg = null, photos = [], loading, isFormValid, mode, onDelete, deleting }) {
-  const { lang, t } = useLang()
   const c = { ...MENSUALITE_CONFIG, ...(cfg || {}) }
   const prix = parseInt(form.prixTotal, 10)
   const mensualite = prix > 0 && form.regime ? calculMensualite(prixDecaisse(prix, form.regime), c) : null
@@ -17,18 +13,18 @@ export function FormRecap({ form, cfg = null, photos = [], loading, isFormValid,
   const localisation = form.ville || form.adresse || null
 
   const rows = [
-    { key: 'projet', label: t('Projet', 'Project'), value: form.projet && form.projet !== 'Hors projet' ? form.projet : null },
-    { key: 'unite', label: t('Unité', 'Unit'), value: form.unite },
-    { key: 'titre', label: t('Titre', 'Titel'), value: form.titre },
-    { key: 'regime', label: t('Régime fiscal', 'Fiscaal regime'), value: texteRegime(form.regime, 'court', lang) || null },
-    { key: 'prix', label: t('Prix encodé', 'Ingevoerde prijs'), value: prix > 0 ? `${prix.toLocaleString(locale(lang))} €` : null },
-    { key: 'public', label: t('Prix public', 'Publieke prijs'), value: prix > 0 && form.regime ? libellePrixPublic(prix, form.regime, lang) : null },
-    { key: 'type', label: 'Type', value: libelleType(form.type, lang) },
-    { key: 'province', label: t('Province', 'Provincie'), value: libelleProvince(form.province, lang) },
-    { key: 'ville', label: t('Ville', 'Gemeente'), value: localisation },
-    { key: 'chambres', label: t('Chambres', 'Slaapkamers'), value: form.chambres },
-    { key: 'surface', label: t('Surface', 'Oppervlakte'), value: form.surface ? `${form.surface} m²` : null },
-    { key: 'photos', label: t('Photos', "Foto's"), value: photos.length || '0', always: true },
+    { label: 'Projet', value: form.projet && form.projet !== 'Hors projet' ? form.projet : null },
+    { label: 'Unité', value: form.unite },
+    { label: 'Titre', value: form.titre },
+    { label: 'Régime fiscal', value: REGIMES[form.regime]?.court || null },
+    { label: 'Prix encodé', value: prix > 0 ? `${prix.toLocaleString('fr-BE')} €` : null },
+    { label: 'Prix public', value: prix > 0 && form.regime ? libellePrixPublic(prix, form.regime) : null },
+    { label: 'Type', value: form.type },
+    { label: 'Province', value: form.province },
+    { label: 'Ville', value: localisation },
+    { label: 'Chambres', value: form.chambres },
+    { label: 'Surface', value: form.surface ? `${form.surface} m²` : null },
+    { label: 'Photos', value: photos.length || '0', always: true },
   ]
 
   return (
@@ -37,20 +33,20 @@ export function FormRecap({ form, cfg = null, photos = [], loading, isFormValid,
       <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 16, padding: '22px 22px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: -40, right: -30, width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.22) 0%, transparent 65%)' }} />
         <div style={{ position: 'relative' }}>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>{t('Aperçu du badge', 'Voorbeeld van de badge')}</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>{t('Propriétaire de ce bien dès', 'Eigenaar van dit pand vanaf')}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Aperçu du badge</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>Propriétaire de ce bien dès</div>
           <div style={{ fontSize: 32, fontWeight: 700, color: '#7CB8A8', letterSpacing: '-0.02em', lineHeight: 1 }}>
-            {mensualite ? `${mensualite.toLocaleString(locale(lang))} €` : '— €'}<span style={{ fontSize: 15 }}>{t('/mois', '/maand')}</span>
+            {mensualite ? `${mensualite.toLocaleString('fr-BE')} €` : '— €'}<span style={{ fontSize: 15 }}>/mois</span>
           </div>
         </div>
       </div>
 
       {/* Récap */}
       <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 20, marginBottom: 16 }}>
-        <h3 style={{ fontSize: 14, fontWeight: 700, color: '#193B5E', margin: '0 0 14px' }}>{t('Récapitulatif', 'Overzicht')}</h3>
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: '#193B5E', margin: '0 0 14px' }}>Récapitulatif</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {rows.map((r) => (
-            <div key={r.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '9px 0', borderBottom: '1px solid #F2F5FA' }}>
+            <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '9px 0', borderBottom: '1px solid #F2F5FA' }}>
               <span style={{ fontSize: 13, color: '#8A92A6' }}>{r.label}</span>
               {r.value ? (
                 <span style={{ fontSize: 13, fontWeight: 600, color: '#193B5E', textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 150 }}>{r.value}</span>
@@ -66,10 +62,7 @@ export function FormRecap({ form, cfg = null, photos = [], loading, isFormValid,
       <div style={{ display: 'flex', gap: 10, background: 'rgba(124,184,168,0.08)', border: '1px solid rgba(124,184,168,0.2)', borderRadius: 12, padding: '12px 14px', marginBottom: 16 }}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
         <p style={{ fontSize: 12, color: '#5A6B7D', margin: 0, lineHeight: 1.5 }}>
-          {t(
-            `La mensualité est calculée automatiquement sur le prix TVA comprise (apport ${Math.round(c.apportPct * 100)} %, ${Math.round(c.dureeMois / 12)} ans, taux ${(c.tauxAnnuel * 100).toFixed(2).replace('.', ',')} %). Choisissez le régime fiscal pour l'obtenir.`,
-            `Het maandbedrag wordt automatisch berekend op de prijs incl. btw (eigen inbreng ${Math.round(c.apportPct * 100)} %, ${Math.round(c.dureeMois / 12)} jaar, rentevoet ${(c.tauxAnnuel * 100).toFixed(2).replace('.', ',')} %). Kies het fiscaal regime om het te zien.`,
-          )}
+          La mensualité est calculée automatiquement sur le prix TVA comprise (apport {Math.round(c.apportPct * 100)} %, {Math.round(c.dureeMois / 12)} ans, taux {(c.tauxAnnuel * 100).toFixed(2).replace('.', ',')} %). Choisissez le régime fiscal pour l'obtenir.
         </p>
       </div>
 
@@ -86,7 +79,7 @@ export function FormRecap({ form, cfg = null, photos = [], loading, isFormValid,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         }}
       >
-        {loading ? t('Enregistrement...', 'Opslaan...') : mode === 'edit' ? t('Enregistrer →', 'Opslaan →') : t('Créer le bien →', 'Pand aanmaken →')}
+        {loading ? 'Enregistrement...' : mode === 'edit' ? 'Enregistrer →' : 'Créer le bien →'}
       </button>
 
       {/* Supprimer (édition) */}
@@ -97,7 +90,7 @@ export function FormRecap({ form, cfg = null, photos = [], loading, isFormValid,
           disabled={deleting}
           style={{ width: '100%', padding: 11, borderRadius: 10, background: 'transparent', color: '#E5484D', fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer', marginTop: 8 }}
         >
-          {deleting ? t('Suppression...', 'Verwijderen...') : t('Supprimer ce bien', 'Dit pand verwijderen')}
+          {deleting ? 'Suppression...' : 'Supprimer ce bien'}
         </button>
       )}
     </div>

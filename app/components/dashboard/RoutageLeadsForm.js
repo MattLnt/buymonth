@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { FormSelect } from './FormSelect'
 import { Icon } from './Icon'
-import { useLang } from '@/app/components/i18n/LangProvider'
 
 // Routage des leads vers les commerciaux d'un promoteur (lot Matexi du
 // 03/11/2026). Le meme ecran sert aux deux cotes : l'admin BuyMonth ouvre la
@@ -30,7 +29,6 @@ const enLignes = (regles) =>
     : [ligneVide()]
 
 export function RoutageLeadsForm({ endpoint, regles, projets = [], admin = false, routageActif = true }) {
-  const { t } = useLang()
   const [lignes, setLignes] = useState(enLignes(regles))
   const [ouvert, setOuvert] = useState(routageActif)
   const [saving, setSaving] = useState(false)
@@ -51,7 +49,7 @@ export function RoutageLeadsForm({ endpoint, regles, projets = [], admin = false
     )
 
   const optionsProjet = [
-    { value: TOUS, label: admin ? 'Tout le portefeuille' : t('Tous mes biens', 'Al mijn panden') },
+    { value: TOUS, label: admin ? 'Tout le portefeuille' : 'Tous mes biens' },
     ...projets.map((p) => ({ value: p, label: p })),
   ]
 
@@ -65,12 +63,12 @@ export function RoutageLeadsForm({ endpoint, regles, projets = [], admin = false
         body: JSON.stringify({ regles: lignes, ...(admin ? { routageActif: ouvert } : {}) }),
       })
       const data = await res.json()
-      if (!res.ok) { setMsg({ type: 'err', text: data.error || t('Erreur.', 'Fout.') }); setSaving(false); return }
+      if (!res.ok) { setMsg({ type: 'err', text: data.error || 'Erreur.' }); setSaving(false); return }
       setLignes(enLignes(data.regles))
-      setMsg({ type: 'ok', text: t('Enregistré.', 'Opgeslagen.') })
+      setMsg({ type: 'ok', text: 'Enregistré.' })
       setSaving(false)
     } catch {
-      setMsg({ type: 'err', text: t('Erreur réseau.', 'Netwerkfout.') })
+      setMsg({ type: 'err', text: 'Erreur réseau.' })
       setSaving(false)
     }
   }
@@ -84,13 +82,13 @@ export function RoutageLeadsForm({ endpoint, regles, projets = [], admin = false
       `}</style>
 
       <h3 style={{ fontSize: 15.5, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>
-        {admin ? 'Routage des leads vers les commerciaux' : t('Mes commerciaux', 'Mijn verkopers')}
+        {admin ? 'Routage des leads vers les commerciaux' : 'Mes commerciaux'}
       </h3>
       <p style={{ fontSize: 13, color: '#8A92A6', margin: '0 0 18px', lineHeight: 1.6, maxWidth: 640 }}>
         {admin
           ? "Ouvrez la fonction pour que le promoteur saisisse lui-même les adresses de ses commerciaux depuis son compte. Vous pouvez aussi les saisir ici, pour la mise en route ou un dépannage."
-          : t("Chaque demande reçue sur vos biens part aussi chez un de vos commerciaux, avec la référence du bien et les coordonnées de l'acheteur, prêtes à reprendre dans votre CRM.", 'Elke aanvraag voor uw panden gaat ook naar een van uw verkopers, met de referentie van het pand en de gegevens van de koper, klaar om in uw CRM over te nemen.')}
-        {' '}{t("Les commerciaux d'une même règle se relaient : la première demande part chez le premier, la suivante chez le deuxième, et ainsi de suite dans l'ordre affiché.", 'De verkopers van eenzelfde regel wisselen elkaar af: de eerste aanvraag gaat naar de eerste, de volgende naar de tweede, enzovoort in de getoonde volgorde.')}
+          : "Chaque demande reçue sur vos biens part aussi chez un de vos commerciaux, avec la référence du bien et les coordonnées de l'acheteur, prêtes à reprendre dans votre CRM."}
+        {' '}Les commerciaux d&apos;une même règle se relaient : la première demande part chez le premier, la suivante chez le deuxième, et ainsi de suite dans l&apos;ordre affiché.
       </p>
 
       {admin && (
@@ -104,19 +102,19 @@ export function RoutageLeadsForm({ endpoint, regles, projets = [], admin = false
         <div key={i} style={{ border: '1px solid #EEF2F7', borderRadius: 12, padding: 18, marginBottom: 14, background: l.actif ? '#FAFBFE' : '#F6F7F9' }}>
           <div className="routage-ligne" style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 20, alignItems: 'start' }}>
             <div>
-              <label style={labelStyle}>{t('Pour', 'Voor')}</label>
+              <label style={labelStyle}>Pour</label>
               <FormSelect
                 value={l.projet || TOUS}
                 onChange={(v) => majLigne(i, { projet: v === TOUS ? '' : v })}
                 options={optionsProjet}
               />
               <p style={{ fontSize: 12, color: '#A9B0BE', margin: '8px 0 0', lineHeight: 1.5 }}>
-                {t("Une règle sur un projet précis l'emporte sur la règle générale.", 'Een regel voor een specifiek project gaat voor op de algemene regel.')}
+                Une règle sur un projet précis l&apos;emporte sur la règle générale.
               </p>
             </div>
 
             <div>
-              <label style={labelStyle}>{t("Commerciaux, dans l'ordre de la tournante", 'Verkopers, in de volgorde van de beurtrol')}</label>
+              <label style={labelStyle}>Commerciaux, dans l&apos;ordre de la tournante</label>
               {l.emails.map((email, k) => (
                 <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 9 }}>
                   <span style={{ flexShrink: 0, width: 26, height: 26, borderRadius: 8, background: 'rgba(124,184,168,0.14)', color: '#4E8E7D', fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -126,13 +124,13 @@ export function RoutageLeadsForm({ endpoint, regles, projets = [], admin = false
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(i, k, e.target.value)}
-                    placeholder={t('prenom.nom@societe.be', 'voornaam.naam@bedrijf.be')}
+                    placeholder="prenom.nom@societe.be"
                     style={{ ...inputStyle, flex: 1 }}
                   />
                   <button
                     type="button"
                     onClick={() => supprimerEmail(i, k)}
-                    title={t('Retirer ce commercial', 'Deze verkoper verwijderen')}
+                    title="Retirer ce commercial"
                     style={{ flexShrink: 0, width: 34, height: 34, borderRadius: 9, border: '1.5px solid #E8EDF2', background: '#fff', color: '#A9B0BE', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Icon name="close" size={14} color="#A9B0BE" />
@@ -145,7 +143,7 @@ export function RoutageLeadsForm({ endpoint, regles, projets = [], admin = false
                 onClick={() => ajouterEmail(i)}
                 style={{ padding: '8px 14px', borderRadius: 9, background: '#fff', color: '#193B5E', border: '1.5px solid #E8EDF2', fontSize: 13, fontWeight: 600, cursor: 'pointer', marginTop: 2 }}
               >
-                {t('+ Ajouter un commercial', '+ Verkoper toevoegen')}
+                + Ajouter un commercial
               </button>
             </div>
           </div>
@@ -153,10 +151,10 @@ export function RoutageLeadsForm({ endpoint, regles, projets = [], admin = false
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, marginTop: 16, paddingTop: 14, borderTop: '1px solid #EEF2F7', flexWrap: 'wrap' }}>
             <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13.5, color: '#5A6B7D', cursor: 'pointer' }}>
               <input type="checkbox" checked={l.actif} onChange={(e) => majLigne(i, { actif: e.target.checked })} />
-              {t('Envoi actif', 'Verzending actief')}
+              Envoi actif
             </label>
             <button type="button" onClick={() => supprimerLigne(i)} style={{ background: 'none', border: 'none', color: '#DC2626', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0 }}>
-              {t('Supprimer cette règle', 'Deze regel verwijderen')}
+              Supprimer cette règle
             </button>
           </div>
         </div>
@@ -167,7 +165,7 @@ export function RoutageLeadsForm({ endpoint, regles, projets = [], admin = false
         onClick={() => setLignes((ls) => [...ls, ligneVide()])}
         style={{ padding: '10px 18px', borderRadius: 10, background: '#fff', color: '#193B5E', border: '1.5px solid #E8EDF2', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', marginBottom: 18 }}
       >
-        {t('+ Ajouter une règle par projet', '+ Regel per project toevoegen')}
+        + Ajouter une règle par projet
       </button>
 
       {msg && (
@@ -181,7 +179,7 @@ export function RoutageLeadsForm({ endpoint, regles, projets = [], admin = false
 
       <div>
         <button type="submit" disabled={saving} style={{ padding: '12px 24px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 14, fontWeight: 600, cursor: saving ? 'wait' : 'pointer' }}>
-          {saving ? t('Enregistrement...', 'Opslaan...') : t('Enregistrer', 'Opslaan')}
+          {saving ? 'Enregistrement...' : 'Enregistrer'}
         </button>
       </div>
     </form>

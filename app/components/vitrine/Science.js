@@ -1,19 +1,12 @@
-"use client";
-import { useLang } from "@/app/components/i18n/LangProvider";
-
 export default function Science() {
-  const { t } = useLang();
   return (
     <section style={{ padding: "26px 0 52px" }}>
       <div className="wrap">
         <div className="science reveal">
-          <span className="eyebrow">{t("Ce n'est pas une intuition — c'est documenté", "Geen buikgevoel — het is onderzocht")}</span>
+          <span className="eyebrow">Ce n'est pas une intuition — c'est documenté</span>
           <p className="big">
-            {t("Le cadrage en mensualités rend le prix ", "Een prijs in maandbedragen is ")}
-            <b>{t("plus lisible", "duidelijker")}</b>
-            {t(" et ", " en ")}
-            <b>{t("plus engageant", "aantrekkelijker")}</b>
-            {t(" pour l'acheteur.", " voor de koper.")}
+            Le cadrage en mensualités rend le prix <b>plus lisible</b> et <b>plus engageant</b> pour
+            l'acheteur.
           </p>
           <div className="refs">
             <span>

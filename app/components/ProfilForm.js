@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useLang } from "@/app/components/i18n/LangProvider";
 
 function validateBce(val) {
   return /^\d{10}$/.test(val.replace(/\./g, "").replace(/\s/g, ""));
@@ -11,7 +10,6 @@ function formatBce(val) {
 }
 
 export default function ProfilForm({ initialData, role }) {
-  const { lang, t } = useLang();
   const [form, setForm] = useState(initialData || {});
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -20,7 +18,7 @@ export default function ProfilForm({ initialData, role }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (role === "VENDEUR" && form.numeroBce && !validateBce(form.numeroBce)) {
-      setError(t("Le numéro BCE doit contenir exactement 10 chiffres (ex: 0663760904)", "Het KBO-nummer moet precies 10 cijfers bevatten (bv. 0663760904)"));
+      setError("Le numéro BCE doit contenir exactement 10 chiffres (ex: 0663760904)");
       return;
     }
     setLoading(true); setError(""); setSuccess(false);
@@ -32,7 +30,7 @@ export default function ProfilForm({ initialData, role }) {
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) setError(data.error || t("Une erreur est survenue", "Er is een fout opgetreden"));
+    if (!res.ok) setError(data.error || "Une erreur est survenue");
     else setSuccess(true);
   }
 
@@ -69,7 +67,7 @@ export default function ProfilForm({ initialData, role }) {
           {success && (
             <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, padding: "12px 16px", color: "#15803D", fontSize: 13, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              {t("Profil mis à jour avec succès !", "Profiel met succes bijgewerkt!")}
+              Profil mis à jour avec succès !
             </div>
           )}
 
@@ -88,30 +86,30 @@ export default function ProfilForm({ initialData, role }) {
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </div>
                 <div>
-                  <h2 style={{ fontSize: 14, fontWeight: 700, color: "#141414", margin: 0 }}>{t("Votre bureau", "Uw kantoor")}</h2>
-                  <p style={{ fontSize: 12, color: "#9CA3AF", margin: 0 }}>{t("Informations transmises aux acheteurs après déblocage", "Informatie die na ontgrendeling aan kopers wordt doorgegeven")}</p>
+                  <h2 style={{ fontSize: 14, fontWeight: 700, color: "#141414", margin: 0 }}>Votre bureau</h2>
+                  <p style={{ fontSize: 12, color: "#9CA3AF", margin: 0 }}>Informations transmises aux acheteurs après déblocage</p>
                 </div>
               </div>
 
               <div className="profil-grid2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
                 <div>
-                  <label style={labelStyle}>{t("Nom du bureau *", "Naam van het kantoor *")}</label>
+                  <label style={labelStyle}>Nom du bureau *</label>
                   <input type="text" value={form.nomBureau || ""} onChange={e => setForm({ ...form, nomBureau: e.target.value })} required
-                    placeholder={t("Bureau Dupont", "Kantoor Peeters")} style={inputStyle}
+                    placeholder="Bureau Dupont" style={inputStyle}
                     onFocus={e => e.target.style.borderColor = "#FF5A1F"}
                     onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
                 </div>
                 <div>
-                  <label style={labelStyle}>{t("Nom du dirigeant *", "Naam van de zaakvoerder *")}</label>
+                  <label style={labelStyle}>Nom du dirigeant *</label>
                   <input type="text" value={form.nomCEO || ""} onChange={e => setForm({ ...form, nomCEO: e.target.value })} required
-                    placeholder={t("Jean Dupont", "Jan Peeters")} style={inputStyle}
+                    placeholder="Jean Dupont" style={inputStyle}
                     onFocus={e => e.target.style.borderColor = "#FF5A1F"}
                     onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
                 </div>
               </div>
 
               <div style={{ marginBottom: 14 }}>
-                <label style={labelStyle}>{t("Téléphone *", "Telefoon *")}</label>
+                <label style={labelStyle}>Téléphone *</label>
                 <input type="text" value={form.telephone || ""} onChange={e => setForm({ ...form, telephone: e.target.value })} required
                   placeholder="+32 456 78 90 12" style={inputStyle}
                   onFocus={e => e.target.style.borderColor = "#FF5A1F"}
@@ -119,9 +117,9 @@ export default function ProfilForm({ initialData, role }) {
               </div>
 
               <div style={{ marginBottom: 14 }}>
-                <label style={labelStyle}>{t("Adresse *", "Adres *")}</label>
+                <label style={labelStyle}>Adresse *</label>
                 <input type="text" value={form.adresse || ""} onChange={e => setForm({ ...form, adresse: e.target.value })} required
-                  placeholder={t("Rue Exemple 1, 1000 Bruxelles", "Voorbeeldstraat 1, 1000 Brussel")} style={inputStyle}
+                  placeholder="Rue Exemple 1, 1000 Bruxelles" style={inputStyle}
                   onFocus={e => e.target.style.borderColor = "#FF5A1F"}
                   onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
               </div>
@@ -129,11 +127,11 @@ export default function ProfilForm({ initialData, role }) {
               {/* Numéro BCE */}
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                  <label style={{ ...labelStyle, marginBottom: 0 }}>{t("Numéro BCE *", "KBO-nummer *")}</label>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>Numéro BCE *</label>
                   {form.numeroBce && (
                     bceValid
-                      ? <span style={{ fontSize: 10, fontWeight: 700, color: "#10B981", background: "#F0FDF4", border: "1px solid #BBF7D0", padding: "2px 8px", borderRadius: 20 }}>✓ {t("Valide", "Geldig")}</span>
-                      : <span style={{ fontSize: 10, fontWeight: 700, color: "#EF4444", background: "#FEF2F2", border: "1px solid #FECACA", padding: "2px 8px", borderRadius: 20 }}>{t("Format incorrect", "Ongeldig formaat")}</span>
+                      ? <span style={{ fontSize: 10, fontWeight: 700, color: "#10B981", background: "#F0FDF4", border: "1px solid #BBF7D0", padding: "2px 8px", borderRadius: 20 }}>✓ Valide</span>
+                      : <span style={{ fontSize: 10, fontWeight: 700, color: "#EF4444", background: "#FEF2F2", border: "1px solid #FECACA", padding: "2px 8px", borderRadius: 20 }}>Format incorrect</span>
                   )}
                 </div>
                 <div style={{ position: "relative" }}>
@@ -143,16 +141,16 @@ export default function ProfilForm({ initialData, role }) {
                     onFocus={e => e.target.style.borderColor = "#FF5A1F"}
                     onBlur={e => e.target.style.borderColor = form.numeroBce && !bceValid ? "#FECACA" : "#E5E7EB"} />
                   {form.numeroBce && bceValid && (
-                    <a href={`https://kbopub.economie.fgov.be/kbopub/toonondernemingps.html?ondernemingsnummer=${form.numeroBce}&lang=${lang === "nl" ? "nl" : "fr"}`}
+                    <a href={`https://kbopub.economie.fgov.be/kbopub/toonondernemingps.html?ondernemingsnummer=${form.numeroBce}&lang=fr`}
                       target="_blank" rel="noopener noreferrer"
                       style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", fontSize: 11, fontWeight: 600, color: "#FF5A1F", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
-                      {t("Vérifier BCE", "KBO controleren")}
+                      Vérifier BCE
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     </a>
                   )}
                 </div>
                 <p style={{ fontSize: 11, color: "#9CA3AF", margin: "6px 0 0" }}>
-                  {t("10 chiffres sans espaces ni points — ex: 0123456789", "10 cijfers zonder spaties of punten — bv. 0123456789")}
+                  10 chiffres sans espaces ni points — ex: 0123456789
                 </p>
               </div>
             </div>
@@ -160,8 +158,8 @@ export default function ProfilForm({ initialData, role }) {
             <button type="submit" disabled={loading || !isValid}
               style={{ padding: "14px", borderRadius: 12, background: !isValid || loading ? "#E5E7EB" : "#141414", color: !isValid || loading ? "#9CA3AF" : "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: !isValid || loading ? "not-allowed" : "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: isValid && !loading ? "0 4px 20px rgba(20,20,20,0.25)" : "none" }}>
               {loading
-                ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>{t("Enregistrement...", "Opslaan...")}</>
-                : <>{t("Enregistrer les modifications", "Wijzigingen opslaan")} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></>
+                ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Enregistrement...</>
+                : <>Enregistrer les modifications <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></>
               }
             </button>
           </form>
@@ -175,19 +173,16 @@ export default function ProfilForm({ initialData, role }) {
               <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(255,90,31,0.15)", display: "flex", alignItems: "center", justifyContent: "center", color: "#FF5A1F" }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
               </div>
-              <h3 style={{ fontSize: 13, fontWeight: 700, color: "#fff", margin: 0 }}>{t("Confidentialité garantie", "Vertrouwelijkheid gegarandeerd")}</h3>
+              <h3 style={{ fontSize: 13, fontWeight: 700, color: "#fff", margin: 0 }}>Confidentialité garantie</h3>
             </div>
             <p style={{ fontSize: 12, color: "#9CA3AF", margin: "0 0 14px", lineHeight: 1.6 }}>
-              {t(
-                "Ces informations ne sont jamais affichées publiquement. Elles sont transmises uniquement après un déblocage payant (699 €) par un acheteur vérifié.",
-                "Deze informatie wordt nooit publiek getoond. Ze wordt enkel doorgegeven na een betaalde ontgrendeling (699 €) door een geverifieerde koper."
-              )}
+              Ces informations ne sont jamais affichées publiquement. Elles sont transmises uniquement après un déblocage payant (699 €) par un acheteur vérifié.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[
-                t("Nom et coordonnées masqués sur la plateforme", "Naam en contactgegevens verborgen op het platform"),
-                t("Transmission uniquement après déblocage", "Enkel doorgegeven na ontgrendeling"),
-                t("Acheteurs vérifiés et abonnés uniquement", "Enkel geverifieerde kopers met een abonnement"),
+                "Nom et coordonnées masqués sur la plateforme",
+                "Transmission uniquement après déblocage",
+                "Acheteurs vérifiés et abonnés uniquement",
               ].map((item, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF5A1F" strokeWidth="2.5" style={{ flexShrink: 0, marginTop: 2 }}><polyline points="20 6 9 17 4 12"/></svg>
@@ -202,15 +197,15 @@ export default function ProfilForm({ initialData, role }) {
               <div style={{ width: 32, height: 32, borderRadius: 8, background: "#F0FDF4", border: "1px solid #BBF7D0", display: "flex", alignItems: "center", justifyContent: "center", color: "#10B981" }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
               </div>
-              <h3 style={{ fontSize: 13, fontWeight: 700, color: "#141414", margin: 0 }}>{t("Complétude du profil", "Volledigheid van het profiel")}</h3>
+              <h3 style={{ fontSize: 13, fontWeight: 700, color: "#141414", margin: 0 }}>Complétude du profil</h3>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[
-                { label: t("Nom du bureau", "Naam van het kantoor"), done: !!form.nomBureau },
-                { label: t("Nom du dirigeant", "Naam van de zaakvoerder"), done: !!form.nomCEO },
-                { label: t("Téléphone", "Telefoon"), done: !!form.telephone },
-                { label: t("Adresse", "Adres"), done: !!form.adresse },
-                { label: t("Numéro BCE", "KBO-nummer"), done: !!form.numeroBce && bceValid },
+                { label: "Nom du bureau", done: !!form.nomBureau },
+                { label: "Nom du dirigeant", done: !!form.nomCEO },
+                { label: "Téléphone", done: !!form.telephone },
+                { label: "Adresse", done: !!form.adresse },
+                { label: "Numéro BCE", done: !!form.numeroBce && bceValid },
               ].map((item, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "#F9FAFB", borderRadius: 8 }}>
                   <span style={{ fontSize: 12, color: "#374151" }}>{item.label}</span>

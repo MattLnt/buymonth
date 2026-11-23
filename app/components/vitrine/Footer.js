@@ -1,11 +1,8 @@
-"use client";
 import Link from "next/link";
-import { useLang } from "@/app/components/i18n/LangProvider";
 import LogoBuyMonth from "@/app/components/LogoBuyMonth";
-import { identificationFinanceCourte } from "@/lib/mensualiteConfig";
+import { IDENTIFICATION_FINANCE_COURTE } from "@/lib/mensualiteConfig";
 
 export default function Footer() {
-  const { lang, t } = useLang();
   return (
     <footer>
       <div className="wrap">
@@ -13,15 +10,9 @@ export default function Footer() {
           <div>
             <span style={{ display: "block", marginBottom: 14 }}><LogoBuyMonth height={62} blanc /></span>
             <p className="sep">
-              {t(
-                "La plateforme marketing d'affichage en mensualités et de mise en relation, éditée par ",
-                "Het marketingplatform voor weergave in maandbedragen en het leggen van contacten, uitgegeven door "
-              )}
-              <b style={{ color: "#fff" }}>BuyMonth SRL</b>
-              {t(
-                ". BuyMonth ne réalise aucun conseil en crédit ni analyse de solvabilité.",
-                ". BuyMonth verstrekt geen kredietbegeleiding en voert geen solvabiliteitsanalyse uit."
-              )}
+              La plateforme marketing d'affichage en mensualités et de mise en relation, éditée par{" "}
+              <b style={{ color: "#fff" }}>BuyMonth SRL</b>. BuyMonth ne réalise aucun conseil en
+              crédit ni analyse de solvabilité.
             </p>
             <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
               <a href="https://www.facebook.com/buymonth" target="_blank" rel="noopener noreferrer" aria-label="Facebook" style={{ width: 38, height: 38, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", background: "rgba(124,184,168,0.12)", border: "1px solid rgba(124,184,168,0.25)", color: "#7CB8A8" }}>
@@ -36,13 +27,11 @@ export default function Footer() {
             </div>
           </div>
           <div>
-            <h5>{t("Partenaire crédit", "Kredietpartner")}</h5>
+            <h5>Partenaire crédit</h5>
             <p className="sep">
-              <b style={{ color: "#fff" }}>BuyMonth Finance</b>
-              {t(
-                ", nom commercial de JG Management SRL, intermédiaire de crédit. Les hypothèses de simulation affichées sur la plateforme sont fournies par BuyMonth Finance.",
-                ", handelsnaam van JG Management SRL, kredietbemiddelaar. De simulatiehypotheses op het platform worden aangeleverd door BuyMonth Finance."
-              )}
+              <b style={{ color: "#fff" }}>BuyMonth Finance</b>, nom commercial de JG Management SRL,
+              intermédiaire de crédit. Les hypothèses de simulation affichées sur la plateforme sont
+              fournies par BuyMonth Finance.
             </p>
           </div>
           <div>
@@ -52,21 +41,20 @@ export default function Footer() {
               <br />
               <a href="mailto:info@buymonth.be">info@buymonth.be</a>
               <br />
-              {t("Partenariats : ", "Partnerships: ")}<a href="mailto:promoteurs@buymonth.be">promoteurs@buymonth.be</a>
+              Partenariats : <a href="mailto:promoteurs@buymonth.be">promoteurs@buymonth.be</a>
             </p>
           </div>
         </div>
         <p className="sep" style={{ marginTop: 22 }}>
-          <Link href="/mentions-legales">{t("Mentions légales", "Juridische vermeldingen")}</Link> &nbsp;·&nbsp;{" "}
-          <Link href="/cgv">{t("CGV / CGU", "Algemene voorwaarden")}</Link> &nbsp;·&nbsp;{" "}
-          <Link href="/confidentialite">{t("Politique de confidentialité", "Privacybeleid")}</Link>
+          <Link href="/mentions-legales">Mentions légales</Link> &nbsp;·&nbsp;{" "}
+          <Link href="/cgv">CGV / CGU</Link> &nbsp;·&nbsp;{" "}
+          <Link href="/confidentialite">Politique de confidentialité</Link>
         </p>
-        <p className="legal">{t("Attention, emprunter de l'argent coûte aussi de l'argent.", "Let op, geld lenen kost ook geld.")}</p>
+        <p className="legal">Attention, emprunter de l'argent coûte aussi de l'argent.</p>
         <p className="fine">
-          {t(
-            `© BuyMonth SRL. Les simulations, le pré-scoring et l'accompagnement crédit sont assurés exclusivement par ${identificationFinanceCourte(lang)}. Les mensualités affichées sont indicatives et ne constituent pas une offre de crédit.`,
-            `© BuyMonth SRL. De simulaties, de pre-scoring en de kredietbegeleiding worden uitsluitend verzorgd door ${identificationFinanceCourte(lang)}. De getoonde maandbedragen zijn indicatief en vormen geen kredietaanbod.`
-          )}
+          © BuyMonth SRL. Les simulations, le pré-scoring et l'accompagnement crédit sont assurés
+          exclusivement par {IDENTIFICATION_FINANCE_COURTE}. Les mensualités
+          affichées sont indicatives et ne constituent pas une offre de crédit.
         </p>
       </div>
     </footer>

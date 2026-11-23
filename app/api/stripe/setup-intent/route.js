@@ -4,21 +4,19 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { resoudreCustomer } from '@/lib/stripe-customer'
-import { getT } from '@/lib/i18n/server'
 
 export async function POST() {
-  const { t } = await getT()
   try {
-    if (!stripe) return NextResponse.json({ error: t('Stripe non configuré.', 'Stripe is niet geconfigureerd.') }, { status: 500 })
+    if (!stripe) return NextResponse.json({ error: 'Stripe non configuré.' }, { status: 500 })
 
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
 
     const client = await prisma.client.findUnique({
       where: { userId: session.user.id },
       include: { user: { select: { email: true } } },
     })
-    if (!client) return NextResponse.json({ error: t('Profil introuvable.', 'Profiel niet gevonden.') }, { status: 404 })
+    if (!client) return NextResponse.json({ error: 'Profil introuvable.' }, { status: 404 })
 
     // Customer Stripe : cree s'il n'existe pas, recree si l'identifiant en base
     // est perime — un customer du mode test n'existe pas en mode live, et sans ce
@@ -52,6 +50,6 @@ export async function POST() {
     return NextResponse.json({ clientSecret: setupIntent.client_secret })
   } catch (e) {
     console.error('[SETUP-INTENT]', e?.message)
-    return NextResponse.json({ error: e?.message || t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
+    return NextResponse.json({ error: e?.message || 'Erreur serveur.' }, { status: 500 })
   }
 }

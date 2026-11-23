@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useLang } from '@/app/components/i18n/LangProvider'
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
@@ -18,10 +17,7 @@ function extractCity(feature) {
   return place?.text || locality?.text || ''
 }
 
-export function AddressInput({ label, value, onSelect, onChange, placeholder, required }) {
-  const { t } = useLang()
-  if (label === undefined) label = t('Adresse', 'Adres')
-  if (placeholder === undefined) placeholder = t('Rue, numéro, ville...', 'Straat, nummer, gemeente...')
+export function AddressInput({ label = 'Adresse', value, onSelect, onChange, placeholder = 'Rue, numéro, ville...', required }) {
   const [results, setResults] = useState([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)

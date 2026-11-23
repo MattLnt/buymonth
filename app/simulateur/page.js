@@ -5,14 +5,11 @@ import Link from 'next/link'
 import { getConfigMensualite } from '@/lib/settings'
 import { prixDecaisse, libellePrixPublic } from '@/lib/regime'
 import { lireBienExterne } from '@/lib/bienExterne'
-import { getT } from '@/lib/i18n/server'
-import { libelleProvince } from '@/app/components/dashboard/libelles'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SimulateurPage({ searchParams }) {
   const sp = await searchParams
-  const { lang, t } = await getT()
   const bienId = sp.bien || null
 
   let bien = null
@@ -26,7 +23,7 @@ export default async function SimulateurPage({ searchParams }) {
 
   // Pas de bien en base : le visiteur arrive peut-être du configurateur d'un partenaire,
   // avec sa configuration dans l'URL (accord Vizion du 07/07/2026, cf. lib/bienExterne.js).
-  if (!bien) bien = lireBienExterne(sp, lang)
+  if (!bien) bien = lireBienExterne(sp)
 
   // Le partenaire peut imposer la durée de crédit de sa simulation ; sinon, paramètres admin.
   const cfgBase = await getConfigMensualite()
@@ -44,10 +41,10 @@ export default async function SimulateurPage({ searchParams }) {
       <div style={{ padding: 18 }}>
         <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 4px' }}>{bien.titre}</h3>
         <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 12 }}>
-          {[bien.ville, libelleProvince(bien.province, lang), bien.reference && `${t('réf.', 'ref.')} ${bien.reference}`].filter(Boolean).join(', ') || t('Belgique', 'België')}
+          {[bien.ville, bien.province, bien.reference && `réf. ${bien.reference}`].filter(Boolean).join(', ') || 'Belgique'}
         </div>
-        <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="card" prefix={t('À partir de', 'Vanaf')} showExemple={false} avertissement={false} />
-        <div style={{ fontSize: 13, color: '#A9B0BE', marginTop: 8 }}>{t('Prix du bien : ', 'Prijs van het pand: ')}{libellePrixPublic(bien.prixTotal, bien.regime, lang)}</div>
+        <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="card" prefix="À partir de" showExemple={false} avertissement={false} />
+        <div style={{ fontSize: 13, color: '#A9B0BE', marginTop: 8 }}>Prix du bien : {libellePrixPublic(bien.prixTotal, bien.regime)}</div>
       </div>
     </div>
   )
@@ -59,13 +56,10 @@ export default async function SimulateurPage({ searchParams }) {
         <div style={{ position: 'absolute', top: '-25%', right: '-5%', width: 460, height: 460, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.18) 0%, transparent 65%)', pointerEvents: 'none' }} />
         <div style={{ ...WRAP, position: 'relative' }}>
           <h1 style={{ fontSize: 32, fontWeight: 700, color: '#fff', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-            {t('Simulez votre ', 'Bereken uw ')}<span style={{ color: '#7CB8A8' }}>{t("capacité d'emprunt", 'leencapaciteit')}</span>
+            Simulez votre <span style={{ color: '#7CB8A8' }}>capacité d'emprunt</span>
           </h1>
           <p style={{ fontSize: 15.5, color: 'rgba(255,255,255,0.65)', margin: 0, maxWidth: 520, lineHeight: 1.6 }}>
-            {t(
-              'En quelques secondes, découvrez si ce bien correspond à votre budget — gratuitement et sans engagement.',
-              'Ontdek in enkele seconden of dit pand binnen uw budget past — gratis en vrijblijvend.'
-            )}
+            En quelques secondes, découvrez si ce bien correspond à votre budget — gratuitement et sans engagement.
           </p>
         </div>
       </div>

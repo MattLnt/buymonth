@@ -4,7 +4,6 @@ import { EmptyState } from '@/app/components/dashboard/Ui'
 import { MesBiensExplorer } from '@/app/components/dashboard/MesBiensExplorer'
 import { Icon } from '@/app/components/dashboard/Icon'
 import Link from 'next/link'
-import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +11,6 @@ const STATUTS_VALIDES = ['ACTIF', 'OPTION', 'HORS_LIGNE', 'VENDU']
 
 export default async function BiensPage({ searchParams }) {
   const client = await getCurrentClient()
-  const { t } = await getT()
   const sp = await searchParams
 
   // Filtre statut pré-appliqué depuis l'URL (?statut=ACTIF / OPTION...) — venant des cartes KPI
@@ -34,19 +32,19 @@ export default async function BiensPage({ searchParams }) {
       <>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
           <p style={{ fontSize: 14.5, color: '#5A6275', margin: 0 }}>
-            <strong style={{ color: '#193B5E' }}>{t('0 bien', '0 panden')}</strong> {t('dans votre portefeuille.', 'in uw portefeuille.')}
+            <strong style={{ color: '#193B5E' }}>0 bien</strong> dans votre portefeuille.
           </p>
           <Link href="/dashboard/client/biens/nouveau" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#193B5E', color: '#fff', padding: '11px 20px', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
-            <Icon name="plus" size={16} /> {t('Ajouter un bien', 'Pand toevoegen')}
+            <Icon name="plus" size={16} /> Ajouter un bien
           </Link>
         </div>
         <EmptyState
           icon="building"
-          title={t("Aucun bien pour l'instant", 'Nog geen panden')}
-          text={t('Ajoutez votre premier bien pour générer son badge mensualité et commencer à recevoir des leads.', 'Voeg uw eerste pand toe om de maandbedragbadge aan te maken en leads te beginnen ontvangen.')}
+          title="Aucun bien pour l'instant"
+          text="Ajoutez votre premier bien pour générer son badge mensualité et commencer à recevoir des leads."
           action={
             <Link href="/dashboard/client/biens/nouveau" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#193B5E', color: '#fff', padding: '11px 22px', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
-              <Icon name="plus" size={16} /> {t('Ajouter un bien', 'Pand toevoegen')}
+              <Icon name="plus" size={16} /> Ajouter un bien
             </Link>
           }
         />

@@ -5,14 +5,12 @@ import { BienForm } from '@/app/components/dashboard/BienForm'
 import { EnvoyerSimulation } from '@/app/components/dashboard/EnvoyerSimulation'
 import { redirect } from 'next/navigation'
 import { getConfigMensualite } from '@/lib/settings'
-import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
 export default async function EditBienPage({ params }) {
   const { id } = await params
   const client = await getCurrentClient()
-  const { t } = await getT()
   const cfg = await getConfigMensualite()
 
   const bien = await prisma.bien.findUnique({ where: { id } })
@@ -30,7 +28,7 @@ export default async function EditBienPage({ params }) {
   return (
     <>
       <PageHeader
-        title={t('Éditer le bien', 'Pand bewerken')}
+        title="Éditer le bien"
         subtitle={bien.titre}
         action={<EnvoyerSimulation bien={{ id: bien.id, titre: bien.titre }} variant="header" />}
       />

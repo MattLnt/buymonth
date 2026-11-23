@@ -4,18 +4,13 @@ import { Icon } from '@/app/components/dashboard/Icon'
 import { LeadsLineChart, TypeDonut, VuesBarChart } from '@/app/components/dashboard/ClientCharts'
 import { STATUTS_FACTURABLES } from '@/lib/facturation'
 import Link from 'next/link'
-import { getT } from '@/lib/i18n/server'
-import { locale } from '@/lib/i18n/config'
-import { libelleType } from '@/app/components/dashboard/libelles'
 
 export const dynamic = 'force-dynamic'
 
 const MOIS_COURTS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
-const MOIS_COURTS_NL = ['Jan', 'Feb', 'Mrt', 'Apr', 'Mei', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec']
 
 export default async function ClientDashboard() {
   const client = await getCurrentClient()
-  const { lang, t } = await getT()
 
   // Charge tout ce dont on a besoin
   const [biens, leads] = await Promise.all([
@@ -50,14 +45,14 @@ export default async function ClientDashboard() {
       const ld = new Date(l.createdAt)
       return ld.getFullYear() === d.getFullYear() && ld.getMonth() === d.getMonth()
     }).length
-    leadsParMois.push({ mois: (lang === 'nl' ? MOIS_COURTS_NL : MOIS_COURTS)[d.getMonth()], leads: count })
+    leadsParMois.push({ mois: MOIS_COURTS[d.getMonth()], leads: count })
   }
 
   // Répartition par type
   const typeMap = {}
   biens.forEach((b) => {
-    const ty = b.type ? libelleType(b.type, lang) : t('Autre', 'Overig')
-    typeMap[ty] = (typeMap[ty] || 0) + 1
+    const t = b.type || 'Autre'
+    typeMap[t] = (typeMap[t] || 0) + 1
   })
   const repartitionType = Object.entries(typeMap).map(([name, value]) => ({ name, value }))
 
@@ -73,10 +68,10 @@ export default async function ClientDashboard() {
 
   // Cartes KPI en grille 2×2 (« Biens en option » remplace « Widgets générés »)
   const kpis = [
-    { label: t('Biens actifs', 'Actieve panden'), value: nbBiensActifs, sub: t(`${nbBiens} au total`, `${nbBiens} in totaal`), icon: 'building', grad: 'linear-gradient(135deg, #16324F 0%, #2E6388 100%)', href: '/dashboard/client/biens?statut=ACTIF' },
-    { label: t('Biens en option', 'Panden in optie'), value: nbBiensOption, sub: t(`${nbBiens} au total`, `${nbBiens} in totaal`), icon: 'tag', grad: 'linear-gradient(135deg, #B4791C 0%, #E89923 100%)', href: '/dashboard/client/biens?statut=OPTION' },
-    { label: t('Leads reçus', 'Ontvangen leads'), value: nbLeads, sub: t(`${tauxConversion}% de conversion`, `${tauxConversion}% conversie`), icon: 'users', grad: 'linear-gradient(135deg, #1D7A5E 0%, #7CB8A8 100%)', href: '/dashboard/client/leads' },
-    { label: t('Vues totales', 'Totaal aantal weergaven'), value: totalVues.toLocaleString(locale(lang)), sub: t('Sur tous vos biens', 'Over al uw panden'), icon: 'eye', grad: 'linear-gradient(135deg, #2E6388 0%, #4A7DA8 100%)', href: '/dashboard/client/biens' },
+    { label: 'Biens actifs', value: nbBiensActifs, sub: `${nbBiens} au total`, icon: 'building', grad: 'linear-gradient(135deg, #16324F 0%, #2E6388 100%)', href: '/dashboard/client/biens?statut=ACTIF' },
+    { label: 'Biens en option', value: nbBiensOption, sub: `${nbBiens} au total`, icon: 'tag', grad: 'linear-gradient(135deg, #B4791C 0%, #E89923 100%)', href: '/dashboard/client/biens?statut=OPTION' },
+    { label: 'Leads reçus', value: nbLeads, sub: `${tauxConversion}% de conversion`, icon: 'users', grad: 'linear-gradient(135deg, #1D7A5E 0%, #7CB8A8 100%)', href: '/dashboard/client/leads' },
+    { label: 'Vues totales', value: totalVues.toLocaleString('fr-BE'), sub: 'Sur tous vos biens', icon: 'eye', grad: 'linear-gradient(135deg, #2E6388 0%, #4A7DA8 100%)', href: '/dashboard/client/biens' },
   ]
 
   return (
@@ -84,7 +79,7 @@ export default async function ClientDashboard() {
       {/* Accueil discret */}
       <div style={{ marginBottom: 24 }}>
         <p style={{ fontSize: 14.5, color: '#5A6275', margin: 0 }}>
-          {t('Bonjour', 'Hallo')} <strong style={{ color: '#193B5E' }}>{client.contactNom || client.societe || ''}</strong>, {t("voici l'activité de votre portefeuille en temps réel.", 'hier is de activiteit van uw portefeuille in realtime.')}
+          Bonjour <strong style={{ color: '#193B5E' }}>{client.contactNom || client.societe || ''}</strong>, voici l'activité de votre portefeuille en temps réel.
         </p>
       </div>
 
@@ -92,7 +87,7 @@ export default async function ClientDashboard() {
       <div className="kpi-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
         <style>{`@media (max-width: 560px){ .kpi-grid { grid-template-columns: 1fr !important; } }`}</style>
         {kpis.map((k) => (
-          <Link key={k.href} href={k.href} style={{ textDecoration: 'none', display: 'block' }}>
+          <Link key={k.label} href={k.href} style={{ textDecoration: 'none', display: 'block' }}>
             <div style={{ background: k.grad, borderRadius: 16, padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
               <div style={{ position: 'absolute', bottom: -40, right: 10, width: 90, height: 90, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
@@ -106,7 +101,7 @@ export default async function ClientDashboard() {
                 <div style={{ fontSize: 34, fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em', marginBottom: 8 }}>{k.value}</div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>{k.sub}</span>
-                  <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>{t('voir →', 'bekijken →')}</span>
+                  <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>voir →</span>
                 </div>
               </div>
             </div>
@@ -130,14 +125,14 @@ export default async function ClientDashboard() {
         <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <div>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', margin: '0 0 2px' }}>{t('Nouveaux leads', 'Nieuwe leads')}</h3>
-              <p style={{ fontSize: 12.5, color: '#9AA2B4', margin: 0 }}>{t('Prospects encore à contacter', 'Prospecten die nog gecontacteerd moeten worden')}</p>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', margin: '0 0 2px' }}>Nouveaux leads</h3>
+              <p style={{ fontSize: 12.5, color: '#9AA2B4', margin: 0 }}>Prospects encore à contacter</p>
             </div>
-            <Link href="/dashboard/client/leads" style={{ fontSize: 12.5, color: '#7CB8A8', fontWeight: 600, textDecoration: 'none' }}>{t('Tout voir →', 'Alles bekijken →')}</Link>
+            <Link href="/dashboard/client/leads" style={{ fontSize: 12.5, color: '#7CB8A8', fontWeight: 600, textDecoration: 'none' }}>Tout voir →</Link>
           </div>
 
           {nouveauxLeads.length === 0 ? (
-            <div style={{ padding: '32px 0', textAlign: 'center', color: '#9AA2B4', fontSize: 13 }}>{t('Aucun nouveau lead à contacter.', 'Geen nieuwe leads om te contacteren.')}</div>
+            <div style={{ padding: '32px 0', textAlign: 'center', color: '#9AA2B4', fontSize: 13 }}>Aucun nouveau lead à contacter.</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {nouveauxLeads.map((l) => (
@@ -146,17 +141,17 @@ export default async function ClientDashboard() {
                     {(l.nom || l.email || '?')[0]?.toUpperCase()}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 600, color: '#193B5E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.nom || l.email || t('Prospect', 'Prospect')}</div>
+                    <div style={{ fontSize: 13.5, fontWeight: 600, color: '#193B5E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.nom || l.email || 'Prospect'}</div>
                     {l.bien?.id ? (
                       <Link href={`/biens/${l.bien.id}`} target="_blank" rel="noopener noreferrer" title={l.bien.titre} style={{ fontSize: 12, color: '#7CB8A8', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
                         {l.bien.titre}
                       </Link>
                     ) : (
-                      <div style={{ fontSize: 12, color: '#9AA2B4' }}>{t('Bien supprimé', 'Pand verwijderd')}</div>
+                      <div style={{ fontSize: 12, color: '#9AA2B4' }}>Bien supprimé</div>
                     )}
                   </div>
                   <div style={{ fontSize: 11.5, color: '#A9B0BE', flexShrink: 0 }}>
-                    {new Date(l.createdAt).toLocaleDateString(locale(lang), { day: '2-digit', month: 'short' })}
+                    {new Date(l.createdAt).toLocaleDateString('fr-BE', { day: '2-digit', month: 'short' })}
                   </div>
                 </div>
               ))}
@@ -172,8 +167,8 @@ export default async function ClientDashboard() {
             <Icon name="euro" size={22} color="#7CB8A8" />
           </span>
           <div>
-            <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 4 }}>{t('Mensualité moyenne', 'Gemiddeld maandbedrag')}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#193B5E', lineHeight: 1 }}>{mensualiteMoy.toLocaleString(locale(lang))} €<span style={{ fontSize: 13, color: '#9AA2B4', fontWeight: 500 }}>{t('/mois', '/maand')}</span></div>
+            <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 4 }}>Mensualité moyenne</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#193B5E', lineHeight: 1 }}>{mensualiteMoy.toLocaleString('fr-BE')} €<span style={{ fontSize: 13, color: '#9AA2B4', fontWeight: 500 }}>/mois</span></div>
           </div>
         </div>
 
@@ -182,8 +177,8 @@ export default async function ClientDashboard() {
             <Icon name="trending" size={22} color="#7CB8A8" />
           </span>
           <div>
-            <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 4 }}>{t('Taux de conversion', 'Conversieratio')}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#193B5E', lineHeight: 1 }}>{tauxConversion} %<span style={{ fontSize: 13, color: '#9AA2B4', fontWeight: 500 }}> {t('vues → leads', 'weergaven → leads')}</span></div>
+            <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 4 }}>Taux de conversion</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#193B5E', lineHeight: 1 }}>{tauxConversion} %<span style={{ fontSize: 13, color: '#9AA2B4', fontWeight: 500 }}> vues → leads</span></div>
           </div>
         </div>
 
@@ -192,7 +187,7 @@ export default async function ClientDashboard() {
             <Icon name="eye" size={22} color="#7CB8A8" />
           </span>
           <div>
-            <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 4 }}>{t('Vues moyennes / bien', 'Gemiddelde weergaven / pand')}</div>
+            <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 4 }}>Vues moyennes / bien</div>
             <div style={{ fontSize: 22, fontWeight: 700, color: '#193B5E', lineHeight: 1 }}>{nbBiens > 0 ? Math.round(totalVues / nbBiens) : 0}</div>
           </div>
         </div>

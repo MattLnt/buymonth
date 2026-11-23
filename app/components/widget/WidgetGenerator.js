@@ -6,12 +6,10 @@ import { FormSelect } from '@/app/components/dashboard/FormSelect'
 import { ColorPicker } from '@/app/components/dashboard/ColorPicker'
 import { Badge } from './Badge'
 import { MENSUALITE_CONFIG } from '@/lib/mensualiteConfig'
-import { useLang } from '@/app/components/i18n/LangProvider'
-import { locale, makeT, withLang } from '@/lib/i18n/config'
 
 const BASE_URL = typeof window !== 'undefined' ? window.location.origin : ''
 
-const pct = (t, lang) => new Intl.NumberFormat(locale(lang), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(t * 100) + ' %'
+const pct = (t) => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(t * 100) + ' %'
 
 const ic = {
   bien: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>,
@@ -19,9 +17,7 @@ const ic = {
   code: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>,
 }
 
-function buildSVG({ mensualite, premium, style, primaire, accent, fond, cTitre, cMentions, cCredit, cfg, lang = 'fr' }) {
-  // Le badge téléchargé suit la langue choisie pour le widget, pas celle du dashboard
-  const t = makeT(lang)
+function buildSVG({ mensualite, premium, style, primaire, accent, fond, cTitre, cMentions, cCredit, cfg }) {
   const dark = style === 'dark'
   const bg = fond || (dark ? '#16324F' : '#FFFFFF')
   const textMain = cTitre || (dark ? '#FFFFFF' : '#16324F')
@@ -36,26 +32,19 @@ function buildSVG({ mensualite, premium, style, primaire, accent, fond, cTitre, 
   <rect width="${w}" height="${h}" rx="16" fill="${bg}" stroke="#EEF2F7"/>
   <path d="M0 16 Q0 0 16 0 H304 Q320 0 320 16 V84 H0 Z" fill="${primaire}"/>
   ${header}
-  <text x="160" y="128" font-family="system-ui,Arial,sans-serif" font-size="14" font-weight="600" fill="${textMain}" text-anchor="middle">${t('Propriétaire de ce bien dès', 'Eigenaar van dit pand vanaf')}</text>
-  <text x="160" y="178" font-family="system-ui,Arial,sans-serif" font-size="40" font-weight="700" fill="${accent}" text-anchor="middle">${mensualite ? mensualite.toLocaleString(locale(lang)) : '—'} €<tspan font-size="19">${t('/mois*', '/maand*')}</tspan></text>
+  <text x="160" y="128" font-family="system-ui,Arial,sans-serif" font-size="14" font-weight="600" fill="${textMain}" text-anchor="middle">Propriétaire de ce bien dès</text>
+  <text x="160" y="178" font-family="system-ui,Arial,sans-serif" font-size="40" font-weight="700" fill="${accent}" text-anchor="middle">${mensualite ? mensualite.toLocaleString('fr-BE') : '—'} €<tspan font-size="19">/mois*</tspan></text>
   <line x1="24" y1="200" x2="296" y2="200" stroke="#EEF2F7"/>
-  <text x="160" y="220" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">${t("* Emprunter de l'argent coûte aussi de l'argent. Estimation indicative, hors droits", '* Let op, geld lenen kost ook geld. Indicatieve raming, exclusief')}</text>
-  <text x="160" y="233" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">${t(
-    `d'enregistrement et frais de notaire (apport ${Math.round(cfg.apportPct * 100)} %, ${Math.round(cfg.dureeMois / 12)} ans, taux ${pct(cfg.tauxAnnuel, lang)}, TAEG ${pct(cfg.taegAnnuel, lang)}).`,
-    `registratierechten en notariskosten (eigen inbreng ${Math.round(cfg.apportPct * 100)} %, ${Math.round(cfg.dureeMois / 12)} jaar, rentevoet ${pct(cfg.tauxAnnuel, lang)}, JKP ${pct(cfg.taegAnnuel, lang)}).`
-  )}</text>
-  <text x="160" y="246" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">${t("Sous réserve d'acceptation du dossier.", 'Onder voorbehoud van aanvaarding van het dossier.')}</text>
-  <text x="160" y="263" font-family="system-ui,Arial,sans-serif" font-size="8.5" font-weight="600" fill="${textCredit}" text-anchor="middle">${t('Hypothèses fournies par BuyMonth Finance, nom commercial', 'Hypotheses aangeleverd door BuyMonth Finance, handelsnaam')}</text>
-  <text x="160" y="275" font-family="system-ui,Arial,sans-serif" font-size="8.5" font-weight="600" fill="${textCredit}" text-anchor="middle">${t('de JG Management SRL, intermédiaire de crédit.', 'van JG Management SRL, kredietbemiddelaar.')}</text>
+  <text x="160" y="220" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">* Emprunter de l'argent coûte aussi de l'argent. Estimation indicative, hors droits</text>
+  <text x="160" y="233" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">d'enregistrement et frais de notaire (apport ${Math.round(cfg.apportPct * 100)} %, ${Math.round(cfg.dureeMois / 12)} ans, taux ${pct(cfg.tauxAnnuel)}, TAEG ${pct(cfg.taegAnnuel)}).</text>
+  <text x="160" y="246" font-family="system-ui,Arial,sans-serif" font-size="8.5" fill="${textMuted}" text-anchor="middle">Sous réserve d'acceptation du dossier.</text>
+  <text x="160" y="263" font-family="system-ui,Arial,sans-serif" font-size="8.5" font-weight="600" fill="${textCredit}" text-anchor="middle">Hypothèses fournies par BuyMonth Finance, nom commercial</text>
+  <text x="160" y="275" font-family="system-ui,Arial,sans-serif" font-size="8.5" font-weight="600" fill="${textCredit}" text-anchor="middle">de JG Management SRL, intermédiaire de crédit.</text>
 </svg>`
 }
 
 export function WidgetGenerator({ biens, plan, cfg: cfgProp }) {
   const cfg = { ...MENSUALITE_CONFIG, ...(cfgProp || {}) }
-  const { lang, t } = useLang()
-  // Langue du badge intégré (FR / NL), indépendante de la langue du dashboard
-  const [widgetLang, setWidgetLang] = useState(lang)
-  const tw = makeT(widgetLang)
   const isPremiumPlan = plan === 'PRO_PLUS' || plan === 'PREMIUM'
   const [bienId, setBienId] = useState(biens[0]?.id || '')
   const [style, setStyle] = useState('light')
@@ -96,14 +85,13 @@ export function WidgetGenerator({ biens, plan, cfg: cfgProp }) {
     params.set('ccredit', cCredit.replace('#', ''))
   }
   if (premium && logoUrl) params.set('logo', encodeURIComponent(logoUrl))
-  if (widgetLang === 'nl') params.set('lang', 'nl')
   const embedUrl = `${BASE_URL}/embed/badge?${params.toString()}`
 
   // Lien du simulateur pour ce bien (bouton « Simuler ma mensualité »)
-  const simulateurUrl = withLang(bienId ? `${BASE_URL}/biens/${bienId}#simuler` : `${BASE_URL}/biens`, widgetLang)
+  const simulateurUrl = bienId ? `${BASE_URL}/biens/${bienId}#simuler` : `${BASE_URL}/biens`
 
-  const iframeCode = `<iframe src="${embedUrl}" title="${tw('Mensualité BuyMonth', 'Maandbedrag BuyMonth')}" loading="lazy" referrerpolicy="no-referrer" style="border:0;width:344px;height:312px;"></iframe>`
-  const htmlCode = `<a href="${bien?.urlClient || '#'}" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none">\n  <img src="${BASE_URL}/api/widget/image?${params.toString()}" alt="${tw(`Propriétaire dès ${mensualite} €/mois`, `Eigenaar vanaf ${mensualite} €/maand`)}" style="width:320px;height:auto" />\n</a>`
+  const iframeCode = `<iframe src="${embedUrl}" title="Mensualité BuyMonth" loading="lazy" referrerpolicy="no-referrer" style="border:0;width:344px;height:312px;"></iframe>`
+  const htmlCode = `<a href="${bien?.urlClient || '#'}" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none">\n  <img src="${BASE_URL}/api/widget/image?${params.toString()}" alt="Propriétaire dès ${mensualite} €/mois" style="width:320px;height:auto" />\n</a>`
 
   function copy(text, key) {
     navigator.clipboard.writeText(text)
@@ -129,7 +117,7 @@ export function WidgetGenerator({ biens, plan, cfg: cfgProp }) {
   }
 
   function downloadSVG() {
-    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond, cTitre: effTitre, cMentions: effMentions, cCredit: effCredit, cfg, lang: widgetLang })
+    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond, cTitre: effTitre, cMentions: effMentions, cCredit: effCredit, cfg })
     const blob = new Blob([svg], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -140,7 +128,7 @@ export function WidgetGenerator({ biens, plan, cfg: cfgProp }) {
   }
 
   function downloadPNG() {
-    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond, cTitre: effTitre, cMentions: effMentions, cCredit: effCredit, cfg, lang: widgetLang })
+    const svg = buildSVG({ mensualite, premium, style, primaire: effPrimaire, accent: effAccent, fond: effFond, cTitre: effTitre, cMentions: effMentions, cCredit: effCredit, cfg })
     const img = new Image()
     const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
     const url = URL.createObjectURL(svgBlob)
@@ -181,7 +169,7 @@ export function WidgetGenerator({ biens, plan, cfg: cfgProp }) {
 
   const bienOptions = biens.map((b) => ({
     value: b.id,
-    label: `${b.titre} — ${b.mensualite} €/${t('mois', 'maand')}`,
+    label: `${b.titre} — ${b.mensualite} €/mois`,
   }))
 
   return (
@@ -190,31 +178,25 @@ export function WidgetGenerator({ biens, plan, cfg: cfgProp }) {
 
       {/* COLONNE CONFIG */}
       <div style={{ minWidth: 0 }}>
-        <FormSection icon={ic.bien} title={t('Choisir un bien', 'Een pand kiezen')} subtitle={t('Le badge affichera sa mensualité', 'De badge toont het maandbedrag ervan')}>
+        <FormSection icon={ic.bien} title="Choisir un bien" subtitle="Le badge affichera sa mensualité">
           <FormSelect
             value={bienId}
             onChange={setBienId}
             options={bienOptions}
-            placeholder={t('Sélectionner un bien', 'Selecteer een pand')}
+            placeholder="Sélectionner un bien"
           />
         </FormSection>
 
-        <FormSection icon={ic.palette} title={t('Apparence', 'Weergave')} subtitle={t('Style et personnalisation', 'Stijl en personalisatie')}>
-          <label style={labelStyle}>{t('Langue du badge', 'Taal van de badge')}</label>
+        <FormSection icon={ic.palette} title="Apparence" subtitle="Style et personnalisation">
+          <label style={labelStyle}>Style</label>
           <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-            <button type="button" onClick={() => setWidgetLang('fr')} style={toggleBtn(widgetLang === 'fr')}>Français</button>
-            <button type="button" onClick={() => setWidgetLang('nl')} style={toggleBtn(widgetLang === 'nl')}>Nederlands</button>
+            <button type="button" onClick={() => setStyle('light')} style={toggleBtn(style === 'light')}>Clair</button>
+            <button type="button" onClick={() => setStyle('dark')} style={toggleBtn(style === 'dark')}>Foncé</button>
           </div>
 
-          <label style={labelStyle}>{t('Style', 'Stijl')}</label>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-            <button type="button" onClick={() => setStyle('light')} style={toggleBtn(style === 'light')}>{t('Clair', 'Licht')}</button>
-            <button type="button" onClick={() => setStyle('dark')} style={toggleBtn(style === 'dark')}>{t('Foncé', 'Donker')}</button>
-          </div>
-
-          <label style={labelStyle}>{t('Thème', 'Thema')}</label>
+          <label style={labelStyle}>Thème</label>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button type="button" onClick={() => setPremium(false)} style={toggleBtn(!premium)}>{t('Classique', 'Klassiek')}</button>
+            <button type="button" onClick={() => setPremium(false)} style={toggleBtn(!premium)}>Classique</button>
             <button type="button" onClick={() => { if (isPremiumPlan) setPremium(true) }} disabled={!isPremiumPlan} style={toggleBtn(premium, !isPremiumPlan)}>
               Pro+{!isPremiumPlan && ' 🔒'}
             </button>
@@ -222,51 +204,51 @@ export function WidgetGenerator({ biens, plan, cfg: cfgProp }) {
 
           {!isPremiumPlan && (
             <p style={{ fontSize: 12, color: '#A9B0BE', margin: '14px 0 0', lineHeight: 1.5 }}>
-              {t('La personnalisation (logo, couleurs) est réservée à la formule Pro+.', 'Personalisatie (logo, kleuren) is voorbehouden aan de formule Pro+.')}
+              La personnalisation (logo, couleurs) est réservée à la formule Pro+.
             </p>
           )}
 
           {premium && isPremiumPlan && (
             <div style={{ marginTop: 22, paddingTop: 22, borderTop: '1px solid #F2F5FA' }}>
-              <label style={labelStyle}>{t('Votre logo', 'Uw logo')}</label>
+              <label style={labelStyle}>Votre logo</label>
               <input ref={logoInput} type="file" accept="image/*" onChange={handleLogo} style={{ display: 'none' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
                 {logoUrl ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ width: 56, height: 40, borderRadius: 8, background: '#16324F', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4 }}>
-                      <img src={logoUrl} alt={t('logo', 'logo')} style={{ maxHeight: 32, maxWidth: 48, objectFit: 'contain' }} />
+                      <img src={logoUrl} alt="logo" style={{ maxHeight: 32, maxWidth: 48, objectFit: 'contain' }} />
                     </div>
-                    <button type="button" onClick={() => setLogoUrl('')} style={{ fontSize: 12, color: '#E5484D', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>{t('Retirer', 'Verwijderen')}</button>
+                    <button type="button" onClick={() => setLogoUrl('')} style={{ fontSize: 12, color: '#E5484D', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Retirer</button>
                   </div>
                 ) : (
                   <button type="button" onClick={() => logoInput.current?.click()} disabled={uploadingLogo} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 10, border: '1.5px dashed #C8D4E2', background: '#FAFDFD', color: '#5A6B7D', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                    {uploadingLogo ? t('Envoi...', 'Uploaden...') : t('↑ Uploader mon logo', '↑ Mijn logo uploaden')}
+                    {uploadingLogo ? 'Envoi...' : '↑ Uploader mon logo'}
                   </button>
                 )}
               </div>
 
-              <label style={labelStyle}>{t('Couleurs', 'Kleuren')}</label>
+              <label style={labelStyle}>Couleurs</label>
               <div style={{ display: 'flex', gap: 10, marginBottom: couleurMode === 'perso' ? 18 : 0 }}>
-                <button type="button" onClick={() => setCouleurMode('buymonth')} style={toggleBtn(couleurMode === 'buymonth')}>{t('Couleurs BuyMonth', 'BuyMonth-kleuren')}</button>
-                <button type="button" onClick={() => setCouleurMode('perso')} style={toggleBtn(couleurMode === 'perso')}>{t('Personnalisées', 'Eigen kleuren')}</button>
+                <button type="button" onClick={() => setCouleurMode('buymonth')} style={toggleBtn(couleurMode === 'buymonth')}>Couleurs BuyMonth</button>
+                <button type="button" onClick={() => setCouleurMode('perso')} style={toggleBtn(couleurMode === 'perso')}>Personnalisées</button>
               </div>
 
               {couleurMode === 'perso' && (
                 <>
                   {/* Couleurs du badge */}
-                  <p style={sousTitre}>{t('Couleurs du badge', 'Kleuren van de badge')}</p>
+                  <p style={sousTitre}>Couleurs du badge</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 18 }}>
-                    <ColorPicker label={t('Couleur principale', 'Hoofdkleur')} value={primaire} onChange={setPrimaire} />
-                    <ColorPicker label={t('Couleur mensualité', 'Kleur maandbedrag')} value={accent} onChange={setAccent} />
-                    <ColorPicker label={t('Couleur de fond', 'Achtergrondkleur')} value={fond} onChange={setFond} />
+                    <ColorPicker label="Couleur principale" value={primaire} onChange={setPrimaire} />
+                    <ColorPicker label="Couleur mensualité" value={accent} onChange={setAccent} />
+                    <ColorPicker label="Couleur de fond" value={fond} onChange={setFond} />
                   </div>
 
                   {/* Couleurs des textes */}
-                  <p style={sousTitre}>{t('Couleurs des textes', 'Tekstkleuren')}</p>
+                  <p style={sousTitre}>Couleurs des textes</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    <ColorPicker label={t('Titre', 'Titel')} value={cTitre} onChange={setCTitre} />
-                    <ColorPicker label={t('Mentions légales', 'Wettelijke vermeldingen')} value={cMentions} onChange={setCMentions} />
-                    <ColorPicker label={t('Ligne crédit', 'Kredietregel')} value={cCredit} onChange={setCCredit} />
+                    <ColorPicker label="Titre" value={cTitre} onChange={setCTitre} />
+                    <ColorPicker label="Mentions légales" value={cMentions} onChange={setCMentions} />
+                    <ColorPicker label="Ligne crédit" value={cCredit} onChange={setCCredit} />
                   </div>
                 </>
               )}
@@ -275,16 +257,16 @@ export function WidgetGenerator({ biens, plan, cfg: cfgProp }) {
         </FormSection>
 
         {/* Code d'intégration — toujours disponible (widget gratuit/inclus) */}
-        <FormSection icon={ic.code} title={t("Code d'intégration", 'Integratiecode')} subtitle={t('Copiez le code sur le site du bien', 'Kopieer de code naar de website van het pand')}>
-          <label style={labelStyle}>{t('Option A — iframe (recommandée)', 'Optie A — iframe (aanbevolen)')}</label>
+        <FormSection icon={ic.code} title="Code d'intégration" subtitle="Copiez le code sur le site du bien">
+          <label style={labelStyle}>Option A — iframe (recommandée)</label>
           <div style={{ position: 'relative', marginBottom: 18 }}>
             <pre style={preBox}>{iframeCode}</pre>
-            <button type="button" onClick={() => copy(iframeCode, 'iframe')} style={copyBtn}>{copied === 'iframe' ? t('Copié ✓', 'Gekopieerd ✓') : t('Copier', 'Kopiëren')}</button>
+            <button type="button" onClick={() => copy(iframeCode, 'iframe')} style={copyBtn}>{copied === 'iframe' ? 'Copié ✓' : 'Copier'}</button>
           </div>
-          <label style={labelStyle}>{t('Option B — image (HTML)', 'Optie B — afbeelding (HTML)')}</label>
+          <label style={labelStyle}>Option B — image (HTML)</label>
           <div style={{ position: 'relative' }}>
             <pre style={preBox}>{htmlCode}</pre>
-            <button type="button" onClick={() => copy(htmlCode, 'html')} style={copyBtn}>{copied === 'html' ? t('Copié ✓', 'Gekopieerd ✓') : t('Copier', 'Kopiëren')}</button>
+            <button type="button" onClick={() => copy(htmlCode, 'html')} style={copyBtn}>{copied === 'html' ? 'Copié ✓' : 'Copier'}</button>
           </div>
         </FormSection>
       </div>
@@ -292,21 +274,21 @@ export function WidgetGenerator({ biens, plan, cfg: cfgProp }) {
       {/* COLONNE PREVIEW */}
       <div style={{ position: 'sticky', top: 24, minWidth: 0 }}>
         <div style={{ background: checker, border: '1px solid #EEF2F7', borderRadius: 16, padding: 28, display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <Badge mensualite={mensualite} premium={premium} theme={style} couleurPrimaire={effPrimaire} couleurAccent={effAccent} couleurFond={effFond} couleurTitre={effTitre} couleurMentions={effMentions} couleurCredit={effCredit} logoUrl={premium ? logoUrl : null} width={280} lang={widgetLang} />
+          <Badge mensualite={mensualite} premium={premium} theme={style} couleurPrimaire={effPrimaire} couleurAccent={effAccent} couleurFond={effFond} couleurTitre={effTitre} couleurMentions={effMentions} couleurCredit={effCredit} logoUrl={premium ? logoUrl : null} width={280} />
         </div>
 
         {/* Bouton « Simuler ma mensualité » → simulateur du bien */}
         <a href={simulateurUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px', borderRadius: 10, background: '#7CB8A8', color: '#0F2A22', textDecoration: 'none', fontSize: 13.5, fontWeight: 700, marginBottom: 10 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2" /><line x1="8" y1="6" x2="16" y2="6" /><line x1="8" y1="10" x2="16" y2="10" /><line x1="8" y1="14" x2="12" y2="14" /></svg>
-          {t('Simuler ma mensualité', 'Mijn maandbedrag berekenen')}
+          Simuler ma mensualité
         </a>
 
         <div style={{ display: 'flex', gap: 10 }}>
           <button type="button" onClick={downloadSVG} style={{ flex: 1, padding: '11px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            {t('Télécharger SVG', 'SVG downloaden')}
+            Télécharger SVG
           </button>
           <button type="button" onClick={downloadPNG} style={{ flex: 1, padding: '11px', borderRadius: 10, background: '#fff', color: '#193B5E', border: '1.5px solid #E8EDF2', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            {t('Télécharger PNG', 'PNG downloaden')}
+            Télécharger PNG
           </button>
         </div>
       </div>

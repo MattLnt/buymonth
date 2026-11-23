@@ -1,17 +1,15 @@
 'use client'
 
 import { useRef } from 'react'
-import { useLang } from '@/app/components/i18n/LangProvider'
 
 export function PhotoUploader({ photos, setPhotos, uploading, setUploading, setError, max = 10 }) {
   const inputRef = useRef(null)
-  const { t } = useLang()
 
   async function handleFiles(e) {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
     if (photos.length + files.length > max) {
-      setError?.(t(`Maximum ${max} photos.`, `Maximaal ${max} foto's.`))
+      setError?.(`Maximum ${max} photos.`)
       return
     }
 
@@ -26,11 +24,11 @@ export function PhotoUploader({ photos, setPhotos, uploading, setUploading, setE
         const res = await fetch('/api/upload', { method: 'POST', body: fd })
         const data = await res.json()
         if (res.ok && data.url) uploaded.push(data.url)
-        else throw new Error(data.error || t('Upload échoué', 'Upload mislukt'))
+        else throw new Error(data.error || 'Upload échoué')
       }
       setPhotos([...photos, ...uploaded])
     } catch (err) {
-      setError?.(err.message || t('Erreur lors de l\'upload.', 'Fout bij het uploaden.'))
+      setError?.(err.message || 'Erreur lors de l\'upload.')
     } finally {
       setUploading(false)
       if (inputRef.current) inputRef.current.value = ''
@@ -50,7 +48,7 @@ export function PhotoUploader({ photos, setPhotos, uploading, setUploading, setE
           <div key={idx} style={{ position: 'relative', aspectRatio: '4/3', borderRadius: 12, overflow: 'hidden', border: '1px solid #EEF2F7', background: `url(${url}) center/cover` }}>
             {idx === 0 && (
               <span style={{ position: 'absolute', top: 6, left: 6, background: 'rgba(124,184,168,0.95)', color: '#16324F', fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20 }}>
-                {t('Principale', 'Hoofdfoto')}
+                Principale
               </span>
             )}
             <button type="button" onClick={() => removePhoto(idx)} style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: '50%', background: 'rgba(20,20,20,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
@@ -71,11 +69,11 @@ export function PhotoUploader({ photos, setPhotos, uploading, setUploading, setE
             }}
           >
             {uploading ? (
-              <span style={{ fontSize: 12, color: '#8A92A6', fontWeight: 600 }}>{t('Envoi...', 'Uploaden...')}</span>
+              <span style={{ fontSize: 12, color: '#8A92A6', fontWeight: 600 }}>Envoi...</span>
             ) : (
               <>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                <span style={{ fontSize: 12, color: '#5A6B7D', fontWeight: 600 }}>{t('Ajouter', 'Toevoegen')}</span>
+                <span style={{ fontSize: 12, color: '#5A6B7D', fontWeight: 600 }}>Ajouter</span>
               </>
             )}
           </button>
@@ -83,7 +81,7 @@ export function PhotoUploader({ photos, setPhotos, uploading, setUploading, setE
       </div>
 
       <p style={{ fontSize: 12, color: '#A9B0BE', margin: '12px 0 0' }}>
-        {photos.length}/{max} {t("photos · La première est l'image principale du bien.", "foto's · De eerste is de hoofdfoto van het pand.")}
+        {photos.length}/{max} photos · La première est l'image principale du bien.
       </p>
     </div>
   )

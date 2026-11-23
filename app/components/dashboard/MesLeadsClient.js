@@ -3,9 +3,6 @@
 import { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import Link from 'next/link'
 import { FormSelect } from './FormSelect'
-import { locale } from '@/lib/i18n/config'
-import { libelleStatutLead } from './libelles'
-import { useLang } from '@/app/components/i18n/LangProvider'
 
 const STATUTS = [
   'À contacter',
@@ -34,13 +31,12 @@ const STATUT_COLOR = {
 
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
-function formatDate(d, lang = 'fr') {
-  return new Date(d).toLocaleDateString(locale(lang), { day: '2-digit', month: '2-digit', year: 'numeric' })
+function formatDate(d) {
+  return new Date(d).toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 // Dropdown custom avec pastilles colorées — menu en position fixe, s'ouvre vers le haut si pas de place en bas
 function StatutDropdown({ value, onChange, disabled }) {
-  const { lang } = useLang()
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState(null)
   const btnRef = useRef(null)
@@ -108,7 +104,7 @@ function StatutDropdown({ value, onChange, disabled }) {
         }}
       >
         <span style={{ width: 7, height: 7, borderRadius: '50%', background: col.c, flexShrink: 0 }} />
-        {libelleStatutLead(value, lang)}
+        {value}
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={col.c} strokeWidth="2.5" style={{ transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : 'none' }}>
           <polyline points="6 9 12 15 18 9" />
         </svg>
@@ -137,7 +133,7 @@ function StatutDropdown({ value, onChange, disabled }) {
                 onMouseLeave={(e) => { if (!actif) e.currentTarget.style.background = 'transparent' }}
               >
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: sc.c, flexShrink: 0 }} />
-                {libelleStatutLead(s, lang)}
+                {s}
                 {actif && (
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="3" style={{ marginLeft: 'auto' }}><polyline points="20 6 9 17 4 12" /></svg>
                 )}
@@ -171,7 +167,6 @@ function Kpi({ label, value, accent }) {
 }
 
 export function MesLeadsClient({ leads }) {
-  const { lang, t } = useLang()
   // état local des statuts (mise à jour optimiste)
   const [statuts, setStatuts] = useState(
     Object.fromEntries(leads.map((l) => [l.id, l.statutPromoteur || 'À contacter']))
@@ -203,7 +198,7 @@ export function MesLeadsClient({ leads }) {
   if (leads.length === 0) {
     return (
       <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: '48px 24px', textAlign: 'center', color: '#8A92A6', fontSize: 14 }}>
-        {t('Aucun lead pour le moment.', 'Nog geen leads.')}
+        Aucun lead pour le moment.
       </div>
     )
   }
@@ -239,8 +234,8 @@ export function MesLeadsClient({ leads }) {
 
       {/* 2 KPI côte à côte */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
-        <Kpi label={t('Total leads', 'Totaal leads')} value={totalLeads} />
-        <Kpi label={t('Ce mois-ci', 'Deze maand')} value={ceMois} accent="#3B62A8" />
+        <Kpi label="Total leads" value={totalLeads} />
+        <Kpi label="Ce mois-ci" value={ceMois} accent="#3B62A8" />
       </div>
 
       {/* Recherche + filtre statut sur la même ligne */}
@@ -249,21 +244,21 @@ export function MesLeadsClient({ leads }) {
           <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#A9B0BE', display: 'flex' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
           </span>
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('Rechercher nom, email, bien...', 'Zoek op naam, e-mail, pand...')} style={{ ...inputStyle, paddingLeft: 36 }} />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher nom, email, bien..." style={{ ...inputStyle, paddingLeft: 36 }} />
         </div>
-        <FormSelect value={statutFiltre} onChange={setStatutFiltre} placeholder={t('Tous les statuts', 'Alle statussen')}
-          options={[{ value: '', label: t('Tous les statuts', 'Alle statussen') }, ...STATUTS.map((s) => ({ value: s, label: libelleStatutLead(s, lang) }))]} />
+        <FormSelect value={statutFiltre} onChange={setStatutFiltre} placeholder="Tous les statuts"
+          options={[{ value: '', label: 'Tous les statuts' }, ...STATUTS.map((s) => ({ value: s, label: s }))]} />
       </div>
 
       {/* Compteur */}
       <div style={{ fontSize: 13.5, color: '#5A6275', marginBottom: 14, fontWeight: 500 }}>
-        {filtered.length} lead{filtered.length > 1 ? 's' : ''} {hasFilters ? t('trouvé' + (filtered.length > 1 ? 's' : ''), 'gevonden') : t('au total', 'in totaal')}
+        {filtered.length} lead{filtered.length > 1 ? 's' : ''} {hasFilters ? 'trouvé' + (filtered.length > 1 ? 's' : '') : 'au total'}
       </div>
 
       {/* Liste */}
       {filtered.length === 0 ? (
         <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: '48px 24px', textAlign: 'center', color: '#8A92A6', fontSize: 14 }}>
-          {t('Aucun lead ne correspond à ces filtres.', 'Geen leads gevonden voor deze filters.')}
+          Aucun lead ne correspond à ces filtres.
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -278,7 +273,7 @@ export function MesLeadsClient({ leads }) {
                 {/* Ligne du haut : identité + statut */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', marginBottom: 6 }}>{lead.nom || t('Sans nom', 'Zonder naam')}</div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', marginBottom: 6 }}>{lead.nom || 'Sans nom'}</div>
                     <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', fontSize: 13, color: '#5A6275' }}>
                       {lead.email && (
                         <a href={`mailto:${lead.email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#5A6275', textDecoration: 'none' }}>
@@ -296,7 +291,7 @@ export function MesLeadsClient({ leads }) {
                     {/* Ligne « Demande de simulation effectuée le … » (sous les coordonnées) */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: '#1C6B52', fontWeight: 600, marginTop: 10 }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
-                      {t('Demande de simulation effectuée le', 'Simulatieaanvraag gedaan op')} {formatDate(lead.createdAt, lang)}
+                      Demande de simulation effectuée le {formatDate(lead.createdAt)}
                     </div>
                   </div>
 
@@ -308,7 +303,7 @@ export function MesLeadsClient({ leads }) {
                 {/* Corps : infos bien */}
                 <div className="mesleads-body" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, background: '#FAFBFE', borderRadius: 12, padding: '14px 16px' }}>
                   <div>
-                    <div style={{ fontSize: 10.5, fontWeight: 700, color: '#A9B0BE', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{t('Bien', 'Pand')}</div>
+                    <div style={{ fontSize: 10.5, fontWeight: 700, color: '#A9B0BE', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Bien</div>
                     {lead.bien ? (
                       <Link href={`/biens/${lead.bien.id}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none', color: '#193B5E', fontSize: 13, fontWeight: 600 }}>
                         {lead.bien.titre}
@@ -317,8 +312,8 @@ export function MesLeadsClient({ leads }) {
                     ) : <span style={{ fontSize: 13, color: '#C2C8D4' }}>—</span>}
                     {lead.bien?.ville && <div style={{ fontSize: 12, color: '#A9B0BE', marginTop: 2 }}>{lead.bien.ville}</div>}
                   </div>
-                  <Info label={t('Projet', 'Project')} value={lead.bien?.projet && lead.bien.projet !== 'Hors projet' ? lead.bien.projet : null} />
-                  <Info label={t('Unité', 'Unit')} value={lead.bien?.unite} />
+                  <Info label="Projet" value={lead.bien?.projet && lead.bien.projet !== 'Hors projet' ? lead.bien.projet : null} />
+                  <Info label="Unité" value={lead.bien?.unite} />
                 </div>
               </div>
             )

@@ -4,25 +4,22 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { BienCard } from './BienCard'
 import { FormSelect } from './FormSelect'
-import { libelleType, libelleProvince } from './libelles'
-import { useLang } from '@/app/components/i18n/LangProvider'
 
 const TYPES = ['Appartement', 'Maison', 'Studio', 'Villa', 'Terrain', 'Bureau', 'Commerce']
 const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', 'Flandre-Occidentale', 'Flandre-Orientale', 'Hainaut', 'Liège', 'Limbourg', 'Luxembourg', 'Namur']
 
-const statutOptions = (t) => [
-  { value: '', label: t('Tous les statuts', 'Alle statussen') },
-  { value: 'ACTIF', label: t('Actifs (facturés)', 'Actief (gefactureerd)') },
-  { value: 'OPTION', label: t('Sous option', 'In optie') },
-  { value: 'HORS_LIGNE', label: t('Hors-ligne', 'Offline') },
-  { value: 'VENDU', label: t('Vendus', 'Verkocht') },
+const STATUT_OPTIONS = [
+  { value: '', label: 'Tous les statuts' },
+  { value: 'ACTIF', label: 'Actifs (facturés)' },
+  { value: 'OPTION', label: 'Sous option' },
+  { value: 'HORS_LIGNE', label: 'Hors-ligne' },
+  { value: 'VENDU', label: 'Vendus' },
 ]
 
 const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
 const inputStyle = { width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E8EDF2', fontSize: 14, boxSizing: 'border-box', outline: 'none', background: '#FAFDFD', color: '#193B5E' }
 
 export function MesBiensExplorer({ biens, statutInitial = '' }) {
-  const { lang, t } = useLang()
   const [q, setQ] = useState('')
   const [type, setType] = useState('')
   const [province, setProvince] = useState('')
@@ -109,8 +106,8 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
     <>
       {/* Recherche ville autocomplete */}
       <div style={{ marginBottom: 18, position: 'relative' }} ref={sugRef}>
-        <label style={labelStyle}>{t('Recherche', 'Zoeken')}</label>
-        <input value={q} onChange={(e) => { setQ(e.target.value); setShowSug(true) }} onFocus={() => setShowSug(true)} placeholder={t('Titre, ville...', 'Titel, gemeente...')} style={inputStyle} />
+        <label style={labelStyle}>Recherche</label>
+        <input value={q} onChange={(e) => { setQ(e.target.value); setShowSug(true) }} onFocus={() => setShowSug(true)} placeholder="Titre, ville..." style={inputStyle} />
         {showSug && suggestions.length > 0 && (
           <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 40, background: '#fff', border: '1px solid #EEF2F7', borderRadius: 10, boxShadow: '0 12px 32px rgba(25,59,94,0.12)', overflow: 'hidden', padding: 4 }}>
             {suggestions.map((ville) => (
@@ -128,13 +125,13 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
 
       {/* Statut */}
       <div style={{ marginBottom: 18 }}>
-        <FormSelect label={t('Statut', 'Status')} value={statut} onChange={setStatut} placeholder={t('Tous les statuts', 'Alle statussen')}
-          options={statutOptions(t)} />
+        <FormSelect label="Statut" value={statut} onChange={setStatut} placeholder="Tous les statuts"
+          options={STATUT_OPTIONS} />
       </div>
 
       {/* Budget mensuel */}
       <div style={{ marginBottom: 18 }}>
-        <label style={labelStyle}>{t('Budget mensuel', 'Maandbudget')}</label>
+        <label style={labelStyle}>Budget mensuel</label>
         <div style={{ display: 'flex', gap: 8 }}>
           <div style={{ position: 'relative', flex: 1 }}>
             <input type="number" value={minM} onChange={(e) => setMinM(e.target.value)} placeholder="Min" style={{ ...inputStyle, paddingRight: 26 }} />
@@ -149,24 +146,24 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
 
       {/* Type */}
       <div style={{ marginBottom: 18 }}>
-        <FormSelect label={t('Type de bien', 'Type pand')} value={type} onChange={setType} placeholder={t('Tous les types', 'Alle types')}
-          options={['', ...TYPES].map((x) => ({ value: x, label: x ? libelleType(x, lang) : t('Tous les types', 'Alle types') }))} />
+        <FormSelect label="Type de bien" value={type} onChange={setType} placeholder="Tous les types"
+          options={['', ...TYPES].map((t) => ({ value: t, label: t || 'Tous les types' }))} />
       </div>
 
       {/* Chambres */}
       <div style={{ marginBottom: 18 }}>
-        <label style={labelStyle}>{t('Chambres minimum', 'Minimum slaapkamers')}</label>
+        <label style={labelStyle}>Chambres minimum</label>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button onClick={() => setChambres((n) => Math.max(0, n - 1))} style={{ width: 40, height: 40, borderRadius: 10, border: '1.5px solid #E8EDF2', background: '#fff', cursor: 'pointer', fontSize: 18, color: '#193B5E', fontWeight: 600 }}>−</button>
-          <div style={{ flex: 1, textAlign: 'center', padding: '11px', borderRadius: 10, background: '#FAFDFD', border: '1.5px solid #E8EDF2', fontSize: 14, fontWeight: 600, color: '#193B5E' }}>{chambres || t('Indiff.', 'Geen voorkeur')}</div>
+          <div style={{ flex: 1, textAlign: 'center', padding: '11px', borderRadius: 10, background: '#FAFDFD', border: '1.5px solid #E8EDF2', fontSize: 14, fontWeight: 600, color: '#193B5E' }}>{chambres || 'Indiff.'}</div>
           <button onClick={() => setChambres((n) => n + 1)} style={{ width: 40, height: 40, borderRadius: 10, border: '1.5px solid #E8EDF2', background: '#fff', cursor: 'pointer', fontSize: 18, color: '#193B5E', fontWeight: 600 }}>+</button>
         </div>
       </div>
 
       {/* Province */}
       <div>
-        <FormSelect label={t('Province', 'Provincie')} value={province} onChange={setProvince} placeholder={t('Toutes', 'Alle')}
-          options={['', ...PROVINCES].map((p) => ({ value: p, label: p ? libelleProvince(p, lang) : t('Toutes', 'Alle') }))} />
+        <FormSelect label="Province" value={province} onChange={setProvince} placeholder="Toutes"
+          options={['', ...PROVINCES].map((p) => ({ value: p, label: p || 'Toutes' }))} />
       </div>
     </>
   )
@@ -174,7 +171,7 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
   const ajouterBtn = (
     <Link href="/dashboard/client/biens/nouveau" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#193B5E', color: '#fff', padding: '11px 20px', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-      {t('Ajouter un bien', 'Pand toevoegen')}
+      Ajouter un bien
     </Link>
   )
 
@@ -183,7 +180,7 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
       {/* En-tête : compteur portefeuille + Ajouter + Filtres (Filtres en mobile) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
         <p style={{ fontSize: 14.5, color: '#5A6275', margin: 0 }}>
-          <strong style={{ color: '#193B5E' }}>{biens.length} {lang === 'nl' ? (biens.length === 1 ? 'pand' : 'panden') : `bien${biens.length > 1 ? 's' : ''}`}</strong> {t('dans votre portefeuille.', 'in uw portefeuille.')}
+          <strong style={{ color: '#193B5E' }}>{biens.length} bien{biens.length > 1 ? 's' : ''}</strong> dans votre portefeuille.
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {ajouterBtn}
@@ -193,7 +190,7 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
               style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', borderRadius: 10, border: '1.5px solid #193B5E', background: '#fff', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
-              {t('Filtres', 'Filters')}
+              Filtres
               {activeCount > 0 && (
                 <span style={{ position: 'absolute', top: -8, right: -8, minWidth: 21, height: 21, padding: '0 5px', borderRadius: 999, background: '#193B5E', color: '#fff', fontSize: 11.5, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff', boxShadow: '0 2px 6px rgba(25,59,94,0.28)' }}>{activeCount}</span>
               )}
@@ -208,9 +205,9 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
         {!isMobile && (
           <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 20, position: 'sticky', top: 92 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', margin: 0 }}>{t('Filtres', 'Filters')}</h3>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', margin: 0 }}>Filtres</h3>
               {hasFilters && (
-                <button onClick={reset} style={{ fontSize: 12, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>{t('Réinitialiser', 'Wissen')}</button>
+                <button onClick={reset} style={{ fontSize: 12, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Réinitialiser</button>
               )}
             </div>
             {filterFields}
@@ -221,14 +218,14 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 13.5, color: '#5A6275', marginBottom: 16, fontWeight: 500 }}>
             {hasFilters
-              ? t(`${filtered.length} résultat${filtered.length > 1 ? 's' : ''}`, `${filtered.length} ${filtered.length === 1 ? 'resultaat' : 'resultaten'}`)
-              : t(`${filtered.length} bien${filtered.length > 1 ? 's' : ''} au total`, `${filtered.length} ${filtered.length === 1 ? 'pand' : 'panden'} in totaal`)}
+              ? `${filtered.length} résultat${filtered.length > 1 ? 's' : ''}`
+              : `${filtered.length} bien${filtered.length > 1 ? 's' : ''} au total`}
           </div>
 
           {filtered.length === 0 ? (
             <div style={{ background: '#fff', border: '1px dashed #D8DFE9', borderRadius: 16, padding: '56px 24px', textAlign: 'center' }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>{t('Aucun bien trouvé', 'Geen panden gevonden')}</h3>
-              <p style={{ fontSize: 14, color: '#5A6275', margin: 0 }}>{t("Essayez d'ajuster vos filtres.", 'Probeer uw filters aan te passen.')}</p>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>Aucun bien trouvé</h3>
+              <p style={{ fontSize: 14, color: '#5A6275', margin: 0 }}>Essayez d'ajuster vos filtres.</p>
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
@@ -260,8 +257,8 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 20px', borderBottom: '1px solid #EEF2F7', flex: 'none' }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#193B5E' }}>{t('Filtres', 'Filters')}</h3>
-              <button onClick={() => setSheetOpen(false)} aria-label={t('Fermer', 'Sluiten')} style={{ width: 36, height: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'none', cursor: 'pointer', color: '#193B5E' }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#193B5E' }}>Filtres</h3>
+              <button onClick={() => setSheetOpen(false)} aria-label="Fermer" style={{ width: 36, height: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'none', cursor: 'pointer', color: '#193B5E' }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
               </button>
             </div>
@@ -271,9 +268,9 @@ export function MesBiensExplorer({ biens, statutInitial = '' }) {
             </div>
 
             <div style={{ display: 'flex', gap: 12, padding: '14px 20px', borderTop: '1px solid #EEF2F7', flex: 'none' }}>
-              <button onClick={reset} style={{ flex: '0 0 auto', padding: '13px 18px', borderRadius: 12, border: '1.5px solid #E8EDF2', background: '#fff', color: '#193B5E', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{t('Réinitialiser', 'Wissen')}</button>
+              <button onClick={reset} style={{ flex: '0 0 auto', padding: '13px 18px', borderRadius: 12, border: '1.5px solid #E8EDF2', background: '#fff', color: '#193B5E', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Réinitialiser</button>
               <button onClick={() => setSheetOpen(false)} style={{ flex: 1, padding: '13px 18px', borderRadius: 12, border: 'none', background: '#193B5E', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
-                {t(`Voir ${filtered.length} bien${filtered.length > 1 ? 's' : ''}`, `${filtered.length} ${filtered.length === 1 ? 'pand' : 'panden'} bekijken`)}
+                Voir {filtered.length} bien{filtered.length > 1 ? 's' : ''}
               </button>
             </div>
           </div>

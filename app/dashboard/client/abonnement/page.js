@@ -5,7 +5,6 @@ import { AbonnementClient } from './AbonnementClient'
 import { decompteFacturation, prochainPremierDuMois, finDelaiDeGrace, dansDelaiDeGrace } from '@/lib/facturation'
 import { stripe, PRICE_PRO, PRICE_PRO_PLUS } from '@/lib/stripe'
 import { getSettings } from '@/lib/settings'
-import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,7 +20,6 @@ const FORMULE_LABEL = { PRO: 'BuyMonth Pro', PRO_PLUS: 'BuyMonth Pro+' }
 export default async function AbonnementPage({ searchParams }) {
   const client = await getCurrentClient()
   const sp = await searchParams
-  const { t } = await getT()
 
   // Décompte « au bien actif » : nb de biens ACTIF + OPTION × tarif de la formule
   const biens = await prisma.bien.findMany({
@@ -99,17 +97,17 @@ export default async function AbonnementPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader title={t('Abonnement', 'Abonnement')} subtitle={t('Gérez votre accès à la plateforme BuyMonth.', 'Beheer uw toegang tot het BuyMonth-platform.')} />
+      <PageHeader title="Abonnement" subtitle="Gérez votre accès à la plateforme BuyMonth." />
 
       {sp.success && (
         <div style={{ background: 'rgba(36,158,124,0.1)', border: '1px solid rgba(36,158,124,0.25)', borderRadius: 12, padding: '14px 18px', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 10 }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#249E7C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
-          <span style={{ fontSize: 14, fontWeight: 600, color: '#1B7A5E' }}>{t('Votre abonnement a bien été pris en compte.', 'Uw abonnement is goed geregistreerd.')}</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: '#1B7A5E' }}>Votre abonnement a bien été pris en compte.</span>
         </div>
       )}
       {sp.canceled && (
         <div style={{ background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 12, padding: '14px 18px', marginBottom: 22 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: '#C2620C' }}>{t('Paiement annulé. Vous pouvez réessayer quand vous le souhaitez.', 'Betaling geannuleerd. U kunt het op elk moment opnieuw proberen.')}</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: '#C2620C' }}>Paiement annulé. Vous pouvez réessayer quand vous le souhaitez.</span>
         </div>
       )}
 

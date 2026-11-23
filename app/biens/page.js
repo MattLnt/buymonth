@@ -4,20 +4,13 @@ import PublicNav from '@/app/components/PublicNav'
 import PublicFooter from '@/app/components/PublicFooter'
 import { filtreClientDiffusable } from '@/lib/facturation'
 import { getConfigMensualite } from '@/lib/settings'
-import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
-export async function generateMetadata() {
-  const { t } = await getT()
-  return {
-    title: t('Les biens en mensualités — BuyMonth', 'Panden in maandbedragen — BuyMonth'),
-    description: t(
-      "Découvrez une sélection de biens immobiliers proposés par nos partenaires, affichés en budget mensuel clair plutôt qu'en prix total.",
-      'Ontdek een selectie vastgoed van onze partners, weergegeven als een duidelijk maandbudget in plaats van een totaalprijs.'
-    ),
-    alternates: { canonical: '/biens' },
-  }
+export const metadata = {
+  title: 'Les biens en mensualités — BuyMonth',
+  description: "Découvrez une sélection de biens immobiliers proposés par nos partenaires, affichés en budget mensuel clair plutôt qu'en prix total.",
+  alternates: { canonical: '/biens' },
 }
 
 export default async function BiensPublicPage() {
@@ -38,7 +31,6 @@ export default async function BiensPublicPage() {
     },
   })
   const cfg = await getConfigMensualite()
-  const { t } = await getT()
 
   // Biens de démonstration (fictifs) : affichés tant qu'aucun vrai bien n'est en ligne.
   // Dès qu'un vrai bien est publié, les démos sortent de la vitrine (leur URL reste accessible).
@@ -66,13 +58,10 @@ export default async function BiensPublicPage() {
 
           <div style={{ ...WRAP, position: 'relative' }}>
             <h1 style={{ fontSize: 40, fontWeight: 700, color: '#fff', margin: '0 0 14px', letterSpacing: '-0.025em', lineHeight: 1.1, textShadow: '0 2px 20px rgba(0,0,0,0.2)' }}>
-              {t('Votre futur bien en ', 'Uw toekomstige woning in ')}<span style={{ color: '#7CB8A8' }}>{t('mensualités', 'maandbedragen')}</span>
+              Votre futur bien en <span style={{ color: '#7CB8A8' }}>mensualités</span>
             </h1>
             <p style={{ fontSize: 16.5, color: 'rgba(255,255,255,0.75)', margin: 0, maxWidth: 620, lineHeight: 1.6 }}>
-              {t(
-                "Découvrez une sélection de biens immobiliers proposés par nos partenaires, affichés en budget mensuel clair plutôt qu'en prix total.",
-                'Ontdek een selectie vastgoed van onze partners, weergegeven als een duidelijk maandbudget in plaats van een totaalprijs.'
-              )}
+              Découvrez une sélection de biens immobiliers proposés par nos partenaires, affichés en budget mensuel clair plutôt qu'en prix total.
             </p>
           </div>
         </div>

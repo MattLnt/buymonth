@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getSettings } from '@/lib/settings'
 import { envoyerEmailContact } from '@/lib/email'
-import { getT } from '@/lib/i18n/server'
 
 export async function POST(req) {
-  const { t } = await getT()
   try {
     const body = await req.json()
     const nom = (body.nom || '').trim()
@@ -14,13 +12,13 @@ export async function POST(req) {
 
     // Validation
     if (!nom || !email || !message) {
-      return NextResponse.json({ error: t('Merci de remplir tous les champs requis.', 'Gelieve alle verplichte velden in te vullen.') }, { status: 400 })
+      return NextResponse.json({ error: 'Merci de remplir tous les champs requis.' }, { status: 400 })
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return NextResponse.json({ error: t('Adresse email invalide.', 'Ongeldig e-mailadres.') }, { status: 400 })
+      return NextResponse.json({ error: 'Adresse email invalide.' }, { status: 400 })
     }
     if (message.length > 5000) {
-      return NextResponse.json({ error: t('Message trop long.', 'Bericht te lang.') }, { status: 400 })
+      return NextResponse.json({ error: 'Message trop long.' }, { status: 400 })
     }
 
     // Destinataires = ceux configurés en admin (mêmes que les leads)
@@ -38,6 +36,6 @@ export async function POST(req) {
     return NextResponse.json({ ok: true })
   } catch (e) {
     console.error('[CONTACT]', e?.message)
-    return NextResponse.json({ error: t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
   }
 }

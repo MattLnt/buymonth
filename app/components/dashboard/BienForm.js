@@ -10,18 +10,16 @@ import { PhotoUploader } from './PhotoUploader'
 import { FormRecap } from './FormRecap'
 import { ConfirmModal } from './ConfirmModal'
 import { libelleChampPrix, libellePrixPublic } from '@/lib/regime'
-import { libelleType, libelleProvince, libelleStatutBien } from './libelles'
-import { useLang } from '@/app/components/i18n/LangProvider'
 
 const TYPES = ['Appartement', 'Maison', 'Studio', 'Villa', 'Terrain', 'Bureau', 'Commerce']
 const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', 'Flandre-Occidentale', 'Flandre-Orientale', 'Hainaut', 'Liège', 'Limbourg', 'Luxembourg', 'Namur']
 const PEB_CLASSES = ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G']
 
-const statuts = (t) => [
-  { value: 'ACTIF', label: t('Actif — en vente (facturé)', 'Actief — te koop (gefactureerd)') },
-  { value: 'OPTION', label: t('Sous option (en ligne, facturé)', 'In optie (online, gefactureerd)') },
-  { value: 'HORS_LIGNE', label: t('Hors-ligne (hors décompte)', 'Offline (niet meegeteld)') },
-  { value: 'VENDU', label: t('Vendu (hors décompte)', 'Verkocht (niet meegeteld)') },
+const STATUTS = [
+  { value: 'ACTIF', label: 'Actif — en vente (facturé)' },
+  { value: 'OPTION', label: 'Sous option (en ligne, facturé)' },
+  { value: 'HORS_LIGNE', label: 'Hors-ligne (hors décompte)' },
+  { value: 'VENDU', label: 'Vendu (hors décompte)' },
 ]
 
 // Couleur + libellé court par statut de bien
@@ -35,7 +33,6 @@ const STATUT_STYLE = {
 // Régime fiscal : deux temps (TVA / droits d'enregistrement, puis 21 % / 6 %) en boutons côte à côte.
 // Le libellé du champ prix s'adapte ; le promoteur n'encode jamais de montant TVAC.
 function RegimeSelect({ value, onChange }) {
-  const { t } = useLang()
   const soumisTva = value === 'TVA_21' || value === 'TVA_6'
   const famille = soumisTva ? 'TVA' : value === 'ENREGISTREMENT' ? 'ENREGISTREMENT' : ''
 
@@ -49,23 +46,23 @@ function RegimeSelect({ value, onChange }) {
 
   return (
     <div>
-      <label style={labelStyle}>{t('Régime fiscal du bien', 'Fiscaal regime van het pand')} <span style={{ color: '#7CB8A8' }}>*</span></label>
+      <label style={labelStyle}>Régime fiscal du bien <span style={{ color: '#7CB8A8' }}>*</span></label>
       <div style={{ display: 'flex', gap: 10 }}>
-        <button type="button" style={btn(famille === 'TVA')} onClick={() => onChange('TVA_21')}>{t('Bien soumis à la TVA', 'Pand onderworpen aan btw')}</button>
-        <button type="button" style={btn(famille === 'ENREGISTREMENT')} onClick={() => onChange('ENREGISTREMENT')}>{t("Bien soumis aux droits d'enregistrement", 'Pand onderworpen aan registratierechten')}</button>
+        <button type="button" style={btn(famille === 'TVA')} onClick={() => onChange('TVA_21')}>Bien soumis à la TVA</button>
+        <button type="button" style={btn(famille === 'ENREGISTREMENT')} onClick={() => onChange('ENREGISTREMENT')}>Bien soumis aux droits d'enregistrement</button>
       </div>
       {famille === 'TVA' && (
         <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-          <button type="button" style={btn(value === 'TVA_21')} onClick={() => onChange('TVA_21')}>{t('TVA 21 %', 'btw 21 %')}</button>
-          <button type="button" style={btn(value === 'TVA_6')} onClick={() => onChange('TVA_6')}>{t('TVA 6 % — démolition-reconstruction', 'btw 6 % — afbraak en heropbouw')}</button>
+          <button type="button" style={btn(value === 'TVA_21')} onClick={() => onChange('TVA_21')}>TVA 21 %</button>
+          <button type="button" style={btn(value === 'TVA_6')} onClick={() => onChange('TVA_6')}>TVA 6 % — démolition-reconstruction</button>
         </div>
       )}
       <p style={{ fontSize: 12, color: '#8A92A6', margin: '10px 0 0', lineHeight: 1.5 }}>
         {famille === 'TVA'
-          ? t('Vous encodez le prix hors TVA. La plateforme calcule le prix TVA comprise et la mensualité dessus.', 'U voert de prijs excl. btw in. Het platform berekent de prijs incl. btw en het maandbedrag daarop.')
+          ? 'Vous encodez le prix hors TVA. La plateforme calcule le prix TVA comprise et la mensualité dessus.'
           : famille === 'ENREGISTREMENT'
-            ? t('Vous encodez le prix de vente. Les droits d\'enregistrement et frais de notaire restent hors calcul.', 'U voert de verkoopprijs in. Registratierechten en notariskosten blijven buiten de berekening.')
-            : t('Ce choix détermine le calcul de la mensualité indicative affichée. Vous déclarez l\'exactitude de cette information.', 'Deze keuze bepaalt de berekening van het getoonde indicatieve maandbedrag. U verklaart dat deze informatie juist is.')}
+            ? 'Vous encodez le prix de vente. Les droits d\'enregistrement et frais de notaire restent hors calcul.'
+            : 'Ce choix détermine le calcul de la mensualité indicative affichée. Vous déclarez l\'exactitude de cette information.'}
       </p>
     </div>
   )
@@ -88,8 +85,6 @@ const ic = {
 
 // Dropdown custom du statut avec pastilles colorées — menu absolu sous le bouton
 function StatutSelect({ value, onChange }) {
-  const { lang, t } = useLang()
-  const STATUTS = statuts(t)
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   const cur = STATUT_STYLE[value] || STATUT_STYLE.ACTIF
@@ -103,7 +98,7 @@ function StatutSelect({ value, onChange }) {
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>{t('Statut du bien', 'Status van het pand')}</label>
+      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Statut du bien</label>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -114,7 +109,7 @@ function StatutSelect({ value, onChange }) {
         }}
       >
         <span style={{ width: 9, height: 9, borderRadius: '50%', background: cur.dot, flexShrink: 0 }} />
-        <span style={{ flex: 1, textAlign: 'left' }}>{STATUTS.find((s) => s.value === value)?.label || libelleStatutBien(value, lang)}</span>
+        <span style={{ flex: 1, textAlign: 'left' }}>{STATUTS.find((s) => s.value === value)?.label || cur.court}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A92A6" strokeWidth="2.5" style={{ transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : 'none', flexShrink: 0 }}><polyline points="6 9 12 15 18 9" /></svg>
       </button>
 
@@ -138,7 +133,7 @@ function StatutSelect({ value, onChange }) {
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '3px 10px', borderRadius: 20, background: st.bg, color: st.c, fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
                   <span style={{ width: 7, height: 7, borderRadius: '50%', background: st.dot }} />
-                  {libelleStatutBien(s.value, lang)}
+                  {st.court}
                 </span>
                 {actif && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="3" style={{ marginLeft: 'auto', flexShrink: 0 }}><polyline points="20 6 9 17 4 12" /></svg>}
               </button>
@@ -152,7 +147,6 @@ function StatutSelect({ value, onChange }) {
 
 export function BienForm({ initial = null, mode = 'create', projets = [], cfg = null }) {
   const router = useRouter()
-  const { lang, t } = useLang()
   const [form, setForm] = useState({
     projet: initial?.projet || 'Hors projet',
     unite: initial?.unite || '',
@@ -212,10 +206,10 @@ export function BienForm({ initial = null, mode = 'create', projets = [], cfg = 
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!isFormValid) { setError(form.regime ? t('Titre et prix valides requis.', 'Geldige titel en prijs vereist.') : t('Choisissez le régime fiscal du bien.', 'Kies het fiscaal regime van het pand.')); return }
+    if (!isFormValid) { setError(form.regime ? 'Titre et prix valides requis.' : 'Choisissez le régime fiscal du bien.'); return }
     // Au moins une photo obligatoire pour un bien visible en ligne
     if (estVisible && photos.length === 0) {
-      setError(t('Ajoutez au moins une photo pour mettre ce bien en ligne.', 'Voeg minstens één foto toe om dit pand online te zetten.'))
+      setError('Ajoutez au moins une photo pour mettre ce bien en ligne.')
       return
     }
     // Si "nouveau projet" activé mais champ vide, on retombe sur "Hors projet"
@@ -230,11 +224,11 @@ export function BienForm({ initial = null, mode = 'create', projets = [], cfg = 
         body: JSON.stringify({ ...form, projet: projetFinal, images: photos, ...(mode === 'edit' ? { id: initial.id } : {}) }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error || t('Erreur.', 'Fout.')); setLoading(false); return }
+      if (!res.ok) { setError(data.error || 'Erreur.'); setLoading(false); return }
       router.push('/dashboard/client/biens')
       router.refresh()
     } catch {
-      setError(t('Erreur réseau.', 'Netwerkfout.')); setLoading(false)
+      setError('Erreur réseau.'); setLoading(false)
     }
   }
 
@@ -273,61 +267,61 @@ export function BienForm({ initial = null, mode = 'create', projets = [], cfg = 
 
           {/* COLONNE PRINCIPALE */}
           <div>
-            <FormSection icon={ic.layers} title={t('Projet & unité', 'Project & unit')} subtitle={t('Rattachez ce bien à un programme (facultatif)', 'Koppel dit pand aan een project (optioneel)')}>
+            <FormSection icon={ic.layers} title="Projet & unité" subtitle="Rattachez ce bien à un programme (facultatif)">
               <div className="bf-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <FormSelect
-                    label={t('Projet', 'Project')}
+                    label="Projet"
                     value={selectValue}
                     onChange={onSelectProjet}
                     options={[
-                      { value: 'Hors projet', label: t('Hors projet', 'Geen project') },
+                      { value: 'Hors projet', label: 'Hors projet' },
                       ...projetsExistants.map((p) => ({ value: p, label: p })),
-                      { value: NOUVEAU, label: t('+ Nouveau projet…', '+ Nieuw project…') },
+                      { value: NOUVEAU, label: '+ Nouveau projet…' },
                     ]}
                   />
                   {nouveauProjet && (
                     <input
                       value={form.projet}
                       onChange={handle('projet')}
-                      placeholder={t('Nom du nouveau programme', 'Naam van het nieuwe project')}
+                      placeholder="Nom du nouveau programme"
                       autoFocus
                       style={{ ...inputStyle, marginTop: 8 }}
                     />
                   )}
                 </div>
-                <FormInput label={t('Unité', 'Unit')} name="unite" value={form.unite} onChange={handle('unite')} placeholder="B2.03" />
+                <FormInput label="Unité" name="unite" value={form.unite} onChange={handle('unite')} placeholder="B2.03" />
               </div>
             </FormSection>
 
-            <FormSection icon={ic.doc} title={t('Informations générales', 'Algemene informatie')} subtitle={t('Titre, type et description du bien', 'Titel, type en beschrijving van het pand')}>
+            <FormSection icon={ic.doc} title="Informations générales" subtitle="Titre, type et description du bien">
               <div style={{ marginBottom: 16 }}>
-                <FormInput label={t("Titre de l'annonce", 'Titel van de advertentie')} name="titre" value={form.titre} onChange={handle('titre')} placeholder={t('Bel appartement neuf 2 chambres', 'Mooi nieuwbouwappartement met 2 slaapkamers')} required />
+                <FormInput label="Titre de l'annonce" name="titre" value={form.titre} onChange={handle('titre')} placeholder="Bel appartement neuf 2 chambres" required />
               </div>
               <div style={{ marginBottom: 16 }}>
-                <FormSelect label={t('Type de bien', 'Type pand')} value={form.type} onChange={(v) => setField('type', v)} options={TYPES.map((x) => ({ value: x, label: libelleType(x, lang) }))} placeholder={t('Sélectionner un type', 'Selecteer een type')} />
+                <FormSelect label="Type de bien" value={form.type} onChange={(v) => setField('type', v)} options={TYPES} placeholder="Sélectionner un type" />
               </div>
-              <FormInput label="Description" name="description" type="textarea" value={form.description} onChange={handle('description')} placeholder={t('Points forts, emplacement, particularités...', 'Troeven, ligging, bijzonderheden...')} />
+              <FormInput label="Description" name="description" type="textarea" value={form.description} onChange={handle('description')} placeholder="Points forts, emplacement, particularités..." />
             </FormSection>
 
-            <FormSection icon={ic.euro} title={t('Prix & régime fiscal', 'Prijs & fiscaal regime')} subtitle={t('La mensualité est calculée automatiquement sur le prix TVA comprise', 'Het maandbedrag wordt automatisch berekend op de prijs incl. btw')}>
+            <FormSection icon={ic.euro} title="Prix & régime fiscal" subtitle="La mensualité est calculée automatiquement sur le prix TVA comprise">
               <div style={{ marginBottom: 16 }}>
                 <RegimeSelect value={form.regime} onChange={(v) => setField('regime', v)} />
               </div>
-              <FormInput label={libelleChampPrix(form.regime, lang)} name="prixTotal" type="number" value={form.prixTotal} onChange={handle('prixTotal')} placeholder="250000" suffix="€" required min="0" />
+              <FormInput label={libelleChampPrix(form.regime)} name="prixTotal" type="number" value={form.prixTotal} onChange={handle('prixTotal')} placeholder="250000" suffix="€" required min="0" />
               {form.regime && parseInt(form.prixTotal, 10) > 0 && (
                 <p style={{ fontSize: 12.5, color: '#5A6B7D', margin: '10px 0 0' }}>
-                  {t('Prix affiché au public :', 'Prijs zichtbaar voor het publiek:')} <strong style={{ color: '#193B5E' }}>{libellePrixPublic(parseInt(form.prixTotal, 10), form.regime, lang)}</strong>
+                  Prix affiché au public : <strong style={{ color: '#193B5E' }}>{libellePrixPublic(parseInt(form.prixTotal, 10), form.regime)}</strong>
                 </p>
               )}
             </FormSection>
 
-            <FormSection icon={ic.pin} title={t('Localisation', 'Ligging')} subtitle={t('Adresse et province du bien', 'Adres en provincie van het pand')}>
+            <FormSection icon={ic.pin} title="Localisation" subtitle="Adresse et province du bien">
               <div style={{ marginBottom: 16 }}>
-                <FormSelect label={t('Province', 'Provincie')} value={form.province} onChange={(v) => setField('province', v)} options={PROVINCES.map((x) => ({ value: x, label: libelleProvince(x, lang) }))} placeholder={t('Sélectionner une province', 'Selecteer een provincie')} />
+                <FormSelect label="Province" value={form.province} onChange={(v) => setField('province', v)} options={PROVINCES} placeholder="Sélectionner une province" />
               </div>
               <AddressInput
-                label={t('Adresse / Localisation', 'Adres / ligging')}
+                label="Adresse / Localisation"
                 value={form.adresse}
                 onChange={(v) => setField('adresse', v)}
                 onSelect={({ adresse, ville, province }) => setForm((f) => ({ ...f, adresse, ville: ville || f.ville, province: province || f.province }))}
@@ -335,43 +329,38 @@ export function BienForm({ initial = null, mode = 'create', projets = [], cfg = 
               {form.ville && (
                 <p style={{ fontSize: 12, color: '#7CB8A8', margin: '8px 0 0', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                  {form.ville}{form.province ? ` · ${libelleProvince(form.province, lang)}` : ''}
+                  {form.ville}{form.province ? ` · ${form.province}` : ''}
                 </p>
               )}
             </FormSection>
 
-            <FormSection icon={ic.grid} title={t('Caractéristiques', 'Kenmerken')} subtitle={t('Surface et aménagements', 'Oppervlakte en voorzieningen')}>
+            <FormSection icon={ic.grid} title="Caractéristiques" subtitle="Surface et aménagements">
               <div className="bf-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-                <FormInput label={t('Chambres', 'Slaapkamers')} name="chambres" type="number" value={form.chambres} onChange={handle('chambres')} placeholder="2" min="0" />
-                <FormInput label={t('Salles de bain', 'Badkamers')} name="sallesDeBain" type="number" value={form.sallesDeBain} onChange={handle('sallesDeBain')} placeholder="1" min="0" />
+                <FormInput label="Chambres" name="chambres" type="number" value={form.chambres} onChange={handle('chambres')} placeholder="2" min="0" />
+                <FormInput label="Salles de bain" name="sallesDeBain" type="number" value={form.sallesDeBain} onChange={handle('sallesDeBain')} placeholder="1" min="0" />
               </div>
               <div className="bf-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-                <FormInput label={t('Surface (m²)', 'Oppervlakte (m²)')} name="surface" type="number" value={form.surface} onChange={handle('surface')} placeholder="85" min="0" />
-                <FormInput label={t('Terrasse (m²)', 'Terras (m²)')} name="terrasse" type="number" value={form.terrasse} onChange={handle('terrasse')} placeholder="12" min="0" />
-                <FormInput label={t('Jardin (m²)', 'Tuin (m²)')} name="jardin" type="number" value={form.jardin} onChange={handle('jardin')} placeholder="0" min="0" />
+                <FormInput label="Surface (m²)" name="surface" type="number" value={form.surface} onChange={handle('surface')} placeholder="85" min="0" />
+                <FormInput label="Terrasse (m²)" name="terrasse" type="number" value={form.terrasse} onChange={handle('terrasse')} placeholder="12" min="0" />
+                <FormInput label="Jardin (m²)" name="jardin" type="number" value={form.jardin} onChange={handle('jardin')} placeholder="0" min="0" />
               </div>
             </FormSection>
 
-            <FormSection icon={ic.zap} title={t('Performance énergétique (PEB)', 'Energieprestatie (EPC)')} subtitle={t('Facultatif', 'Optioneel')}>
+            <FormSection icon={ic.zap} title="Performance énergétique (PEB)" subtitle="Facultatif">
               <div className="bf-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-                <FormInput label={t('N° de PEB', 'EPC-nummer')} name="pebNumero" value={form.pebNumero} onChange={handle('pebNumero')} placeholder="20230000123456" />
-                <FormSelect label={t('Classe PEB', 'EPC-klasse')} value={form.pebClasse} onChange={(v) => setField('pebClasse', v)}
-                  options={[{ value: '', label: t('Non renseigné', 'Niet ingevuld') }, ...PEB_CLASSES.map((c) => ({ value: c, label: c }))]} />
-                <FormInput label={t('Consommation (kWh/an)', 'Verbruik (kWh/jaar)')} name="pebKwh" value={form.pebKwh} onChange={handle('pebKwh')} placeholder="145" />
+                <FormInput label="N° de PEB" name="pebNumero" value={form.pebNumero} onChange={handle('pebNumero')} placeholder="20230000123456" />
+                <FormSelect label="Classe PEB" value={form.pebClasse} onChange={(v) => setField('pebClasse', v)}
+                  options={[{ value: '', label: 'Non renseigné' }, ...PEB_CLASSES.map((c) => ({ value: c, label: c }))]} />
+                <FormInput label="Consommation (kWh/an)" name="pebKwh" value={form.pebKwh} onChange={handle('pebKwh')} placeholder="145" />
               </div>
             </FormSection>
 
-            <FormSection icon={ic.tag} title={t('Statut & visibilité', 'Status & zichtbaarheid')} subtitle={t('Le statut détermine si le bien est facturé', 'De status bepaalt of het pand gefactureerd wordt')}>
+            <FormSection icon={ic.tag} title="Statut & visibilité" subtitle="Le statut détermine si le bien est facturé">
               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
                 <StatutSelect value={form.statut} onChange={(v) => setField('statut', v)} />
                 {(() => {
                   const st = STATUT_STYLE[form.statut] || STATUT_STYLE.ACTIF
-                  const messages = lang === 'nl' ? {
-                    ACTIF: <>Dit pand wordt <strong>meegeteld in uw abonnement</strong> — gefactureerd aan het tarief van uw formule, per actief pand en pro rata. Een pand dat offline wordt gezet of verkocht is, valt er automatisch uit.</>,
-                    OPTION: <>Dit pand blijft <strong>online zichtbaar en meegeteld</strong> in uw abonnement. Op de fiche en in de catalogus verschijnt een banner “In optie”.</>,
-                    HORS_LIGNE: <>Dit pand wordt <strong>niet meegeteld</strong> in uw abonnement en is niet zichtbaar voor het publiek zolang het offline staat.</>,
-                    VENDU: <>Dit pand is gemarkeerd als <strong>verkocht</strong>: het valt buiten de facturatie en is niet meer zichtbaar voor het publiek.</>,
-                  } : {
+                  const messages = {
                     ACTIF: <>Ce bien sera <strong>compté dans votre abonnement</strong> — facturé au tarif de votre formule, par bien actif et au prorata. Un bien mis hors-ligne ou vendu en sort automatiquement.</>,
                     OPTION: <>Ce bien reste <strong>visible en ligne et compté</strong> dans votre abonnement. Un bandeau « Sous option » s'affiche sur la fiche et le catalogue.</>,
                     HORS_LIGNE: <>Ce bien <strong>n'est pas compté</strong> dans votre abonnement et n'apparaît pas au public tant qu'il reste hors-ligne.</>,
@@ -391,12 +380,12 @@ export function BienForm({ initial = null, mode = 'create', projets = [], cfg = 
               </div>
             </FormSection>
 
-            <FormSection icon={ic.photo} title={t('Photos', "Foto's")} subtitle={t('Au moins une photo pour publier (10 max)', 'Minstens één foto om te publiceren (max. 10)')}>
+            <FormSection icon={ic.photo} title="Photos" subtitle="Au moins une photo pour publier (10 max)">
               <PhotoUploader photos={photos} setPhotos={setPhotos} uploading={uploading} setUploading={setUploading} setError={setError} />
             </FormSection>
 
-            <FormSection icon={ic.doc} title={t('Lien externe', 'Externe link')} subtitle={t('Vers la fiche du bien sur votre site', 'Naar de fiche van het pand op uw website')}>
-              <FormInput label={t("URL de l'annonce", 'URL van de advertentie')} name="urlClient" type="url" value={form.urlClient} onChange={handle('urlClient')} placeholder={t('https://votre-site.be/bien/123', 'https://uw-website.be/pand/123')} />
+            <FormSection icon={ic.doc} title="Lien externe" subtitle="Vers la fiche du bien sur votre site">
+              <FormInput label="URL de l'annonce" name="urlClient" type="url" value={form.urlClient} onChange={handle('urlClient')} placeholder="https://votre-site.be/bien/123" />
             </FormSection>
           </div>
 
@@ -411,20 +400,13 @@ export function BienForm({ initial = null, mode = 'create', projets = [], cfg = 
         onClose={() => setConfirmOpen(false)}
         onConfirm={confirmerSuppression}
         loading={deleting}
-        title={t('Supprimer ce bien ?', 'Dit pand verwijderen?')}
-        confirmLabel={t('Supprimer le bien', 'Pand verwijderen')}
+        title="Supprimer ce bien ?"
+        confirmLabel="Supprimer le bien"
         message={
-          lang === 'nl' ? (
-            <>
-              {initial?.titre ? <>Het pand <strong style={{ color: '#193B5E' }}>{initial.titre}</strong> wordt definitief verwijderd. </> : 'Dit pand wordt definitief verwijderd. '}
-              Deze actie kan niet ongedaan worden gemaakt.
-            </>
-          ) : (
-            <>
-              {initial?.titre ? <>Le bien <strong style={{ color: '#193B5E' }}>{initial.titre}</strong> sera définitivement supprimé. </> : 'Ce bien sera définitivement supprimé. '}
-              Cette action est irréversible.
-            </>
-          )
+          <>
+            {initial?.titre ? <>Le bien <strong style={{ color: '#193B5E' }}>{initial.titre}</strong> sera définitivement supprimé. </> : 'Ce bien sera définitivement supprimé. '}
+            Cette action est irréversible.
+          </>
         }
       />
     </div>

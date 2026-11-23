@@ -1,23 +1,20 @@
 "use client";
 import { useState } from "react";
-import { useLang } from "@/app/components/i18n/LangProvider";
 
 const RULES = [
-  { key: "len", label: (t) => t("10 caractères min.", "Min. 10 tekens"), test: (v) => v.length >= 10 },
-  { key: "upper", label: (t) => t("Une majuscule", "Een hoofdletter"), test: (v) => /[A-Z]/.test(v) },
-  { key: "lower", label: (t) => t("Une minuscule", "Een kleine letter"), test: (v) => /[a-z]/.test(v) },
-  { key: "digit", label: (t) => t("Un chiffre", "Een cijfer"), test: (v) => /\d/.test(v) },
-  { key: "symbol", label: (t) => t("Un symbole (!@#…)", "Een symbool (!@#…)"), test: (v) => /[^A-Za-z0-9]/.test(v) },
+  { key: "len", label: "10 caractères min.", test: (v) => v.length >= 10 },
+  { key: "upper", label: "Une majuscule", test: (v) => /[A-Z]/.test(v) },
+  { key: "lower", label: "Une minuscule", test: (v) => /[a-z]/.test(v) },
+  { key: "digit", label: "Un chiffre", test: (v) => /\d/.test(v) },
+  { key: "symbol", label: "Un symbole (!@#…)", test: (v) => /[^A-Za-z0-9]/.test(v) },
 ];
 
 export function validatePassword(value) {
   return RULES.every((r) => r.test(value));
 }
 
-export function PasswordField({ label, value, onChange, name = "password", showChecklist = true }) {
-  const { t } = useLang();
+export function PasswordField({ label = "Mot de passe", value, onChange, name = "password", showChecklist = true }) {
   const [show, setShow] = useState(false);
-  if (label === undefined) label = t("Mot de passe", "Wachtwoord");
 
   return (
     <div style={{ marginBottom: 16 }}>
@@ -52,7 +49,7 @@ export function PasswordField({ label, value, onChange, name = "password", showC
         <button
           type="button"
           onClick={() => setShow(!show)}
-          aria-label={show ? t("Masquer", "Verbergen") : t("Afficher", "Tonen")}
+          aria-label={show ? "Masquer" : "Afficher"}
           style={{ position: "absolute", right: 12, background: "none", border: "none", cursor: "pointer", display: "flex", padding: 4 }}
         >
           {show ? (
@@ -86,7 +83,7 @@ export function PasswordField({ label, value, onChange, name = "password", showC
                   )}
                 </span>
                 <span style={{ fontSize: 13, fontWeight: ok ? 600 : 400, color: ok ? "#249E7C" : "#9AA2B4", transition: "color 0.2s" }}>
-                  {r.label(t)}
+                  {r.label}
                 </span>
               </div>
             );

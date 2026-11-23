@@ -1,7 +1,6 @@
 'use client'
 
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { useLang } from '@/app/components/i18n/LangProvider'
 
 const NAVY = '#193B5E'
 const TEAL = '#7CB8A8'
@@ -12,7 +11,6 @@ const titleStyle = { fontSize: 15, fontWeight: 700, color: '#193B5E', margin: '0
 const subStyle = { fontSize: 12.5, color: '#9AA2B4', margin: '0 0 20px' }
 
 function CustomTooltip({ active, payload, label, suffix = '' }) {
-  const { t } = useLang()
   if (!active || !payload || !payload.length) return null
   return (
     <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 10, padding: '10px 14px', boxShadow: '0 8px 24px rgba(25,59,94,0.1)' }}>
@@ -20,7 +18,7 @@ function CustomTooltip({ active, payload, label, suffix = '' }) {
       {payload.map((p, i) => (
         <div key={i} style={{ fontSize: 12.5, color: '#5A6275', display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color || p.payload?.fill }} />
-          {p.name}{t(' : ', ': ')}<strong style={{ color: '#193B5E' }}>{p.value}{suffix}</strong>
+          {p.name} : <strong style={{ color: '#193B5E' }}>{p.value}{suffix}</strong>
         </div>
       ))}
     </div>
@@ -28,11 +26,10 @@ function CustomTooltip({ active, payload, label, suffix = '' }) {
 }
 
 export function LeadsLineChart({ data }) {
-  const { t } = useLang()
   return (
     <div style={cardStyle}>
-      <h3 style={titleStyle}>{t('Leads reçus', 'Ontvangen leads')}</h3>
-      <p style={subStyle}>{t('Évolution sur les 6 derniers mois', 'Evolutie over de laatste 6 maanden')}</p>
+      <h3 style={titleStyle}>Leads reçus</h3>
+      <p style={subStyle}>Évolution sur les 6 derniers mois</p>
       <ResponsiveContainer width="100%" height={240}>
         <LineChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
           <defs>
@@ -53,14 +50,13 @@ export function LeadsLineChart({ data }) {
 }
 
 export function TypeDonut({ data }) {
-  const { t } = useLang()
   const total = data.reduce((s, d) => s + d.value, 0)
   return (
     <div style={cardStyle}>
-      <h3 style={titleStyle}>{t('Répartition des biens', 'Verdeling van de panden')}</h3>
-      <p style={subStyle}>{t('Par type de bien', 'Per type pand')}</p>
+      <h3 style={titleStyle}>Répartition des biens</h3>
+      <p style={subStyle}>Par type de bien</p>
       {total === 0 ? (
-        <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9AA2B4', fontSize: 13 }}>{t('Aucun bien à afficher', 'Geen panden om te tonen')}</div>
+        <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9AA2B4', fontSize: 13 }}>Aucun bien à afficher</div>
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <ResponsiveContainer width={180} height={180}>
@@ -89,13 +85,12 @@ export function TypeDonut({ data }) {
 }
 
 export function VuesBarChart({ data }) {
-  const { t } = useLang()
   return (
     <div style={cardStyle}>
-      <h3 style={titleStyle}>{t('Biens les plus vus', 'Meest bekeken panden')}</h3>
-      <p style={subStyle}>{t('Top 5 par nombre de vues', 'Top 5 op aantal weergaven')}</p>
+      <h3 style={titleStyle}>Biens les plus vus</h3>
+      <p style={subStyle}>Top 5 par nombre de vues</p>
       {data.length === 0 ? (
-        <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9AA2B4', fontSize: 13 }}>{t("Aucune vue pour l'instant", 'Nog geen weergaven')}</div>
+        <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9AA2B4', fontSize: 13 }}>Aucune vue pour l'instant</div>
       ) : (
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={data} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
@@ -103,7 +98,7 @@ export function VuesBarChart({ data }) {
             <XAxis type="number" tick={{ fontSize: 12, fill: '#9AA2B4' }} axisLine={false} tickLine={false} allowDecimals={false} />
             <YAxis type="category" dataKey="nom" tick={{ fontSize: 12, fill: '#5A6275' }} axisLine={false} tickLine={false} width={90} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(124,184,168,0.06)' }} />
-            <Bar dataKey="vues" name={t('Vues', 'Weergaven')} fill={NAVY} radius={[0, 6, 6, 0]} barSize={18} />
+            <Bar dataKey="vues" name="Vues" fill={NAVY} radius={[0, 6, 6, 0]} barSize={18} />
           </BarChart>
         </ResponsiveContainer>
       )}

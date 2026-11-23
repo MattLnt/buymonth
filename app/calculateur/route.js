@@ -1,18 +1,13 @@
 import { readFile } from 'fs/promises'
 import path from 'path'
-import { getLang } from '@/lib/i18n/server'
 
-// La langue dépend de la requête (cookie / ?lang=) : plus de rendu statique
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-static'
 
-// Sert le calculateur HTML autonome à l'URL propre /calculateur
-// FR : public/calculateur-rentabilite.html — NL : public/calculateur-rentabilite-nl.html
+// Sert le calculateur HTML autonome (public/calculateur-rentabilite.html) à l'URL propre /calculateur
 export async function GET() {
-  const lang = await getLang()
-  const fichier = lang === 'nl' ? 'calculateur-rentabilite-nl.html' : 'calculateur-rentabilite.html'
-  const filePath = path.join(process.cwd(), 'public', fichier)
+  const filePath = path.join(process.cwd(), 'public', 'calculateur-rentabilite.html')
   const html = await readFile(filePath, 'utf-8')
   return new Response(html, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8', Vary: 'Cookie' },
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
   })
 }

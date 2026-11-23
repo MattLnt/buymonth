@@ -6,9 +6,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Icon } from './Icon'
 import { EnvoyerSimulation } from './EnvoyerSimulation'
-import { locale } from '@/lib/i18n/config'
-import { libelleType, libelleProvince, libelleStatutBien } from './libelles'
-import { useLang } from '@/app/components/i18n/LangProvider'
 
 const STATUT_META = {
   ACTIF: { label: 'Actif', bg: 'rgba(36,158,124,0.92)', visible: true, facture: true },
@@ -19,7 +16,6 @@ const STATUT_META = {
 
 export function BienCard({ bien }) {
   const router = useRouter()
-  const { lang, t } = useLang()
   const [deleting, setDeleting] = useState(false)
   const [confirm, setConfirm] = useState(false)
   const [dupliquing, setDupliquing] = useState(false)
@@ -63,7 +59,7 @@ export function BienCard({ bien }) {
           {!meta.visible && (
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
           )}
-          {libelleStatutBien(bien.statut in STATUT_META ? bien.statut : 'ACTIF', lang)}
+          {meta.label}
         </span>
 
         {/* Pastille leads en haut à droite */}
@@ -77,24 +73,24 @@ export function BienCard({ bien }) {
       <div style={{ padding: 18, flex: 1, display: 'flex', flexDirection: 'column' }}>
         <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: '0 0 4px', lineHeight: 1.3 }}>{bien.titre}</h3>
         <div style={{ fontSize: 13, color: '#8A92A6', marginBottom: 12 }}>
-          {[bien.ville, libelleProvince(bien.province, lang)].filter(Boolean).join(', ') || t('Localisation non précisée', 'Ligging niet opgegeven')}
+          {[bien.ville, bien.province].filter(Boolean).join(', ') || 'Localisation non précisée'}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
-          <span style={{ fontSize: 22, fontWeight: 700, color: '#7CB8A8', letterSpacing: '-0.02em' }}>{bien.mensualite} €<span style={{ fontSize: 13 }}>{t('/mois', '/maand')}</span></span>
-          <span style={{ fontSize: 13, color: '#A9B0BE' }}>· {libellePrixPublic(bien.prixTotal, bien.regime, lang)}{bien.regime && bien.regime !== 'ENREGISTREMENT' ? ` (${bien.prixTotal.toLocaleString(locale(lang))} € ${t('HTVA', 'excl. btw')})` : ''}</span>
+          <span style={{ fontSize: 22, fontWeight: 700, color: '#7CB8A8', letterSpacing: '-0.02em' }}>{bien.mensualite} €<span style={{ fontSize: 13 }}>/mois</span></span>
+          <span style={{ fontSize: 13, color: '#A9B0BE' }}>· {libellePrixPublic(bien.prixTotal, bien.regime)}{bien.regime && bien.regime !== 'ENREGISTREMENT' ? ` (${bien.prixTotal.toLocaleString('fr-BE')} € HTVA)` : ''}</span>
         </div>
 
         {/* Ligne facturation / visibilité */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, marginBottom: 14, color: meta.facture ? '#1B7A5E' : '#8A92A6' }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: meta.facture ? '#249E7C' : '#C3CAD4' }} />
-          {meta.facture ? t('Compté dans votre abonnement', 'Meegeteld in uw abonnement') : t('Hors décompte de facturation', 'Niet meegeteld in de facturatie')}
-          {!meta.visible && <span style={{ color: '#A9B0BE' }}>· {t('non visible en ligne', 'niet online zichtbaar')}</span>}
+          {meta.facture ? 'Compté dans votre abonnement' : 'Hors décompte de facturation'}
+          {!meta.visible && <span style={{ color: '#A9B0BE' }}>· non visible en ligne</span>}
         </div>
 
         <div style={{ display: 'flex', gap: 14, fontSize: 12.5, color: '#5A6275', marginBottom: 16, flexWrap: 'wrap' }}>
-          {bien.type && <span>{libelleType(bien.type, lang)}</span>}
-          {bien.chambres != null && <span>{bien.chambres} {t('ch.', 'slpk.')}</span>}
+          {bien.type && <span>{bien.type}</span>}
+          {bien.chambres != null && <span>{bien.chambres} ch.</span>}
           {bien.surface != null && <span>{bien.surface} m²</span>}
         </div>
 
@@ -103,20 +99,20 @@ export function BienCard({ bien }) {
           {/* Ligne 1 : Éditer + Supprimer */}
           <div style={{ display: 'flex', gap: 8 }}>
             <Link href={`/dashboard/client/biens/${bien.id}`} style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 9, background: '#F2F5FA', color: '#193B5E', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-              {t('Éditer', 'Bewerken')}
+              Éditer
             </Link>
 
             {confirm ? (
               <div style={{ display: 'flex', gap: 6, flex: 1 }}>
                 <button onClick={handleDelete} disabled={deleting} style={{ flex: 1, padding: '9px 8px', borderRadius: 9, background: '#E5484D', color: '#fff', border: 'none', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
-                  {deleting ? '...' : t('Confirmer', 'Bevestigen')}
+                  {deleting ? '...' : 'Confirmer'}
                 </button>
                 <button onClick={() => setConfirm(false)} style={{ padding: '9px 10px', borderRadius: 9, background: '#F2F5FA', color: '#5A6275', border: 'none', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
-                  {t('Non', 'Nee')}
+                  Non
                 </button>
               </div>
             ) : (
-              <button onClick={() => setConfirm(true)} title={t('Supprimer', 'Verwijderen')} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '9px 12px', borderRadius: 9, background: '#FDF0F0', color: '#E5484D', border: 'none', cursor: 'pointer' }}>
+              <button onClick={() => setConfirm(true)} title="Supprimer" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '9px 12px', borderRadius: 9, background: '#FDF0F0', color: '#E5484D', border: 'none', cursor: 'pointer' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
               </button>
             )}
@@ -131,16 +127,16 @@ export function BienCard({ bien }) {
               style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 9, background: '#fff', color: '#5A6275', border: '1px solid #E8EDF2', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-              {t('Voir', 'Bekijken')}
+              Voir
             </Link>
             <button
               onClick={handleDupliquer}
               disabled={dupliquing}
-              title={t('Dupliquer en hors-ligne', 'Dupliceren als offline')}
+              title="Dupliquer en hors-ligne"
               style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 9, background: '#fff', color: '#5A6275', border: '1px solid #E8EDF2', fontSize: 13, fontWeight: 600, cursor: dupliquing ? 'wait' : 'pointer' }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>
-              {dupliquing ? '...' : t('Dupliquer', 'Dupliceren')}
+              {dupliquing ? '...' : 'Dupliquer'}
             </button>
           </div>
 

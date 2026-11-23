@@ -5,22 +5,19 @@ import { prisma } from '@/lib/prisma'
 import { stripe, priceForFormule } from '@/lib/stripe'
 import { STATUTS_FACTURABLES, prochainPremierDuMois } from '@/lib/facturation'
 import { getSettings } from '@/lib/settings'
-import { getT } from '@/lib/i18n/server'
-import { locale } from '@/lib/i18n/config'
 
 export async function POST(req) {
-  const { lang, t } = await getT()
   try {
-    if (!stripe) return NextResponse.json({ error: t('Stripe non configuré.', 'Stripe is niet geconfigureerd.') }, { status: 500 })
+    if (!stripe) return NextResponse.json({ error: 'Stripe non configuré.' }, { status: 500 })
 
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
 
     const { paymentMethodId } = await req.json()
-    if (!paymentMethodId) return NextResponse.json({ error: t('Moyen de paiement manquant.', 'Betaalmethode ontbreekt.') }, { status: 400 })
+    if (!paymentMethodId) return NextResponse.json({ error: 'Moyen de paiement manquant.' }, { status: 400 })
 
     const client = await prisma.client.findUnique({ where: { userId: session.user.id } })
-    if (!client?.stripeCustomerId) return NextResponse.json({ error: t('Client Stripe introuvable.', 'Stripe-klant niet gevonden.') }, { status: 404 })
+    if (!client?.stripeCustomerId) return NextResponse.json({ error: 'Client Stripe introuvable.' }, { status: 404 })
 
     const customerId = client.stripeCustomerId
 
@@ -29,16 +26,14 @@ export async function POST(req) {
       where: { clientId: client.id, statut: { in: STATUTS_FACTURABLES } },
     })
     if (quantite < 1) {
-      return NextResponse.json({ error: t('Ajoutez au moins un bien actif (ou en option) avant de vous abonner.', 'Voeg minstens één actief pand (of pand in optie) toe voordat u een abonnement neemt.') }, { status: 400 })
+      return NextResponse.json({ error: 'Ajoutez au moins un bien actif (ou en option) avant de vous abonner.' }, { status: 400 })
     }
 
     const price = priceForFormule(client.formule)
-    if (!price) return NextResponse.json({ error: t('Tarif de la formule non configuré.', 'Het tarief van de formule is niet geconfigureerd.') }, { status: 500 })
+    if (!price) return NextResponse.json({ error: 'Tarif de la formule non configuré.' }, { status: 500 })
 
     await stripe.customers.update(customerId, {
       invoice_settings: { default_payment_method: paymentMethodId },
-      // Langue des factures et documents Stripe envoyés au promoteur
-      preferred_locales: [lang === 'nl' ? 'nl' : 'fr'],
     })
 
     const settings = await getSettings()
@@ -75,10 +70,7 @@ export async function POST(req) {
           customer: customerId,
           amount: montant,
           currency: prixStripe?.currency || 'eur',
-          description: t(
-            `Abonnement du ${maintenant.toLocaleDateString(locale(lang))} au 1er du mois suivant — ${quantite} bien${quantite > 1 ? 's' : ''} au prorata (${joursRestants} jour${joursRestants > 1 ? 's' : ''})`,
-            `Abonnement van ${maintenant.toLocaleDateString(locale(lang))} tot de 1e van de volgende maand — ${quantite} ${quantite > 1 ? 'panden' : 'pand'} pro rata (${joursRestants} ${joursRestants > 1 ? 'dagen' : 'dag'})`
-          ),
+          description: `Abonnement du ${maintenant.toLocaleDateString('fr-BE')} au 1er du mois suivant — ${quantite} bien${quantite > 1 ? 's' : ''} au prorata (${joursRestants} jour${joursRestants > 1 ? 's' : ''})`,
         })
       }
     }
@@ -126,6 +118,6 @@ export async function POST(req) {
     return NextResponse.json({ ok: true, status: sub.status })
   } catch (e) {
     console.error('[CREER-ABO]', e?.message)
-    return NextResponse.json({ error: e?.message || t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
+    return NextResponse.json({ error: e?.message || 'Erreur serveur.' }, { status: 500 })
   }
 }
