@@ -3,9 +3,12 @@ import Link from "next/link";
 import LogoBuyMonth from "@/app/components/LogoBuyMonth";
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
+import { useLang } from "@/app/components/i18n/LangProvider";
+import LangSwitcher from "@/app/components/i18n/LangSwitcher";
 
 export default function PublicNav({ variant = "dark" }) {
   const { status } = useSession();
+  const { t } = useLang();
   const isLoggedIn = status === "authenticated";
 
   const [scrolled, setScrolled] = useState(false);
@@ -23,8 +26,8 @@ export default function PublicNav({ variant = "dark" }) {
   }, [menuOpen]);
 
   const navLinks = [
-    { href: "/biens", label: "Les biens", desc: "Découvrir les biens disponibles" },
-    { href: "/contact", label: "Contact", desc: "Notre équipe vous répond" },
+    { href: "/biens", label: t("Les biens", "Het aanbod"), desc: t("Découvrir les biens disponibles", "Ontdek de beschikbare panden") },
+    { href: "/contact", label: t("Contact", "Contact"), desc: t("Notre équipe vous répond", "Ons team helpt u verder") },
   ];
 
   // La nav est "claire" (texte foncé) uniquement quand variant=light ET pas scrollée ET menu fermé.
@@ -66,29 +69,31 @@ export default function PublicNav({ variant = "dark" }) {
             <Link key={l.href} href={l.href} style={{ color: linkColor, fontSize: 14, textDecoration: "none", fontWeight: 500, transition: "color 0.3s ease" }}>{l.label}</Link>
           ))}
 
+          <LangSwitcher color={lightMode ? "#193B5E" : "#fff"} style={{ transition: "color 0.3s ease" }} />
+
           {isLoggedIn ? (
             <>
               <Link href="/dashboard"
                 style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#7CB8A8", color: "#193B5E", padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
-                Mon espace →
+                {t("Mon espace →", "Mijn account →")}
               </Link>
               <button onClick={() => signOut({ callbackUrl: "/" })}
                 style={{ background: "none", border: "none", cursor: "pointer", color: logoutColor, fontSize: 14, fontWeight: 600, padding: 0, transition: "color 0.3s ease" }}>
-                Déconnexion
+                {t("Déconnexion", "Uitloggen")}
               </button>
             </>
           ) : (
             <>
-              <Link href="/login" style={{ color: loginColor, fontSize: 14, textDecoration: "none", fontWeight: 600, transition: "color 0.3s ease" }}>Connexion</Link>
+              <Link href="/login" style={{ color: loginColor, fontSize: 14, textDecoration: "none", fontWeight: 600, transition: "color 0.3s ease" }}>{t("Connexion", "Inloggen")}</Link>
               <Link href="/register"
                 style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#7CB8A8", color: "#193B5E", padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
-                S'inscrire →
+                {t("S'inscrire →", "Registreren →")}
               </Link>
             </>
           )}
         </div>
 
-        <button className="burger-btn" aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+        <button className="burger-btn" aria-label={menuOpen ? t("Fermer le menu", "Menu sluiten") : t("Ouvrir le menu", "Menu openen")}
           onClick={() => setMenuOpen(!menuOpen)}
           style={{ background: "none", border: "none", cursor: "pointer", padding: 8, zIndex: 201, width: 40, height: 40, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5 }}>
           {[0, 1, 2].map(i => (
@@ -113,7 +118,7 @@ export default function PublicNav({ variant = "dark" }) {
           <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "88px 28px 32px", position: "relative", zIndex: 1, overflowY: "auto" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(124,184,168,0.1)", border: "1px solid rgba(124,184,168,0.2)", borderRadius: 20, padding: "5px 12px", marginBottom: 36, alignSelf: "flex-start", animation: "itemIn 0.4s ease 0.05s both" }}>
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#7CB8A8" }} />
-              <span style={{ fontSize: 10, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.08em" }}>VOTRE FUTUR BIEN EN MENSUALITÉS</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "#7CB8A8", letterSpacing: "0.08em" }}>{t("VOTRE FUTUR BIEN EN MENSUALITÉS", "UW TOEKOMSTIGE WONING IN MAANDBEDRAGEN")}</span>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 28 }}>
@@ -135,25 +140,27 @@ export default function PublicNav({ variant = "dark" }) {
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <Link href="/dashboard" onClick={() => setMenuOpen(false)}
                   style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "16px", background: "#7CB8A8", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#193B5E", textDecoration: "none", animation: "itemIn 0.4s ease 0.34s both" }}>
-                  Mon espace →
+                  {t("Mon espace →", "Mijn account →")}
                 </Link>
                 <button onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }); }}
                   style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "15px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#fff", cursor: "pointer", animation: "itemIn 0.4s ease 0.4s both" }}>
-                  Déconnexion
+                  {t("Déconnexion", "Uitloggen")}
                 </button>
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <Link href="/login" onClick={() => setMenuOpen(false)}
                   style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "15px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#fff", textDecoration: "none", animation: "itemIn 0.4s ease 0.34s both" }}>
-                  Connexion
+                  {t("Connexion", "Inloggen")}
                 </Link>
                 <Link href="/register" onClick={() => setMenuOpen(false)}
                   style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "16px", background: "#7CB8A8", borderRadius: 14, fontSize: 15, fontWeight: 700, color: "#193B5E", textDecoration: "none", animation: "itemIn 0.4s ease 0.4s both" }}>
-                  S'inscrire →
+                  {t("S'inscrire →", "Registreren →")}
                 </Link>
               </div>
             )}
+
+            <LangSwitcher color="#fff" size={14} style={{ alignSelf: "center", marginTop: 24, animation: "itemIn 0.4s ease 0.46s both" }} />
           </div>
 
           <div style={{ padding: "20px 28px 40px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", zIndex: 1 }}>

@@ -1,12 +1,17 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useLang } from '@/app/components/i18n/LangProvider'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
+const MOIS_NL = ['Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December']
 const JOURS = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
+const JOURS_NL = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']
 
 // value/onChange au format 'YYYY-MM-DD' (string) ou '' si vide
-export function DatePicker({ value, onChange, placeholder = 'Choisir une date', minDate, label }) {
+export function DatePicker({ value, onChange, placeholder, minDate, label }) {
+  const { lang, t } = useLang()
+  if (placeholder === undefined) placeholder = t('Choisir une date', 'Kies een datum')
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -86,7 +91,7 @@ export function DatePicker({ value, onChange, placeholder = 'Choisir une date', 
             <button type="button" onClick={() => setViewDate(new Date(year, month - 1, 1))} style={navBtn}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
             </button>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#193B5E' }}>{MOIS[month]} {year}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#193B5E' }}>{(lang === 'nl' ? MOIS_NL : MOIS)[month]} {year}</span>
             <button type="button" onClick={() => setViewDate(new Date(year, month + 1, 1))} style={navBtn}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
             </button>
@@ -94,7 +99,7 @@ export function DatePicker({ value, onChange, placeholder = 'Choisir une date', 
 
           {/* Jours de la semaine */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 6 }}>
-            {JOURS.map((j) => (
+            {(lang === 'nl' ? JOURS_NL : JOURS).map((j) => (
               <div key={j} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#A9B0BE', padding: '4px 0' }}>{j}</div>
             ))}
           </div>
@@ -133,8 +138,8 @@ export function DatePicker({ value, onChange, placeholder = 'Choisir une date', 
 
           {/* Pied : aujourd'hui / effacer */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 14, paddingTop: 12, borderTop: '1px solid #F2F5FA' }}>
-            <button type="button" onClick={() => { onChange(''); setOpen(false) }} style={footBtn('#A9B0BE')}>Effacer</button>
-            <button type="button" onClick={() => pick(new Date())} style={footBtn('#7CB8A8')}>Aujourd'hui</button>
+            <button type="button" onClick={() => { onChange(''); setOpen(false) }} style={footBtn('#A9B0BE')}>{t('Effacer', 'Wissen')}</button>
+            <button type="button" onClick={() => pick(new Date())} style={footBtn('#7CB8A8')}>{t("Aujourd'hui", 'Vandaag')}</button>
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
+import { LANG_COOKIE, LANG_HEADER } from '@/lib/i18n/config'
 
 const STATUTS_ACTIFS = ['active', 'trialing']
 
@@ -11,8 +12,29 @@ function aAcces(token) {
   return false
 }
 
+// ?lang=nl ou ?lang=fr dans l'URL : force la langue de la page (liens partagés, e-mails,
+// widgets) et la mémorise dans un cookie, sauf dans un widget embarqué.
+function avecLangue(req, res) {
+  const l = req.nextUrl.searchParams.get('lang')
+  if (l !== 'fr' && l !== 'nl') return res
+  if (!req.nextUrl.pathname.startsWith('/embed')) {
+    res.cookies.set(LANG_COOKIE, l, { path: '/', maxAge: 31536000, sameSite: 'lax' })
+  }
+  return res
+}
+
+function suite(req) {
+  const l = req.nextUrl.searchParams.get('lang')
+  if (l !== 'fr' && l !== 'nl') return NextResponse.next()
+  const headers = new Headers(req.headers)
+  headers.set(LANG_HEADER, l)
+  return avecLangue(req, NextResponse.next({ request: { headers } }))
+}
+
 export async function middleware(req) {
   const { pathname } = req.nextUrl
+
+  if (!pathname.startsWith('/dashboard')) return suite(req)
 
   const token = await getToken({
     req,
@@ -26,7 +48,7 @@ export async function middleware(req) {
   if (pathname.startsWith('/dashboard/admin')) {
     if (!token) return NextResponse.redirect(new URL('/login', req.url))
     if (token.role !== 'ADMIN') return NextResponse.redirect(new URL('/', req.url))
-    return NextResponse.next()
+    return suite(req)
   }
 
   // ── Espace client ──
@@ -37,7 +59,7 @@ export async function middleware(req) {
     if (process.env.BLOCAGE_ABONNEMENT === 'true') {
       // La page abonnement reste toujours accessible (sinon boucle de redirection)
       if (pathname.startsWith('/dashboard/client/abonnement')) {
-        return NextResponse.next()
+        return suite(req)
       }
       // Admin jamais bloqué
       if (token.role !== 'ADMIN') {
@@ -46,7 +68,7 @@ export async function middleware(req) {
         }
       }
     }
-    return NextResponse.next()
+    return suite(req)
   }
 
   // ── /dashboard nu → laisse le routeur de rôle gérer ──
@@ -54,9 +76,10 @@ export async function middleware(req) {
     if (!token) return NextResponse.redirect(new URL('/login', req.url))
   }
 
-  return NextResponse.next()
+  return suite(req)
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  // Tout sauf les fichiers statiques et l'API
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\.[a-zA-Z0-9]+$).*)'],
 }

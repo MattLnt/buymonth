@@ -1,8 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useLang } from '@/app/components/i18n/LangProvider'
 
-export function FormSelect({ label, value, onChange, options = [], placeholder = 'Sélectionner', required }) {
+export function FormSelect({ label, value, onChange, options = [], placeholder, required }) {
+  const { t } = useLang()
+  if (placeholder === undefined) placeholder = t('Sélectionner', 'Selecteren')
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useLang } from '@/app/components/i18n/LangProvider'
 
 /*
  * Modale de confirmation réutilisable.
@@ -19,13 +20,18 @@ export function ConfirmModal({
   open,
   onClose,
   onConfirm,
-  title = "Confirmer l'action",
-  message = 'Cette action est définitive.',
-  confirmLabel = 'Supprimer',
-  cancelLabel = 'Annuler',
+  title,
+  message,
+  confirmLabel,
+  cancelLabel,
   loading = false,
   danger = true,
 }) {
+  const { t } = useLang()
+  if (title === undefined) title = t("Confirmer l'action", 'Actie bevestigen')
+  if (message === undefined) message = t('Cette action est définitive.', 'Deze actie is definitief.')
+  if (confirmLabel === undefined) confirmLabel = t('Supprimer', 'Verwijderen')
+  if (cancelLabel === undefined) cancelLabel = t('Annuler', 'Annuleren')
   useEffect(() => {
     if (!open) return
     function onKey(e) { if (e.key === 'Escape' && !loading) onClose?.() }

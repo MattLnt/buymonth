@@ -5,6 +5,7 @@
 
 import PublicNav from '@/app/components/PublicNav'
 import PublicFooter from '@/app/components/PublicFooter'
+import { getT } from '@/lib/i18n/server'
 
 export const carte = {
   background: '#fff',
@@ -87,7 +88,8 @@ export const Tableau = ({ entetes, lignes }) => (
   </div>
 )
 
-export default function PageLegale({ titre, maj, children }) {
+export default async function PageLegale({ titre, maj, children }) {
+  const { t } = await getT()
   return (
     <div style={{ minHeight: '100vh', background: '#EEF1F6' }}>
       <PublicNav />
@@ -129,14 +131,14 @@ export default function PageLegale({ titre, maj, children }) {
             }}
           />
           <p style={{ fontSize: 11, fontWeight: 700, color: '#7CB8A8', letterSpacing: '0.1em', margin: '0 0 14px', position: 'relative' }}>
-            LÉGAL
+            {t('LÉGAL', 'JURIDISCH')}
           </p>
           <h1 style={{ fontSize: 40, fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-0.025em', position: 'relative' }}>
             {titre}
           </h1>
           {maj && (
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', margin: '14px 0 0', position: 'relative' }}>
-              Dernière mise à jour : {maj}
+              {t('Dernière mise à jour :', 'Laatst bijgewerkt:')} {maj}
             </p>
           )}
         </div>

@@ -11,9 +11,12 @@ import {
   PasswordField,
   validatePassword,
 } from "@/app/components/ui/PasswordField";
+import { useLang } from "@/app/components/i18n/LangProvider";
+import LangSwitcher from "@/app/components/i18n/LangSwitcher";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { t } = useLang();
 
   const [form, setForm] = useState({
     societe: "",
@@ -38,7 +41,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     if (!validatePassword(form.password)) {
-      setError("Le mot de passe ne respecte pas tous les critères.");
+      setError(t("Le mot de passe ne respecte pas tous les critères.", "Het wachtwoord voldoet niet aan alle voorwaarden."));
       setLoading(false);
       return;
     }
@@ -55,7 +58,7 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Erreur.");
+        setError(data.error || t("Erreur.", "Fout."));
         setLoading(false);
         return;
       }
@@ -73,7 +76,7 @@ export default function RegisterPage() {
 
       router.push("/dashboard");
     } catch {
-      setError("Erreur réseau.");
+      setError(t("Erreur réseau.", "Netwerkfout."));
       setLoading(false);
     }
   }
@@ -161,6 +164,13 @@ export default function RegisterPage() {
           background-size: 44px 44px;
         }
 
+        .register-lang {
+          position: absolute;
+          top: 14px;
+          right: 20px;
+          z-index: 3;
+        }
+
         .register-wrapper {
           position: relative;
           z-index: 2;
@@ -215,6 +225,11 @@ export default function RegisterPage() {
             margin: 0 auto;
           }
 
+          .register-lang {
+            top: 8px;
+            right: 12px;
+          }
+
           .register-brand {
             margin-top: 4px;
             margin-bottom: 18px;
@@ -250,6 +265,10 @@ export default function RegisterPage() {
       `}</style>
 
       <div className="register-grid" />
+
+      <div className="register-lang">
+        <LangSwitcher color="#fff" />
+      </div>
 
       <div className="register-wrapper">
 
@@ -304,7 +323,7 @@ export default function RegisterPage() {
                 fontWeight: 600,
               }}
             >
-              Espace promoteur
+              {t("Espace promoteur", "Voor projectontwikkelaars")}
             </span>
           </div>
         </div>
@@ -349,7 +368,7 @@ export default function RegisterPage() {
                   fontWeight: 700,
                 }}
               >
-                Inscription sécurisée
+                {t("Inscription sécurisée", "Beveiligde registratie")}
               </span>
             </div>
 
@@ -362,7 +381,7 @@ export default function RegisterPage() {
                 letterSpacing: "-0.02em",
               }}
             >
-              Créer un compte
+              {t("Créer un compte", "Account aanmaken")}
             </h1>
 
             <p
@@ -373,7 +392,7 @@ export default function RegisterPage() {
                 lineHeight: 1.5,
               }}
             >
-              Rejoignez l'espace promoteur BuyMonth
+              {t("Rejoignez l'espace promoteur BuyMonth", "Word lid van BuyMonth als projectontwikkelaar")}
             </p>
           </div>
 
@@ -398,23 +417,23 @@ export default function RegisterPage() {
           {/* Formulaire */}
           <form onSubmit={handleSubmit}>
             <Field
-              label="Société"
+              label={t("Société", "Bedrijf")}
               value={form.societe}
               onChange={set("societe")}
-              placeholder="Nom de votre société"
+              placeholder={t("Nom de votre société", "Naam van uw bedrijf")}
               required
             />
 
             <div className="register-row">
               <Field
-                label="Nom du contact"
+                label={t("Nom du contact", "Naam contactpersoon")}
                 value={form.contactNom}
                 onChange={set("contactNom")}
-                placeholder="Votre nom"
+                placeholder={t("Votre nom", "Uw naam")}
               />
 
               <Field
-                label="Téléphone"
+                label={t("Téléphone", "Telefoon")}
                 value={form.telephone}
                 onChange={set("telephone")}
                 placeholder="+32 ..."
@@ -422,11 +441,11 @@ export default function RegisterPage() {
             </div>
 
             <Field
-              label="Email"
+              label={t("Email", "E-mail")}
               type="email"
               value={form.email}
               onChange={set("email")}
-              placeholder="vous@societe.be"
+              placeholder={t("vous@societe.be", "u@bedrijf.be")}
               required
             />
 
@@ -441,7 +460,7 @@ export default function RegisterPage() {
               full
               disabled={loading}
             >
-              {loading ? "Création..." : "Créer mon compte"}
+              {loading ? t("Création...", "Aanmaken...") : t("Créer mon compte", "Mijn account aanmaken")}
             </Button>
           </form>
 
@@ -469,7 +488,7 @@ export default function RegisterPage() {
                 whiteSpace: "nowrap",
               }}
             >
-              Déjà inscrit ?
+              {t("Déjà inscrit ?", "Al geregistreerd?")}
             </span>
 
             <div
@@ -497,7 +516,7 @@ export default function RegisterPage() {
               textDecoration: "none",
             }}
           >
-            Se connecter
+            {t("Se connecter", "Inloggen")}
           </Link>
         </div>
 
@@ -505,7 +524,7 @@ export default function RegisterPage() {
             FOOTER
             ========================= */}
         <p className="register-footer">
-          © 2026 BuyMonth · Belgique
+          © 2026 BuyMonth · {t("Belgique", "België")}
         </p>
       </div>
     </main>

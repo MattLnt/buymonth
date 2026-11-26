@@ -2,11 +2,13 @@ import { getCurrentClient } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/app/components/dashboard/Ui'
 import { ProfilForm } from './ProfilForm'
+import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ClientProfilPage() {
   const client = await getCurrentClient()
+  const { t } = await getT()
   const full = await prisma.client.findUnique({
     where: { id: client.id },
     include: { user: { select: { email: true } } },
@@ -14,7 +16,7 @@ export default async function ClientProfilPage() {
 
   return (
     <>
-      <PageHeader title="Profil" subtitle="Vos informations société, affichées sur vos biens." />
+      <PageHeader title={t('Profil', 'Profiel')} subtitle={t('Vos informations société, affichées sur vos biens.', 'Uw bedrijfsgegevens, getoond bij uw panden.')} />
       <ProfilForm
         initial={{
           societe: full.societe,

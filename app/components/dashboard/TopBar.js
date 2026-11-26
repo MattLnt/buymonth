@@ -5,17 +5,19 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
 import { Icon } from './Icon'
+import { useLang } from '@/app/components/i18n/LangProvider'
+import LangSwitcher from '@/app/components/i18n/LangSwitcher'
 
-const CLIENT_TITLES = [
-  { match: '/dashboard/client/biens/nouveau', title: 'Ajouter un bien', parent: 'Mes biens', parentHref: '/dashboard/client/biens' },
-  { match: '/dashboard/client/biens/', title: 'Détail du bien', parent: 'Mes biens', parentHref: '/dashboard/client/biens' },
-  { match: '/dashboard/client/biens', title: 'Mes biens' },
-  { match: '/dashboard/client/widgets/paiements', title: 'Historique des paiements', parent: 'Widgets', parentHref: '/dashboard/client/widgets' },
-  { match: '/dashboard/client/widgets', title: 'Générateur de widget' },
-  { match: '/dashboard/client/leads', title: 'Mes leads' },
-  { match: '/dashboard/client/abonnement', title: 'Mon abonnement' },
-  { match: '/dashboard/client/profil', title: 'Mon profil' },
-  { match: '/dashboard/client', title: 'Tableau de bord' },
+const clientTitles = (t) => [
+  { match: '/dashboard/client/biens/nouveau', title: t('Ajouter un bien', 'Pand toevoegen'), parent: t('Mes biens', 'Mijn panden'), parentHref: '/dashboard/client/biens' },
+  { match: '/dashboard/client/biens/', title: t('Détail du bien', 'Details van het pand'), parent: t('Mes biens', 'Mijn panden'), parentHref: '/dashboard/client/biens' },
+  { match: '/dashboard/client/biens', title: t('Mes biens', 'Mijn panden') },
+  { match: '/dashboard/client/widgets/paiements', title: t('Historique des paiements', 'Betalingsoverzicht'), parent: 'Widgets', parentHref: '/dashboard/client/widgets' },
+  { match: '/dashboard/client/widgets', title: t('Générateur de widget', 'Widgetgenerator') },
+  { match: '/dashboard/client/leads', title: t('Mes leads', 'Mijn leads') },
+  { match: '/dashboard/client/abonnement', title: t('Mon abonnement', 'Mijn abonnement') },
+  { match: '/dashboard/client/profil', title: t('Mon profil', 'Mijn profiel') },
+  { match: '/dashboard/client', title: t('Tableau de bord', 'Dashboard') },
 ]
 
 const ADMIN_TITLES = [
@@ -27,15 +29,16 @@ const ADMIN_TITLES = [
   { match: '/dashboard/admin', title: "Vue d'ensemble" },
 ]
 
-function resolveTitle(pathname, role) {
-  const list = role === 'admin' ? ADMIN_TITLES : CLIENT_TITLES
-  const found = list.find((t) => pathname.startsWith(t.match))
-  return found || { title: 'Tableau de bord' }
+function resolveTitle(pathname, role, t) {
+  const list = role === 'admin' ? ADMIN_TITLES : clientTitles(t)
+  const found = list.find((x) => pathname.startsWith(x.match))
+  return found || { title: t('Tableau de bord', 'Dashboard') }
 }
 
 export function TopBar({ societe, email, statut, role = 'client', collapsed, onToggle }) {
   const pathname = usePathname()
-  const { title } = resolveTitle(pathname, role)
+  const { t } = useLang()
+  const { title } = resolveTitle(pathname, role, t)
 
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
@@ -49,10 +52,10 @@ export function TopBar({ societe, email, statut, role = 'client', collapsed, onT
   }, [])
 
   const statutConfig = {
-    active: { label: 'Abonné', color: '#7CB8A8', bg: 'rgba(124,184,168,0.16)', dot: '#7CB8A8' },
-    trialing: { label: 'Essai gratuit', color: '#E8B563', bg: 'rgba(232,181,99,0.16)', dot: '#E8B563' },
+    active: { label: t('Abonné', 'Geabonneerd'), color: '#7CB8A8', bg: 'rgba(124,184,168,0.16)', dot: '#7CB8A8' },
+    trialing: { label: t('Essai gratuit', 'Gratis proefperiode'), color: '#E8B563', bg: 'rgba(232,181,99,0.16)', dot: '#E8B563' },
     admin: { label: 'Administrateur', color: '#E8B563', bg: 'rgba(232,181,99,0.16)', dot: '#E8B563' },
-    none: { label: 'Sans abonnement', color: 'rgba(255,255,255,0.7)', bg: 'rgba(255,255,255,0.08)', dot: 'rgba(255,255,255,0.5)' },
+    none: { label: t('Sans abonnement', 'Geen abonnement'), color: 'rgba(255,255,255,0.7)', bg: 'rgba(255,255,255,0.08)', dot: 'rgba(255,255,255,0.5)' },
   }
   const sc = statutConfig[statut] || statutConfig.none
 
@@ -67,10 +70,10 @@ export function TopBar({ societe, email, statut, role = 'client', collapsed, onT
         { label: 'Voir le site', href: '/', icon: 'home' },
       ]
     : [
-        { label: 'Mon profil', href: '/dashboard/client/profil', icon: 'settings' },
-        { label: 'Mon abonnement', href: '/dashboard/client/abonnement', icon: 'card' },
-        { label: 'Les biens', href: '/biens', icon: 'building' },
-        { label: 'Voir le site', href: '/', icon: 'home' },
+        { label: t('Mon profil', 'Mijn profiel'), href: '/dashboard/client/profil', icon: 'settings' },
+        { label: t('Mon abonnement', 'Mijn abonnement'), href: '/dashboard/client/abonnement', icon: 'card' },
+        { label: t('Les biens', 'Het aanbod'), href: '/biens', icon: 'building' },
+        { label: t('Voir le site', 'Naar de website'), href: '/', icon: 'home' },
       ]
 
   const StatutPastille = (
@@ -99,7 +102,7 @@ export function TopBar({ societe, email, statut, role = 'client', collapsed, onT
 
         {/* Gauche : bouton rétract + titre */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
-          <button onClick={onToggle} aria-label="Réduire le menu" className="bm-topbar-toggle"
+          <button onClick={onToggle} aria-label={t('Réduire le menu', 'Menu inklappen')} className="bm-topbar-toggle"
             style={{ width: 40, height: 40, borderRadius: 11, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', flexShrink: 0, transition: 'background 0.15s' }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.14)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}>
@@ -111,8 +114,9 @@ export function TopBar({ societe, email, statut, role = 'client', collapsed, onT
           </div>
         </div>
 
-        {/* Droite : statut + avatar */}
+        {/* Droite : langue + statut + avatar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          {role !== 'admin' && <LangSwitcher color="#fff" size={12.5} />}
           {statutHref
             ? <Link href={statutHref} className="bm-topbar-statut" style={{ textDecoration: 'none', display: 'inline-flex' }}>{StatutPastille}</Link>
             : <span className="bm-topbar-statut" style={{ display: 'inline-flex' }}>{StatutPastille}</span>}
@@ -122,14 +126,14 @@ export function TopBar({ societe, email, statut, role = 'client', collapsed, onT
               <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#7CB8A8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#16324F', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
                 {(societe || email || '?')[0]?.toUpperCase()}
               </div>
-              <span className="bm-topbar-statut-label" style={{ fontSize: 13, fontWeight: 600, color: '#fff', maxWidth: 120, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{societe || 'Mon compte'}</span>
+              <span className="bm-topbar-statut-label" style={{ fontSize: 13, fontWeight: 600, color: '#fff', maxWidth: 120, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{societe || t('Mon compte', 'Mijn account')}</span>
               <Icon name="chevronDown" size={14} color="rgba(255,255,255,0.6)" />
             </button>
 
             {menuOpen && (
               <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 220, background: '#fff', border: '1px solid #E6EBF2', borderRadius: 14, boxShadow: '0 12px 32px rgba(25,59,94,0.18)', padding: 8, zIndex: 50 }}>
                 <div style={{ padding: '10px 12px', borderBottom: '1px solid #F2F5FA', marginBottom: 6 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#193B5E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{societe || 'Mon compte'}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#193B5E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{societe || t('Mon compte', 'Mijn account')}</div>
                   {email && <div style={{ fontSize: 11.5, color: '#9AA2B4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{email}</div>}
                 </div>
                 {menuLinks.map((m) => (
@@ -145,7 +149,7 @@ export function TopBar({ societe, email, statut, role = 'client', collapsed, onT
                   onMouseEnter={(e) => e.currentTarget.style.background = '#FEF2F2'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                   <Icon name="logout" size={16} color="#E0564E" />
-                  Déconnexion
+                  {t('Déconnexion', 'Uitloggen')}
                 </button>
               </div>
             )}

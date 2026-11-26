@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { getConfigMensualite, calculMensualiteServeur } from '@/lib/settings'
 import { Badge } from '@/app/components/widget/Badge'
+import { normLang } from '@/lib/i18n/config'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,6 +9,8 @@ export default async function EmbedBadgePage({ searchParams }) {
   const sp = await searchParams
   const bienId = sp.bien
   const premium = sp.premium === '1'
+  // Langue du badge : uniquement ?lang= dans l'URL de l'iframe (site du promoteur), FR sinon
+  const lang = normLang(Array.isArray(sp.lang) ? sp.lang[0] : sp.lang)
   const theme = sp.theme === 'dark' ? 'dark' : 'light'
   const couleurPrimaire = sp.primaire ? `#${sp.primaire.replace('#', '')}` : '#16324F'
   const couleurAccent = sp.accent ? `#${sp.accent.replace('#', '')}` : '#7CB8A8'
@@ -46,6 +49,7 @@ export default async function EmbedBadgePage({ searchParams }) {
       couleurCredit={couleurCredit}
       logoUrl={logoUrl}
       width={320}
+      lang={lang}
     />
   )
 

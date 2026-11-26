@@ -3,19 +3,21 @@
 import { useState } from "react";
 import {
   MENSUALITE_CONFIG,
-  AVERTISSEMENT_LEGAL,
-  NOTE_ESTIMATION,
-  IDENTIFICATION_FINANCE,
+  avertissementLegal,
+  noteEstimation,
+  identificationFinance,
   exempleRepresentatif,
   texteExempleRepresentatif,
 } from "@/lib/mensualiteConfig";
 import { phraseRegime } from "@/lib/regime";
+import { locale } from "@/lib/i18n/config";
+import { useLang } from "@/app/components/i18n/LangProvider";
 
-const eur = (n) =>
-  new Intl.NumberFormat("fr-BE", { maximumFractionDigits: 0 }).format(n) + " €";
-const pct = (t) =>
-  new Intl.NumberFormat("fr-BE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
-    t * 100
+const eur = (n, lang) =>
+  new Intl.NumberFormat(locale(lang), { maximumFractionDigits: 0 }).format(n) + " €";
+const pct = (v, lang) =>
+  new Intl.NumberFormat(locale(lang), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+    v * 100
   ) + " %";
 
 /*
@@ -29,7 +31,7 @@ const pct = (t) =>
  *   cfg         hypothèses venant des paramètres admin (apportPct, tauxAnnuel, taegAnnuel, dureeMois)
  *   variant     "inline" | "card" | "badge" | "hero"   (défaut "inline")
  *   tone        "light" | "dark"   (défaut "light" ; "dark" = sur fond sombre)
- *   prefix      texte avant le montant (défaut "À partir de")
+ *   prefix      texte avant le montant (défaut "À partir de" / "Vanaf")
  *   showExemple bool — affiche l'icône i + détail des hypothèses (défaut true)
  *   exempleVisible bool — bloc « Exemple représentatif » toujours visible sous le montant (défaut true)
  *                    Obligatoire dès qu'un €/mois apparaît (SPF Économie : « le renvoi ne suffit pas »).
@@ -40,33 +42,35 @@ export default function Mensualite({
   cfg = MENSUALITE_CONFIG,
   variant = "inline",
   tone = "light",
-  prefix = "À partir de",
+  prefix,
   showExemple = true,
   exempleVisible = true,
   avertissement = true,
 }) {
   const [open, setOpen] = useState(false);
+  const { lang, t } = useLang();
+  const prefixTxt = prefix === undefined ? t("À partir de", "Vanaf") : prefix;
 
   if (!prixTotal || prixTotal <= 0) return null;
 
   const ex = exempleRepresentatif(prixTotal, regime, cfg);
-  const phrase = phraseRegime(regime);
-  const texteExemple = texteExempleRepresentatif(prixTotal, regime, cfg);
+  const phrase = phraseRegime(regime, lang);
+  const texteExemple = texteExempleRepresentatif(prixTotal, regime, cfg, lang);
 
   return (
     <span className={`mens mens--${variant} mens--${tone}`}>
       <span className="mens-line">
-        {prefix && <small className="mens-prefix">{prefix}</small>}
+        {prefixTxt && <small className="mens-prefix">{prefixTxt}</small>}
         <b className="mens-amount">
-          {eur(ex.mensualite)}
-          <span className="mens-unit">/mois*</span>
+          {eur(ex.mensualite, lang)}
+          <span className="mens-unit">{t("/mois*", "/maand*")}</span>
         </b>
 
         {showExemple && (
           <button
             type="button"
             className="mens-info"
-            aria-label="Voir l'exemple représentatif"
+            aria-label={t("Voir l'exemple représentatif", "Representatief voorbeeld bekijken")}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
           >
@@ -77,55 +81,58 @@ export default function Mensualite({
 
       {/* Avertissement légal affiché avec le montant (retiré sur /simulateur à la demande du client, test Vizion du 16/11, point 4) */}
       <span className="mens-warn">
-        * {avertissement && `${AVERTISSEMENT_LEGAL} `}{NOTE_ESTIMATION}
+        * {avertissement && `${avertissementLegal(lang)} `}{noteEstimation(lang)}
       </span>
 
       {/* Exemple représentatif — bloc distinct, visible en permanence (ordinateur et mobile) */}
       {exempleVisible && (
         <span className="mens-exemple-visible" role="note">
-          {texteExemple} {IDENTIFICATION_FINANCE}
+          {texteExemple} {identificationFinance(lang)}
         </span>
       )}
 
       {showExemple && open && (
         <span className="mens-exemple" role="note">
-          <b>Exemple représentatif</b>
+          <b>{t("Exemple représentatif", "Representatief voorbeeld")}</b>
           <span className="mens-ex-row">
-            <span>Prix du bien{phrase ? ` (${phrase})` : ""}</span>
-            <span>{eur(ex.prixDecaisse)}</span>
+            <span>{t("Prix du bien", "Prijs van het pand")}{phrase ? ` (${phrase})` : ""}</span>
+            <span>{eur(ex.prixDecaisse, lang)}</span>
           </span>
           <span className="mens-ex-row">
-            <span>Apport pris en compte</span>
-            <span>{eur(ex.apport)}</span>
+            <span>{t("Apport pris en compte", "Eigen inbreng in rekening gebracht")}</span>
+            <span>{eur(ex.apport, lang)}</span>
           </span>
           <span className="mens-ex-row">
-            <span>Capital emprunté</span>
-            <span>{eur(ex.capital)}</span>
+            <span>{t("Capital emprunté", "Geleend kapitaal")}</span>
+            <span>{eur(ex.capital, lang)}</span>
           </span>
           <span className="mens-ex-row">
-            <span>Durée</span>
+            <span>{t("Durée", "Looptijd")}</span>
             <span>
-              {ex.dureeMois} mois ({ex.dureeAns} ans)
+              {t(`${ex.dureeMois} mois (${ex.dureeAns} ans)`, `${ex.dureeMois} maanden (${ex.dureeAns} jaar)`)}
             </span>
           </span>
           <span className="mens-ex-row">
-            <span>Taux débiteur annuel fixe</span>
-            <span>{pct(ex.tauxAnnuel)}</span>
+            <span>{t("Taux débiteur annuel fixe", "Vaste jaarlijkse debetrentevoet")}</span>
+            <span>{pct(ex.tauxAnnuel, lang)}</span>
           </span>
           <span className="mens-ex-row">
-            <span>TAEG</span>
-            <span>{pct(ex.taegAnnuel)}</span>
+            <span>{t("TAEG", "JKP")}</span>
+            <span>{pct(ex.taegAnnuel, lang)}</span>
           </span>
           <span className="mens-ex-row">
-            <span>Mensualité ({ex.dureeMois} mensualités)</span>
-            <span>{eur(ex.mensualite)}</span>
+            <span>{t(`Mensualité (${ex.dureeMois} mensualités)`, `Maandbedrag (${ex.dureeMois} maandbedragen)`)}</span>
+            <span>{eur(ex.mensualite, lang)}</span>
           </span>
           <span className="mens-ex-row">
-            <span>Montant total dû</span>
-            <span>{eur(ex.montantTotalDu)}</span>
+            <span>{t("Montant total dû", "Totaal verschuldigd bedrag")}</span>
+            <span>{eur(ex.montantTotalDu, lang)}</span>
           </span>
           <span className="mens-ex-note">
-            Sous réserve d'acceptation du dossier. Les hypothèses ne constituent pas une offre de crédit.
+            {t(
+              "Sous réserve d'acceptation du dossier. Les hypothèses ne constituent pas une offre de crédit.",
+              "Onder voorbehoud van aanvaarding van het dossier. De hypotheses vormen geen kredietaanbod."
+            )}
           </span>
         </span>
       )}

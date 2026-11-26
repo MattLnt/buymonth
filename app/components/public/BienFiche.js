@@ -4,7 +4,9 @@ import { prixDecaisse, libellePrixPublic } from '@/lib/regime'
 import { BienGallery } from '@/app/components/public/BienGallery'
 import { SimulateurModal } from '@/app/components/public/SimulateurModal'
 import Mensualite from '@/app/components/Mensualite'
-import { IDENTIFICATION_FINANCE } from '@/lib/mensualiteConfig'
+import { identificationFinance } from '@/lib/mensualiteConfig'
+import { getT } from '@/lib/i18n/server'
+import { libelleType, libelleProvince } from '@/app/components/dashboard/libelles'
 import PublicNav from '@/app/components/PublicNav'
 import PublicFooter from '@/app/components/PublicFooter'
 
@@ -19,15 +21,15 @@ const specIcon = {
   pin: <><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></>,
 }
 
-const STATUT_LABEL = { HORS_LIGNE: 'Hors-ligne', VENDU: 'Vendu', OPTION: 'Sous option', ACTIF: 'Actif' }
+const statutLabels = (t) => ({ HORS_LIGNE: t('Hors-ligne', 'Offline'), VENDU: t('Vendu', 'Verkocht'), OPTION: t('Sous option', 'In optie'), ACTIF: t('Actif', 'Actief') })
 
 // Pastille de statut affichée sur la fiche (près du titre)
-const STATUT_PASTILLE = {
-  ACTIF: { label: 'En vente', c: '#1C6B52', bg: 'rgba(36,158,124,0.14)', dot: '#249E7C' },
-  OPTION: { label: 'Sous option', c: '#8A6D1B', bg: 'rgba(232,153,35,0.16)', dot: '#E89923' },
-  HORS_LIGNE: { label: 'Hors-ligne', c: '#5A6B7D', bg: '#EEF1F5', dot: '#8A92A6' },
-  VENDU: { label: 'Vendu', c: '#193B5E', bg: 'rgba(25,59,94,0.10)', dot: '#193B5E' },
-}
+const statutPastilles = (t) => ({
+  ACTIF: { label: t('En vente', 'Te koop'), c: '#1C6B52', bg: 'rgba(36,158,124,0.14)', dot: '#249E7C' },
+  OPTION: { label: t('Sous option', 'In optie'), c: '#8A6D1B', bg: 'rgba(232,153,35,0.16)', dot: '#E89923' },
+  HORS_LIGNE: { label: t('Hors-ligne', 'Offline'), c: '#5A6B7D', bg: '#EEF1F5', dot: '#8A92A6' },
+  VENDU: { label: t('Vendu', 'Verkocht'), c: '#193B5E', bg: 'rgba(25,59,94,0.10)', dot: '#193B5E' },
+})
 
 /*
  * Rendu complet d'une fiche bien. Réutilisé par :
@@ -36,16 +38,17 @@ const STATUT_PASTILLE = {
  */
 export async function BienFiche({ bien, apercu = false }) {
   const cfg = await getConfigMensualite()
+  const { lang, t } = await getT()
 
   const specs = [
-    bien.type && { icon: 'type', label: 'Type de bien', value: bien.type },
-    bien.chambres != null && { icon: 'bed', label: 'Chambres', value: bien.chambres },
-    bien.sallesDeBain != null && { icon: 'bath', label: 'Salles de bain', value: bien.sallesDeBain },
-    bien.surface != null && { icon: 'ruler', label: 'Surface habitable', value: `${bien.surface} m²` },
-    bien.terrasse != null && bien.terrasse > 0 && { icon: 'terrasse', label: 'Terrasse', value: `${bien.terrasse} m²` },
-    bien.jardin != null && bien.jardin > 0 && { icon: 'jardin', label: 'Jardin', value: `${bien.jardin} m²` },
-    bien.pebClasse && { icon: 'peb', label: 'Classe PEB', value: bien.pebClasse + (bien.pebKwh ? ` · ${bien.pebKwh} kWh/m²·an` : '') },
-    (bien.ville || bien.province) && { icon: 'pin', label: 'Localisation', value: [bien.ville, bien.province].filter(Boolean).join(', ') },
+    bien.type && { icon: 'type', label: t('Type de bien', 'Type pand'), value: libelleType(bien.type, lang) },
+    bien.chambres != null && { icon: 'bed', label: t('Chambres', 'Slaapkamers'), value: bien.chambres },
+    bien.sallesDeBain != null && { icon: 'bath', label: t('Salles de bain', 'Badkamers'), value: bien.sallesDeBain },
+    bien.surface != null && { icon: 'ruler', label: t('Surface habitable', 'Bewoonbare oppervlakte'), value: `${bien.surface} m²` },
+    bien.terrasse != null && bien.terrasse > 0 && { icon: 'terrasse', label: t('Terrasse', 'Terras'), value: `${bien.terrasse} m²` },
+    bien.jardin != null && bien.jardin > 0 && { icon: 'jardin', label: t('Jardin', 'Tuin'), value: `${bien.jardin} m²` },
+    bien.pebClasse && { icon: 'peb', label: t('Classe PEB', 'EPC-klasse'), value: bien.pebClasse + (bien.pebKwh ? ` · ${bien.pebKwh} ${t('kWh/m²·an', 'kWh/m²·jaar')}` : '') },
+    (bien.ville || bien.province) && { icon: 'pin', label: t('Localisation', 'Ligging'), value: [bien.ville, libelleProvince(bien.province, lang)].filter(Boolean).join(', ') },
   ].filter(Boolean)
 
   // Le simulateur compare le budget du visiteur au prix décaissé (TVAC pour le neuf)
@@ -58,10 +61,10 @@ export async function BienFiche({ bien, apercu = false }) {
   const agenceHref = !apercu && bien.client?.slug ? `/agences/${bien.client.slug}` : null
 
   const estVisible = bien.published
-  const statutLabel = STATUT_LABEL[bien.statut] || bien.statut
+  const statutLabel = statutLabels(t)[bien.statut] || bien.statut
 
   // Pastille de statut : en public on ne montre que ACTIF/OPTION ; en aperçu on montre les 4 statuts
-  const stPastille = STATUT_PASTILLE[bien.statut]
+  const stPastille = statutPastilles(t)[bien.statut]
   const montrePastille = stPastille && (apercu || bien.statut === 'ACTIF' || bien.statut === 'OPTION')
 
   const agenceInner = bien.client?.societe ? (
@@ -71,7 +74,7 @@ export async function BienFiche({ bien, apercu = false }) {
           {bien.client.logoUrl ? <img src={bien.client.logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : bien.client.societe[0]?.toUpperCase()}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12, color: '#8A92A6' }}>Proposé par</div>
+          <div style={{ fontSize: 12, color: '#8A92A6' }}>{t('Proposé par', 'Aangeboden door')}</div>
           <div style={{ fontSize: 15, fontWeight: 700, color: '#193B5E', display: 'flex', alignItems: 'center', gap: 6 }}>
             {bien.client.societe}
             {agenceHref && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7CB8A8" strokeWidth="2" style={{ flexShrink: 0 }}><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>}
@@ -80,12 +83,12 @@ export async function BienFiche({ bien, apercu = false }) {
       </div>
       {bien.client.telephone && (
         <div style={{ fontSize: 13, color: '#5A6275', paddingTop: 14, borderTop: '1px solid #F2F5FA' }}>
-          <span style={{ color: '#8A92A6' }}>Téléphone : </span>{bien.client.telephone}
+          <span style={{ color: '#8A92A6' }}>{t('Téléphone : ', 'Telefoon: ')}</span>{bien.client.telephone}
         </div>
       )}
       {agenceHref && (
         <div style={{ fontSize: 12.5, color: '#7CB8A8', fontWeight: 600, marginTop: bien.client.telephone ? 12 : 14, paddingTop: bien.client.telephone ? 12 : 14, borderTop: '1px solid #F2F5FA' }}>
-          Voir tous les biens de cette agence →
+          {t('Voir tous les biens de cette agence →', 'Alle panden van dit vastgoedkantoor bekijken →')}
         </div>
       )}
     </>
@@ -107,18 +110,18 @@ export async function BienFiche({ bien, apercu = false }) {
                 </span>
                 <div style={{ flex: 1, minWidth: 200 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 15.5, fontWeight: 700, color: '#fff' }}>Aperçu privé</span>
+                    <span style={{ fontSize: 15.5, fontWeight: 700, color: '#fff' }}>{t('Aperçu privé', 'Privévoorbeeld')}</span>
                     <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', color: estVisible ? '#7CB8A8' : '#F4B063', background: estVisible ? 'rgba(124,184,168,0.16)' : 'rgba(244,176,99,0.14)', border: `1px solid ${estVisible ? 'rgba(124,184,168,0.35)' : 'rgba(244,176,99,0.35)'}`, padding: '3px 10px', borderRadius: 20 }}>{statutLabel}</span>
                   </div>
                   <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
                     {estVisible
-                      ? 'Voici le rendu public de ce bien, tel que le verront les acheteurs.'
-                      : "Voici le rendu tel qu'il apparaîtra en public. Ce bien n'est pas diffusé actuellement."}
+                      ? t('Voici le rendu public de ce bien, tel que le verront les acheteurs.', 'Zo ziet dit pand er publiek uit, zoals kopers het zullen zien.')
+                      : t("Voici le rendu tel qu'il apparaîtra en public. Ce bien n'est pas diffusé actuellement.", 'Zo zal het pand er publiek uitzien. Dit pand wordt momenteel niet gepubliceerd.')}
                   </div>
                 </div>
                 <Link href="/dashboard/client/biens" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13.5, fontWeight: 700, color: '#16324F', background: '#fff', padding: '11px 18px', borderRadius: 10, textDecoration: 'none', flexShrink: 0 }}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-                  Retour à Mes biens
+                  {t('Retour à Mes biens', 'Terug naar Mijn panden')}
                 </Link>
               </div>
             </div>
@@ -130,7 +133,7 @@ export async function BienFiche({ bien, apercu = false }) {
       <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', padding: apercu ? '22px 0 28px' : '96px 0 28px' }}>
         <div style={{ ...WRAP }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>
-            <Link href="/biens" style={{ color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }}>Catalogue</Link>
+            <Link href="/biens" style={{ color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }}>{t('Catalogue', 'Aanbod')}</Link>
             <span>→</span>
             <span style={{ color: '#7CB8A8', fontWeight: 600 }}>{bien.titre}</span>
           </div>
@@ -161,17 +164,17 @@ export async function BienFiche({ bien, apercu = false }) {
               {bien.demo && (
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(25,59,94,0.06)', border: '1px solid rgba(25,59,94,0.12)', borderRadius: 10, padding: '7px 12px', margin: '6px 0 10px', fontSize: 12.5, fontWeight: 600, color: '#193B5E' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                  Bien fictif, à titre d'illustration
+                  {t("Bien fictif, à titre d'illustration", 'Fictief pand, ter illustratie')}
                 </div>
               )}
               <div style={{ fontSize: 15, color: '#8A92A6', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                {[bien.ville, bien.province].filter(Boolean).join(', ') || 'Belgique'}
+                {[bien.ville, libelleProvince(bien.province, lang)].filter(Boolean).join(', ') || t('Belgique', 'België')}
               </div>
             </div>
 
             <div style={card}>
-              <h2 style={{ fontSize: 17, fontWeight: 700, color: '#193B5E', margin: '0 0 18px' }}>Caractéristiques</h2>
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: '#193B5E', margin: '0 0 18px' }}>{t('Caractéristiques', 'Kenmerken')}</h2>
               <div className="bien-specs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 {specs.map((s) => (
                   <div key={s.label} style={{ background: '#FAFDFD', border: '1px solid #EEF2F7', borderRadius: 12, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -189,7 +192,7 @@ export async function BienFiche({ bien, apercu = false }) {
 
             {bien.description && (
               <div style={card}>
-                <h2 style={{ fontSize: 17, fontWeight: 700, color: '#193B5E', margin: '0 0 12px' }}>Description</h2>
+                <h2 style={{ fontSize: 17, fontWeight: 700, color: '#193B5E', margin: '0 0 12px' }}>{t('Description', 'Beschrijving')}</h2>
                 <p style={{ fontSize: 14.5, color: '#3D4759', lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap' }}>{bien.description}</p>
               </div>
             )}
@@ -200,9 +203,9 @@ export async function BienFiche({ bien, apercu = false }) {
             <div style={{ background: 'linear-gradient(150deg, #16324F 0%, #1D4267 100%)', borderRadius: 16, padding: 26, position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: -40, right: -30, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,184,168,0.2) 0%, transparent 65%)' }} />
               <div style={{ position: 'relative' }}>
-                <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="hero" tone="dark" prefix="Propriétaire dès" />
+                <Mensualite prixTotal={bien.prixTotal} regime={bien.regime} cfg={cfg} variant="hero" tone="dark" prefix={t('Propriétaire dès', 'Eigenaar vanaf')} />
                 <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                  Prix du bien : <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{libellePrixPublic(bien.prixTotal, bien.regime)}</strong>
+                  {t('Prix du bien : ', 'Prijs van het pand: ')}<strong style={{ color: 'rgba(255,255,255,0.85)' }}>{libellePrixPublic(bien.prixTotal, bien.regime, lang)}</strong>
                 </div>
               </div>
             </div>
@@ -210,13 +213,13 @@ export async function BienFiche({ bien, apercu = false }) {
             <div style={{ ...card, padding: 22 }}>
               {bien.demo && (
                 <p style={{ fontSize: 12, color: '#5A6275', margin: '0 0 12px', lineHeight: 1.5, textAlign: 'center' }}>
-                  Bien fictif, à titre d'illustration : cette résidence n'existe pas.
+                  {t("Bien fictif, à titre d'illustration : cette résidence n'existe pas.", 'Fictief pand, ter illustratie: deze residentie bestaat niet.')}
                 </p>
               )}
               <SimulateurModal bien={simBien} cfg={cfg} />
               {bien.urlClient && (
                 <a href={bien.urlClient} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', background: '#fff', color: '#193B5E', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none', border: '1.5px solid #E8EDF2', marginTop: 10 }}>
-                  Voir l'annonce complète
+                  {t("Voir l'annonce complète", 'Volledige advertentie bekijken')}
                 </a>
               )}
             </div>
@@ -234,7 +237,7 @@ export async function BienFiche({ bien, apercu = false }) {
             )}
 
             <p style={{ fontSize: 10.5, color: '#A9B0BE', margin: 0, lineHeight: 1.5, textAlign: 'center', padding: '0 8px' }}>
-              Sous réserve d'acceptation du crédit. {IDENTIFICATION_FINANCE}
+              {t("Sous réserve d'acceptation du crédit.", 'Onder voorbehoud van aanvaarding van het krediet.')} {identificationFinance(lang)}
             </p>
           </div>
         </div>

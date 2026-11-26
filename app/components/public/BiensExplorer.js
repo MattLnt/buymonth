@@ -4,6 +4,8 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { FormSelect } from '@/app/components/dashboard/FormSelect'
 import { BienPublicCard } from '@/app/components/public/BienPublicCard'
 import { estNeuf as estNeufRegime } from '@/lib/regime'
+import { useLang } from '@/app/components/i18n/LangProvider'
+import { libelleType, libelleProvince } from '@/app/components/dashboard/libelles'
 
 const TYPES = ['Appartement', 'Maison', 'Studio', 'Villa', 'Terrain', 'Bureau', 'Commerce']
 const PROVINCES = ['Anvers', 'Brabant flamand', 'Brabant wallon', 'Bruxelles', 'Flandre-Occidentale', 'Flandre-Orientale', 'Hainaut', 'Liège', 'Limbourg', 'Luxembourg', 'Namur']
@@ -20,6 +22,7 @@ function estNeuf(b) {
 }
 
 export function BiensExplorer({ biens, cfg }) {
+  const { lang, t } = useLang()
   const [q, setQ] = useState('')
   const [type, setType] = useState('')
   const [province, setProvince] = useState('')
@@ -68,8 +71,8 @@ export function BiensExplorer({ biens, cfg }) {
       if (province && b.province !== province) return
       if (b.ville) set.add(b.ville)
     })
-    return [...set].sort((a, b) => a.localeCompare(b, 'fr'))
-  }, [biens, province])
+    return [...set].sort((a, b) => a.localeCompare(b, lang))
+  }, [biens, province, lang])
 
   // Si on change de province et que la ville choisie n'y est plus, on la réinitialise
   useEffect(() => {
@@ -134,9 +137,9 @@ export function BiensExplorer({ biens, cfg }) {
 
   const compteur = (val, dec, inc) => (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <button onClick={dec} style={{ width: 42, height: 42, borderRadius: 10, border: '1.5px solid #E8EDF2', background: '#fff', cursor: 'pointer', fontSize: 18, color: '#193B5E', fontWeight: 600 }}>−</button>
-      <div style={{ flex: 1, textAlign: 'center', padding: '11px', borderRadius: 10, background: '#FAFDFD', border: '1.5px solid #E8EDF2', fontSize: 14, fontWeight: 600, color: '#193B5E' }}>{val || 'Indifférent'}</div>
-      <button onClick={inc} style={{ width: 42, height: 42, borderRadius: 10, border: '1.5px solid #E8EDF2', background: '#fff', cursor: 'pointer', fontSize: 18, color: '#193B5E', fontWeight: 600 }}>+</button>
+      <button onClick={dec} aria-label={t('Moins', 'Minder')} style={{ width: 42, height: 42, borderRadius: 10, border: '1.5px solid #E8EDF2', background: '#fff', cursor: 'pointer', fontSize: 18, color: '#193B5E', fontWeight: 600 }}>−</button>
+      <div style={{ flex: 1, textAlign: 'center', padding: '11px', borderRadius: 10, background: '#FAFDFD', border: '1.5px solid #E8EDF2', fontSize: 14, fontWeight: 600, color: '#193B5E' }}>{val || t('Indifférent', 'Maakt niet uit')}</div>
+      <button onClick={inc} aria-label={t('Plus', 'Meer')} style={{ width: 42, height: 42, borderRadius: 10, border: '1.5px solid #E8EDF2', background: '#fff', cursor: 'pointer', fontSize: 18, color: '#193B5E', fontWeight: 600 }}>+</button>
     </div>
   )
 
@@ -145,12 +148,12 @@ export function BiensExplorer({ biens, cfg }) {
     <>
       {/* Recherche libre avec autocomplete */}
       <div style={{ marginBottom: 20, position: 'relative' }} ref={sugRef}>
-        <label style={labelStyle}>Recherche</label>
+        <label style={labelStyle}>{t('Recherche', 'Zoeken')}</label>
         <input
           value={q}
           onChange={(e) => { setQ(e.target.value); setShowSug(true) }}
           onFocus={() => setShowSug(true)}
-          placeholder="Titre, mot-clé..."
+          placeholder={t('Titre, mot-clé...', 'Titel, trefwoord...')}
           style={inputStyle}
         />
         {showSug && suggestions.length > 0 && (
@@ -174,23 +177,23 @@ export function BiensExplorer({ biens, cfg }) {
 
       {/* Province */}
       <div style={{ marginBottom: 16 }}>
-        <FormSelect label="Province" value={province} onChange={setProvince} options={['', ...PROVINCES].map((p) => ({ value: p, label: p || 'Toutes' }))} placeholder="Toutes" />
+        <FormSelect label={t('Province', 'Provincie')} value={province} onChange={setProvince} options={['', ...PROVINCES].map((p) => ({ value: p, label: p ? libelleProvince(p, lang) : t('Toutes', 'Alle') }))} placeholder={t('Toutes', 'Alle')} />
       </div>
 
       {/* Ville (dépend de la province) */}
       <div style={{ marginBottom: 20 }}>
         <FormSelect
-          label="Ville"
+          label={t('Ville', 'Gemeente')}
           value={ville}
           onChange={setVille}
-          options={['', ...villesDispo].map((v) => ({ value: v, label: v || (province ? 'Toutes les villes' : 'Toutes') }))}
-          placeholder="Toutes"
+          options={['', ...villesDispo].map((v) => ({ value: v, label: v || (province ? t('Toutes les villes', 'Alle gemeenten') : t('Toutes', 'Alle')) }))}
+          placeholder={t('Toutes', 'Alle')}
         />
       </div>
 
       {/* Budget mensuel */}
       <div style={{ marginBottom: 20 }}>
-        <label style={labelStyle}>Budget mensuel</label>
+        <label style={labelStyle}>{t('Budget mensuel', 'Maandelijks budget')}</label>
         <div style={{ display: 'flex', gap: 10 }}>
           <div style={{ position: 'relative', flex: 1 }}>
             <input type="number" value={minM} onChange={(e) => setMinM(e.target.value)} placeholder="Min" style={{ ...inputStyle, paddingRight: 30 }} />
@@ -205,49 +208,49 @@ export function BiensExplorer({ biens, cfg }) {
 
       {/* Type */}
       <div style={{ marginBottom: 16 }}>
-        <FormSelect label="Type de bien" value={type} onChange={setType} options={['', ...TYPES].map((t) => ({ value: t, label: t || 'Tous les types' }))} placeholder="Tous les types" />
+        <FormSelect label={t('Type de bien', 'Type pand')} value={type} onChange={setType} options={['', ...TYPES].map((ty) => ({ value: ty, label: ty ? libelleType(ty, lang) : t('Tous les types', 'Alle types') }))} placeholder={t('Tous les types', 'Alle types')} />
       </div>
 
       {/* Neuf / Existant */}
       <div style={{ marginBottom: 20 }}>
         <FormSelect
-          label="Neuf ou existant"
+          label={t('Neuf ou existant', 'Nieuwbouw of bestaand')}
           value={neuf}
           onChange={setNeuf}
-          options={[{ value: '', label: 'Indifférent' }, { value: 'neuf', label: 'Neuf' }, { value: 'existant', label: 'Existant' }]}
-          placeholder="Indifférent"
+          options={[{ value: '', label: t('Indifférent', 'Maakt niet uit') }, { value: 'neuf', label: t('Neuf', 'Nieuwbouw') }, { value: 'existant', label: t('Existant', 'Bestaand') }]}
+          placeholder={t('Indifférent', 'Maakt niet uit')}
         />
       </div>
 
       {/* Surface minimum */}
       <div style={{ marginBottom: 20 }}>
-        <label style={labelStyle}>Surface minimum (m²)</label>
-        <input type="number" value={surfaceMin} onChange={(e) => setSurfaceMin(e.target.value)} placeholder="Ex. 80" style={inputStyle} />
+        <label style={labelStyle}>{t('Surface minimum (m²)', 'Minimale oppervlakte (m²)')}</label>
+        <input type="number" value={surfaceMin} onChange={(e) => setSurfaceMin(e.target.value)} placeholder={t('Ex. 80', 'Bv. 80')} style={inputStyle} />
       </div>
 
       {/* Chambres minimum */}
       <div style={{ marginBottom: 20 }}>
-        <label style={labelStyle}>Chambres minimum</label>
+        <label style={labelStyle}>{t('Chambres minimum', 'Minimum slaapkamers')}</label>
         {compteur(chambres, () => setChambres((n) => Math.max(0, n - 1)), () => setChambres((n) => n + 1))}
       </div>
 
       {/* Salles de bain minimum */}
       <div style={{ marginBottom: 20 }}>
-        <label style={labelStyle}>Salles de bain minimum</label>
+        <label style={labelStyle}>{t('Salles de bain minimum', 'Minimum badkamers')}</label>
         {compteur(sdb, () => setSdb((n) => Math.max(0, n - 1)), () => setSdb((n) => n + 1))}
       </div>
 
       {/* Extérieur */}
       <div>
-        <label style={labelStyle}>Extérieur</label>
+        <label style={labelStyle}>{t('Extérieur', 'Buitenruimte')}</label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', fontSize: 13.5, color: '#3D4759', fontWeight: 500 }}>
             <input type="checkbox" checked={terrasse} onChange={(e) => setTerrasse(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#7CB8A8', cursor: 'pointer' }} />
-            Terrasse
+            {t('Terrasse', 'Terras')}
           </label>
           <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', fontSize: 13.5, color: '#3D4759', fontWeight: 500 }}>
             <input type="checkbox" checked={jardin} onChange={(e) => setJardin(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#7CB8A8', cursor: 'pointer' }} />
-            Jardin
+            {t('Jardin', 'Tuin')}
           </label>
         </div>
       </div>
@@ -261,9 +264,9 @@ export function BiensExplorer({ biens, cfg }) {
       {!isMobile && (
         <div style={{ background: '#fff', border: '1px solid #EEF2F7', borderRadius: 16, padding: 22, position: 'sticky', top: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: 0 }}>Filtres</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#193B5E', margin: 0 }}>{t('Filtres', 'Filters')}</h3>
             {hasFilters && (
-              <button onClick={reset} style={{ fontSize: 12.5, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Réinitialiser</button>
+              <button onClick={reset} style={{ fontSize: 12.5, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>{t('Réinitialiser', 'Wissen')}</button>
             )}
           </div>
           {filterFields}
@@ -281,25 +284,27 @@ export function BiensExplorer({ biens, cfg }) {
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', borderRadius: 12, border: '1.5px solid #193B5E', background: '#fff', color: '#193B5E', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
-              Filtres
+              {t('Filtres', 'Filters')}
               {activeCount > 0 && (
                 <span style={{ background: '#193B5E', color: '#fff', borderRadius: 999, minWidth: 20, height: 20, padding: '0 6px', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{activeCount}</span>
               )}
             </button>
             {hasFilters && (
-              <button onClick={reset} style={{ fontSize: 13, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Réinitialiser</button>
+              <button onClick={reset} style={{ fontSize: 13, color: '#7CB8A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>{t('Réinitialiser', 'Wissen')}</button>
             )}
           </div>
         )}
 
         <div style={{ fontSize: 14, color: '#5A6275', marginBottom: 18, fontWeight: 500 }}>
-          {filtered.length} bien{filtered.length > 1 ? 's' : ''} {hasFilters ? 'correspondant' + (filtered.length > 1 ? 's' : '') : 'disponible' + (filtered.length > 1 ? 's' : '')}
+          {lang === 'nl'
+            ? `${filtered.length} ${filtered.length === 1 ? 'pand' : 'panden'} ${hasFilters ? 'gevonden' : 'beschikbaar'}`
+            : `${filtered.length} bien${filtered.length > 1 ? 's' : ''} ${hasFilters ? 'correspondant' + (filtered.length > 1 ? 's' : '') : 'disponible' + (filtered.length > 1 ? 's' : '')}`}
         </div>
 
         {filtered.length === 0 ? (
           <div style={{ background: '#fff', border: '1px dashed #D8DFE9', borderRadius: 16, padding: '64px 24px', textAlign: 'center' }}>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>Aucun bien trouvé</h3>
-            <p style={{ fontSize: 14, color: '#5A6275', margin: 0 }}>Essayez d'élargir vos critères de recherche.</p>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#193B5E', margin: '0 0 6px' }}>{t('Aucun bien trouvé', 'Geen panden gevonden')}</h3>
+            <p style={{ fontSize: 14, color: '#5A6275', margin: 0 }}>{t("Essayez d'élargir vos critères de recherche.", 'Probeer uw zoekcriteria te verruimen.')}</p>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 22 }}>
@@ -331,8 +336,8 @@ export function BiensExplorer({ biens, cfg }) {
           >
             {/* En-tête */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 20px', borderBottom: '1px solid #EEF2F7', flex: 'none' }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#193B5E' }}>Filtres</h3>
-              <button onClick={() => setSheetOpen(false)} aria-label="Fermer" style={{ width: 36, height: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'none', cursor: 'pointer', color: '#193B5E' }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#193B5E' }}>{t('Filtres', 'Filters')}</h3>
+              <button onClick={() => setSheetOpen(false)} aria-label={t('Fermer', 'Sluiten')} style={{ width: 36, height: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'none', cursor: 'pointer', color: '#193B5E' }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
               </button>
             </div>
@@ -344,9 +349,11 @@ export function BiensExplorer({ biens, cfg }) {
 
             {/* Pied : Réinitialiser + Voir X biens */}
             <div style={{ display: 'flex', gap: 12, padding: '14px 20px', borderTop: '1px solid #EEF2F7', flex: 'none' }}>
-              <button onClick={reset} style={{ flex: '0 0 auto', padding: '13px 18px', borderRadius: 12, border: '1.5px solid #E8EDF2', background: '#fff', color: '#193B5E', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Réinitialiser</button>
+              <button onClick={reset} style={{ flex: '0 0 auto', padding: '13px 18px', borderRadius: 12, border: '1.5px solid #E8EDF2', background: '#fff', color: '#193B5E', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>{t('Réinitialiser', 'Wissen')}</button>
               <button onClick={() => setSheetOpen(false)} style={{ flex: 1, padding: '13px 18px', borderRadius: 12, border: 'none', background: '#193B5E', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
-                Voir {filtered.length} bien{filtered.length > 1 ? 's' : ''}
+                {lang === 'nl'
+                  ? `${filtered.length} ${filtered.length === 1 ? 'pand' : 'panden'} bekijken`
+                  : `Voir ${filtered.length} bien${filtered.length > 1 ? 's' : ''}`}
               </button>
             </div>
           </div>

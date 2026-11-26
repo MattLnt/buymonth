@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { resoudreCustomer } from '@/lib/stripe-customer'
+import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,12 +19,12 @@ export const dynamic = 'force-dynamic'
  * chiffres, mois et année d'expiration. Aucun numéro complet, aucun IBAN entier.
  */
 
-function moyenLisible(pm) {
+function moyenLisible(pm, t) {
   if (!pm) return null
   if (pm.type === 'card' && pm.card) {
     return {
       type: 'card',
-      libelle: 'Carte bancaire',
+      libelle: t('Carte bancaire', 'Bankkaart'),
       marque: pm.card.brand || null,
       fin: pm.card.last4 || null,
       expireLe: pm.card.exp_month && pm.card.exp_year
@@ -34,29 +35,31 @@ function moyenLisible(pm) {
   if (pm.type === 'sepa_debit' && pm.sepa_debit) {
     return {
       type: 'sepa_debit',
-      libelle: 'Prélèvement SEPA',
+      libelle: t('Prélèvement SEPA', 'SEPA-domiciliëring'),
       marque: pm.sepa_debit.bank_code || null,
       fin: pm.sepa_debit.last4 || null,
       expireLe: null,
     }
   }
-  return { type: pm.type, libelle: 'Moyen de paiement', marque: null, fin: null, expireLe: null }
+  return { type: pm.type, libelle: t('Moyen de paiement', 'Betaalmethode'), marque: null, fin: null, expireLe: null }
 }
 
-const STATUT_FACTURE = {
-  paid: 'Payée',
-  open: 'En attente',
-  draft: 'Brouillon',
-  uncollectible: 'Irrécouvrable',
-  void: 'Annulée',
-}
+const statutFacture = (t) => ({
+  paid: t('Payée', 'Betaald'),
+  open: t('En attente', 'Openstaand'),
+  draft: t('Brouillon', 'Concept'),
+  uncollectible: t('Irrécouvrable', 'Oninbaar'),
+  void: t('Annulée', 'Geannuleerd'),
+})
 
 export async function GET() {
+  const { t } = await getT()
+  const STATUT_FACTURE = statutFacture(t)
   try {
-    if (!stripe) return NextResponse.json({ error: 'Stripe non configuré.' }, { status: 500 })
+    if (!stripe) return NextResponse.json({ error: t('Stripe non configuré.', 'Stripe is niet geconfigureerd.') }, { status: 500 })
 
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
 
     const client = await prisma.client.findUnique({ where: { userId: session.user.id } })
 
@@ -75,7 +78,7 @@ export async function GET() {
       const pm = await stripe.paymentMethods.retrieve(
         typeof defautId === 'string' ? defautId : defautId.id
       )
-      moyen = moyenLisible(pm)
+      moyen = moyenLisible(pm, t)
     }
 
     const liste = await stripe.invoices.list({ customer: customer.id, limit: 24 })
@@ -112,6 +115,6 @@ export async function GET() {
     return NextResponse.json({ moyen, factures, resiliation })
   } catch (e) {
     console.error('[FACTURATION]', e?.message)
-    return NextResponse.json({ error: 'Impossible de charger vos informations de facturation.' }, { status: 500 })
+    return NextResponse.json({ error: t('Impossible de charger vos informations de facturation.', 'Uw factuurgegevens konden niet worden geladen.') }, { status: 500 })
   }
 }

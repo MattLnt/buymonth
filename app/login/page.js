@@ -5,9 +5,12 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import CalMark from "../components/vitrine/CalMark";
+import { useLang } from "@/app/components/i18n/LangProvider";
+import LangSwitcher from "@/app/components/i18n/LangSwitcher";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useLang();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -28,7 +31,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (res.error) {
-      setError("Email ou mot de passe incorrect");
+      setError(t("Email ou mot de passe incorrect", "E-mail of wachtwoord onjuist"));
     } else {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -93,6 +96,10 @@ export default function LoginPage() {
           display: none;
         }
 
+        .login-mobile-lang {
+          display: none;
+        }
+
         .login-content {
           width: 100%;
           max-width: 440px;
@@ -132,6 +139,14 @@ export default function LoginPage() {
             justify-content: flex-start !important;
             overflow-x: hidden !important;
             overflow-y: auto !important;
+            position: relative !important;
+          }
+
+          .login-mobile-lang {
+            display: block !important;
+            position: absolute !important;
+            top: 12px !important;
+            right: 14px !important;
           }
 
           .login-mobile-header {
@@ -210,7 +225,7 @@ export default function LoginPage() {
         />
 
         {/* Logo */}
-        <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
           <Link
             href="/"
             style={{
@@ -230,6 +245,7 @@ export default function LoginPage() {
               Buy<span style={{ color: "#7CB8A8" }}>Month</span>
             </span>
           </Link>
+          <LangSwitcher color="#fff" />
         </div>
 
         {/* Contenu central */}
@@ -262,7 +278,7 @@ export default function LoginPage() {
                 fontWeight: 600,
               }}
             >
-              Espace promoteur
+              {t("Espace promoteur", "Voor projectontwikkelaars")}
             </span>
           </div>
 
@@ -276,9 +292,9 @@ export default function LoginPage() {
               letterSpacing: "-0.02em",
             }}
           >
-            Vos biens affichés
+            {t("Vos biens affichés", "Uw panden getoond")}
             <br />
-            en <span style={{ color: "#7CB8A8" }}>mensualités.</span>
+            {t("en ", "in ")}<span style={{ color: "#7CB8A8" }}>{t("mensualités.", "maandbedragen.")}</span>
           </h2>
 
           <p
@@ -290,8 +306,10 @@ export default function LoginPage() {
               maxWidth: 360,
             }}
           >
-            Connectez-vous pour gérer vos biens, vos widgets et suivre vos
-            leads.
+            {t(
+              "Connectez-vous pour gérer vos biens, vos widgets et suivre vos leads.",
+              "Log in om uw panden en widgets te beheren en uw leads op te volgen."
+            )}
           </p>
 
           <div
@@ -302,10 +320,10 @@ export default function LoginPage() {
             }}
           >
             {[
-              "Affichez vos biens en budget mensuel clair",
-              "Générez des widgets pour votre site",
-              "Recevez des leads qualifiés en temps réel",
-              "Conforme — partenaire crédit BuyMonth Finance",
+              t("Affichez vos biens en budget mensuel clair", "Toon uw panden met een duidelijk maandbudget"),
+              t("Générez des widgets pour votre site", "Maak widgets voor uw website"),
+              t("Recevez des leads qualifiés en temps réel", "Ontvang gekwalificeerde leads in realtime"),
+              t("Conforme — partenaire crédit BuyMonth Finance", "Conform — kredietpartner BuyMonth Finance"),
             ].map((item, i) => (
               <div
                 key={i}
@@ -369,7 +387,7 @@ export default function LoginPage() {
                 margin: "0 0 10px",
               }}
             >
-              Pas encore de compte ?
+              {t("Pas encore de compte ?", "Nog geen account?")}
             </p>
 
             <Link
@@ -385,7 +403,7 @@ export default function LoginPage() {
                 textDecoration: "none",
               }}
             >
-              Créer un compte promoteur
+              {t("Créer un compte promoteur", "Account aanmaken als projectontwikkelaar")}
             </Link>
           </div>
         </div>
@@ -395,6 +413,11 @@ export default function LoginPage() {
           PANNEAU DROIT / MOBILE
           ========================= */}
       <div className="login-right">
+        {/* Langue (mobile) */}
+        <div className="login-mobile-lang">
+          <LangSwitcher color="#fff" />
+        </div>
+
         {/* En-tête mobile */}
         <div className="login-mobile-header">
           <Link
@@ -444,7 +467,7 @@ export default function LoginPage() {
                 fontWeight: 600,
               }}
             >
-              Espace promoteur
+              {t("Espace promoteur", "Voor projectontwikkelaars")}
             </span>
           </div>
         </div>
@@ -492,7 +515,7 @@ export default function LoginPage() {
                     fontWeight: 700,
                   }}
                 >
-                  Accès sécurisé
+                  {t("Accès sécurisé", "Beveiligde toegang")}
                 </span>
               </div>
 
@@ -505,7 +528,7 @@ export default function LoginPage() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                Connexion
+                {t("Connexion", "Inloggen")}
               </h2>
 
               <p
@@ -515,7 +538,7 @@ export default function LoginPage() {
                   margin: 0,
                 }}
               >
-                Accédez à votre espace promoteur
+                {t("Accédez à votre espace promoteur", "Ga naar uw account als projectontwikkelaar")}
               </p>
             </div>
 
@@ -574,7 +597,7 @@ export default function LoginPage() {
                     marginBottom: 8,
                   }}
                 >
-                  Email
+                  {t("Email", "E-mail")}
                 </label>
 
                 <div style={{ position: "relative" }}>
@@ -605,7 +628,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    placeholder="vous@exemple.com"
+                    placeholder={t("vous@exemple.com", "u@voorbeeld.be")}
                     style={{
                       width: "100%",
                       border: "1.5px solid #E8EDF2",
@@ -639,7 +662,7 @@ export default function LoginPage() {
                     marginBottom: 8,
                   }}
                 >
-                  Mot de passe
+                  {t("Mot de passe", "Wachtwoord")}
                 </label>
 
                 <div style={{ position: "relative" }}>
@@ -677,7 +700,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    placeholder="Votre mot de passe"
+                    placeholder={t("Votre mot de passe", "Uw wachtwoord")}
                     style={{
                       width: "100%",
                       border: "1.5px solid #E8EDF2",
@@ -699,6 +722,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? t("Masquer le mot de passe", "Wachtwoord verbergen") : t("Afficher le mot de passe", "Wachtwoord tonen")}
                     style={{
                       position: "absolute",
                       right: 14,
@@ -759,7 +783,7 @@ export default function LoginPage() {
                       fontWeight: 600,
                     }}
                   >
-                    Mot de passe oublié ?
+                    {t("Mot de passe oublié ?", "Wachtwoord vergeten?")}
                   </Link>
                 </p>
               </div>
@@ -800,11 +824,11 @@ export default function LoginPage() {
                     >
                       <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l-2.83-2.83M16.24 7.76l2.83-2.83" />
                     </svg>
-                    Connexion...
+                    {t("Connexion...", "Inloggen...")}
                   </>
                 ) : (
                   <>
-                    Se connecter
+                    {t("Se connecter", "Inloggen")}
                     <svg
                       width="16"
                       height="16"
@@ -843,7 +867,7 @@ export default function LoginPage() {
                   color: "#C2C8D4",
                 }}
               >
-                Pas encore de compte ?
+                {t("Pas encore de compte ?", "Nog geen account?")}
               </span>
 
               <div
@@ -871,7 +895,7 @@ export default function LoginPage() {
                 textDecoration: "none",
               }}
             >
-              Créer un compte promoteur
+              {t("Créer un compte promoteur", "Account aanmaken als projectontwikkelaar")}
             </Link>
           </div>
 
@@ -884,7 +908,7 @@ export default function LoginPage() {
               textAlign: "center",
             }}
           >
-            © 2026 BuyMonth · Belgique
+            © 2026 BuyMonth · {t("Belgique", "België")}
           </p>
         </div>
       </div>

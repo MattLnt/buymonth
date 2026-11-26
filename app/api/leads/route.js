@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
+import { getT } from '@/lib/i18n/server'
 import { prisma } from '@/lib/prisma'
 import { getSettings } from '@/lib/settings'
 import { envoyerEmailLead, envoyerEmailLeadCommercial } from '@/lib/email'
 import { destinataireRoutage } from '@/lib/routage'
 
 export async function POST(req) {
+  const { t } = await getT()
   try {
     const b = await req.json()
 
@@ -19,13 +21,13 @@ export async function POST(req) {
           ville: true,
           projet: true,
           unite: true,
-          client: { select: { user: { select: { email: true } }, societe: true } },
+          client: { select: { user: { select: { email: true, langue: true } }, societe: true } },
         },
       })
     }
 
     if (!b.email && !b.telephone) {
-      return NextResponse.json({ error: 'Email ou téléphone requis.' }, { status: 400 })
+      return NextResponse.json({ error: t('Email ou téléphone requis.', 'E-mail of telefoon verplicht.') }, { status: 400 })
     }
 
     const lead = await prisma.lead.create({
@@ -62,7 +64,15 @@ export async function POST(req) {
 
       // Bien d'un partenaire : pas de fiche en base, on alimente l'email avec le libelle recu
       const bienEmail = bien || (lead.bienExterne ? { titre: lead.bienExterne } : null)
-      await envoyerEmailLead({ lead, bien: bienEmail, destinataires: uniques })
+      // Le promoteur reçoit l'e-mail dans la langue de son compte ; BuyMonth en français.
+      const langPromoteur = bien?.client?.user?.langue === 'nl' ? 'nl' : 'fr'
+      if (emailPromoteur && langPromoteur === 'nl') {
+        const autres = uniques.filter((e) => e !== emailPromoteur)
+        if (autres.length) await envoyerEmailLead({ lead, bien: bienEmail, destinataires: autres })
+        await envoyerEmailLead({ lead, bien: bienEmail, destinataires: [emailPromoteur], lang: 'nl' })
+      } else {
+        await envoyerEmailLead({ lead, bien: bienEmail, destinataires: uniques })
+      }
     } catch (e) {
       // on n'échoue jamais la requête si l'email plante
     }
@@ -74,7 +84,7 @@ export async function POST(req) {
       if (bien && lead.consentPromoteur) {
         const destinataire = await destinataireRoutage({ lead, bien })
         if (destinataire) {
-          await envoyerEmailLeadCommercial({ lead, bien, destinataire })
+          await envoyerEmailLeadCommercial({ lead, bien, destinataire, lang: bien?.client?.user?.langue })
         }
       }
     } catch (e) {
@@ -83,6 +93,6 @@ export async function POST(req) {
 
     return NextResponse.json({ ok: true, leadId: lead.id })
   } catch (e) {
-    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
+    return NextResponse.json({ error: t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
   }
 }

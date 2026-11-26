@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,16 +19,17 @@ export const dynamic = 'force-dynamic'
  * deja regle, et personne ne demande ca en cliquant « resilier ».
  */
 export async function POST(req) {
+  const { t } = await getT()
   try {
-    if (!stripe) return NextResponse.json({ error: 'Stripe non configuré.' }, { status: 500 })
+    if (!stripe) return NextResponse.json({ error: t('Stripe non configuré.', 'Stripe is niet geconfigureerd.') }, { status: 500 })
 
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: t('Non autorisé.', 'Niet toegestaan.') }, { status: 401 })
 
     const { annuler } = await req.json().catch(() => ({}))
 
     const client = await prisma.client.findUnique({ where: { userId: session.user.id } })
-    if (!client?.stripeSubId) return NextResponse.json({ error: 'Aucun abonnement en cours.' }, { status: 400 })
+    if (!client?.stripeSubId) return NextResponse.json({ error: t('Aucun abonnement en cours.', 'Geen lopend abonnement.') }, { status: 400 })
 
     const sub = await stripe.subscriptions.update(client.stripeSubId, {
       cancel_at_period_end: annuler !== false,
@@ -43,11 +45,11 @@ export async function POST(req) {
       resilie: Boolean(sub.cancel_at || sub.cancel_at_period_end),
       le: fin ? fin * 1000 : null,
       message: annuler === false
-        ? 'Votre abonnement est réactivé.'
-        : 'Votre abonnement prendra fin à la date indiquée. Vos biens restent en ligne jusque-là.',
+        ? t('Votre abonnement est réactivé.', 'Uw abonnement is opnieuw geactiveerd.')
+        : t('Votre abonnement prendra fin à la date indiquée. Vos biens restent en ligne jusque-là.', 'Uw abonnement loopt af op de aangegeven datum. Uw panden blijven tot dan online.'),
     })
   } catch (e) {
     console.error('[RESILIER]', e?.message)
-    return NextResponse.json({ error: e?.message || 'Erreur serveur.' }, { status: 500 })
+    return NextResponse.json({ error: e?.message || t('Erreur serveur.', 'Serverfout.') }, { status: 500 })
   }
 }

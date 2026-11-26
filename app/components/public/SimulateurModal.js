@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { Simulateur } from './Simulateur'
+import { useLang } from '@/app/components/i18n/LangProvider'
 
-export function SimulateurModal({ bien, cfg, label = 'Demander mon estimation de capacité' }) {
+export function SimulateurModal({ bien, cfg, label }) {
+  const { t } = useLang()
+  const labelTxt = label ?? t('Demander mon estimation de capacité', 'Mijn leencapaciteit laten berekenen')
   const [open, setOpen] = useState(false)
   const [hover, setHover] = useState(false)
   const [step, setStep] = useState(1)
@@ -60,7 +63,7 @@ export function SimulateurModal({ bien, cfg, label = 'Demander mon estimation de
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
           </svg>
         </span>
-        <span style={{ position: 'relative' }}>{label}</span>
+        <span style={{ position: 'relative' }}>{labelTxt}</span>
       </button>
 
       {open && (
@@ -81,6 +84,7 @@ export function SimulateurModal({ bien, cfg, label = 'Demander mon estimation de
           >
             <button
               onClick={() => setOpen(false)}
+              aria-label={t('Fermer', 'Sluiten')}
               style={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, borderRadius: '50%', background: '#F2F5FA', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5A6275', zIndex: 20 }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>

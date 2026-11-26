@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useLang } from '@/app/components/i18n/LangProvider'
 
 /*
  * Bouton « Envoyer la simulation » + petite fenêtre de saisie de l'adresse e-mail du client.
@@ -10,7 +11,10 @@ import { useEffect, useState } from 'react'
  *   variant : 'card' (bouton compact dans la carte) | 'header' (bouton plein dans l'en-tête de page)
  */
 export function EnvoyerSimulation({ bien, variant = 'card' }) {
+  const { lang, t } = useLang()
   const [open, setOpen] = useState(false)
+  // Langue de l'e-mail envoyé à l'acheteur (par défaut : langue en cours du dashboard)
+  const [emailLang, setEmailLang] = useState(lang)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
@@ -27,6 +31,11 @@ export function EnvoyerSimulation({ bien, variant = 'card' }) {
     }
   }, [open, loading])
 
+  function ouvrir() {
+    setEmailLang(lang)
+    setOpen(true)
+  }
+
   function fermer() {
     setOpen(false)
     setTimeout(() => { setEmail(''); setSent(false); setError('') }, 200)
@@ -40,13 +49,13 @@ export function EnvoyerSimulation({ bien, variant = 'card' }) {
       const res = await fetch('/api/biens/envoyer-simulation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: bien.id, email }),
+        body: JSON.stringify({ id: bien.id, email, lang: emailLang }),
       })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) { setError(data.error || 'Envoi impossible.'); return }
+      if (!res.ok) { setError(data.error || t('Envoi impossible.', 'Versturen mislukt.')); return }
       setSent(true)
     } catch {
-      setError('Envoi impossible. Vérifiez votre connexion.')
+      setError(t('Envoi impossible. Vérifiez votre connexion.', 'Versturen mislukt. Controleer uw verbinding.'))
     } finally {
       setLoading(false)
     }
@@ -62,21 +71,21 @@ export function EnvoyerSimulation({ bien, variant = 'card' }) {
   const bouton = variant === 'header' ? (
     <button
       type="button"
-      onClick={() => setOpen(true)}
+      onClick={ouvrir}
       style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}
     >
       {icone}
-      Envoyer la simulation
+      {t('Envoyer la simulation', 'Simulatie versturen')}
     </button>
   ) : (
     <button
       type="button"
-      onClick={() => setOpen(true)}
-      title="Envoyer le lien de simulation à un client"
+      onClick={ouvrir}
+      title={t('Envoyer le lien de simulation à un client', 'De simulatielink naar een klant sturen')}
       style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 9, background: '#193B5E', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
     >
       {icone}
-      Envoyer la simulation
+      {t('Envoyer la simulation', 'Simulatie versturen')}
     </button>
   )
 
@@ -104,34 +113,34 @@ export function EnvoyerSimulation({ bien, variant = 'card' }) {
 
             {sent ? (
               <>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#193B5E', margin: '0 0 8px', letterSpacing: '-0.01em' }}>Simulation envoyée</h3>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#193B5E', margin: '0 0 8px', letterSpacing: '-0.01em' }}>{t('Simulation envoyée', 'Simulatie verstuurd')}</h3>
                 <p style={{ fontSize: 14, color: '#5A6275', lineHeight: 1.6, margin: '0 0 24px' }}>
-                  Votre client recevra dans quelques instants un e-mail BuyMonth avec le lien de simulation du bien <strong style={{ color: '#193B5E' }}>{bien.titre}</strong>.
+                  {t('Votre client recevra dans quelques instants un e-mail BuyMonth avec le lien de simulation du bien', 'Uw klant ontvangt binnen enkele ogenblikken een e-mail van BuyMonth met de simulatielink voor het pand')} <strong style={{ color: '#193B5E' }}>{bien.titre}</strong>.
                 </p>
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                   <button type="button" onClick={() => { setSent(false); setEmail('') }} style={{ padding: '11px 18px', borderRadius: 10, background: '#F2F5FA', color: '#5A6275', border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-                    Envoyer à un autre client
+                    {t('Envoyer à un autre client', 'Naar een andere klant sturen')}
                   </button>
                   <button type="button" onClick={fermer} style={{ padding: '11px 20px', borderRadius: 10, background: '#193B5E', color: '#fff', border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
-                    Fermer
+                    {t('Fermer', 'Sluiten')}
                   </button>
                 </div>
               </>
             ) : (
               <>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#193B5E', margin: '0 0 8px', letterSpacing: '-0.01em' }}>Envoyer la simulation</h3>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#193B5E', margin: '0 0 8px', letterSpacing: '-0.01em' }}>{t('Envoyer la simulation', 'Simulatie versturen')}</h3>
                 <p style={{ fontSize: 14, color: '#5A6275', lineHeight: 1.6, margin: '0 0 20px' }}>
-                  Votre client recevra un e-mail BuyMonth, à votre nom, avec le lien pour simuler sa mensualité sur le bien <strong style={{ color: '#193B5E' }}>{bien.titre}</strong>.
+                  {t('Votre client recevra un e-mail BuyMonth, à votre nom, avec le lien pour simuler sa mensualité sur le bien', 'Uw klant ontvangt een e-mail van BuyMonth, op uw naam, met de link om zijn maandbedrag te berekenen voor het pand')} <strong style={{ color: '#193B5E' }}>{bien.titre}</strong>.
                 </p>
 
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
-                  Adresse e-mail du client
+                  {t('Adresse e-mail du client', 'E-mailadres van de klant')}
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="client@exemple.be"
+                  placeholder={t('client@exemple.be', 'klant@voorbeeld.be')}
                   required
                   autoFocus
                   disabled={loading}
@@ -141,16 +150,37 @@ export function EnvoyerSimulation({ bien, variant = 'card' }) {
                 />
                 {error && <p style={{ fontSize: 13, color: '#E5484D', margin: '8px 0 0', lineHeight: 1.5 }}>{error}</p>}
 
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#5A6B7D', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '18px 0 8px' }}>
+                  {t("Langue de l'e-mail", 'Taal van de e-mail')}
+                </label>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  {[{ code: 'fr', label: 'Français' }, { code: 'nl', label: 'Nederlands' }].map((o) => {
+                    const actif = emailLang === o.code
+                    return (
+                      <button
+                        key={o.code}
+                        type="button"
+                        onClick={() => setEmailLang(o.code)}
+                        disabled={loading}
+                        aria-pressed={actif}
+                        style={{ flex: 1, padding: '10px 14px', borderRadius: 10, cursor: loading ? 'not-allowed' : 'pointer', fontSize: 13.5, fontWeight: 600, fontFamily: 'inherit', border: `1.5px solid ${actif ? '#193B5E' : '#E8EDF2'}`, background: actif ? '#193B5E' : '#FAFDFD', color: actif ? '#fff' : '#5A6B7D', transition: 'all 0.15s ease' }}
+                      >
+                        {o.label}
+                      </button>
+                    )
+                  })}
+                </div>
+
                 <p style={{ fontSize: 12, color: '#8A92A6', margin: '14px 0 22px', lineHeight: 1.5 }}>
-                  L'adresse sert uniquement à cet envoi et n'est pas conservée.
+                  {t("L'adresse sert uniquement à cet envoi et n'est pas conservée.", 'Het adres wordt enkel voor deze verzending gebruikt en niet bewaard.')}
                 </p>
 
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                   <button type="button" onClick={fermer} disabled={loading} style={{ padding: '11px 18px', borderRadius: 10, background: '#F2F5FA', color: '#5A6275', border: 'none', fontSize: 14, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer' }}>
-                    Annuler
+                    {t('Annuler', 'Annuleren')}
                   </button>
                   <button type="submit" disabled={loading || !email} style={{ padding: '11px 20px', borderRadius: 10, background: loading || !email ? '#E5E9F0' : '#193B5E', color: loading || !email ? '#9AA2B4' : '#fff', border: 'none', fontSize: 14, fontWeight: 700, cursor: loading ? 'wait' : !email ? 'not-allowed' : 'pointer' }}>
-                    {loading ? 'Envoi...' : 'Envoyer'}
+                    {loading ? t('Envoi...', 'Versturen...') : t('Envoyer', 'Versturen')}
                   </button>
                 </div>
               </>

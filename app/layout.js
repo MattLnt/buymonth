@@ -1,6 +1,8 @@
 import { Fraunces, Montserrat } from 'next/font/google'
 import './globals.css'
 import SessionProviderWrapper from '@/app/components/SessionProviderWrapper'
+import { LangProvider } from '@/app/components/i18n/LangProvider'
+import { getLang } from '@/lib/i18n/server'
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -17,49 +19,48 @@ const montserrat = Montserrat({
   display: 'swap',
 })
 
-export const metadata = {
-  metadataBase: new URL('https://buymonth.be'),
-  title: {
-    default: 'BuyMonth — Votre bien immobilier en mensualités',
-    template: '%s — BuyMonth',
-  },
-  description:
-    "BuyMonth permet aux promoteurs et agences d'afficher leurs biens immobiliers en mensualité plutôt qu'en prix total. Simulez votre capacité d'emprunt en quelques clics.",
-  keywords: [
-    'BuyMonth',
-    'immobilier',
-    'mensualité',
-    'promoteur',
-    'simulateur de crédit',
-    'capacité d\'emprunt',
-    'Belgique',
-  ],
-  authors: [{ name: 'BuyMonth' }],
-  icons: {
-    icon: '/favicon.ico',
-  },
-  alternates: {
-    canonical: '/',
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'fr_BE',
-    url: 'https://buymonth.be',
-    siteName: 'BuyMonth',
+const META = {
+  fr: {
     title: 'BuyMonth — Votre bien immobilier en mensualités',
     description:
-      "Affichez et visualisez chaque bien immobilier en mensualité plutôt qu'en prix total.",
+      "BuyMonth permet aux promoteurs et agences d'afficher leurs biens immobiliers en mensualité plutôt qu'en prix total. Simulez votre capacité d'emprunt en quelques clics.",
+    short: "Affichez et visualisez chaque bien immobilier en mensualité plutôt qu'en prix total.",
+    keywords: ['BuyMonth', 'immobilier', 'mensualité', 'promoteur', 'simulateur de crédit', "capacité d'emprunt", 'Belgique'],
+    og: 'fr_BE',
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'BuyMonth — Votre bien immobilier en mensualités',
+  nl: {
+    title: 'BuyMonth — Uw vastgoed in maandbedragen',
     description:
-      "Affichez et visualisez chaque bien immobilier en mensualité plutôt qu'en prix total.",
+      'Met BuyMonth tonen projectontwikkelaars en vastgoedkantoren hun panden in maandbedragen in plaats van de totale prijs. Bereken uw leencapaciteit in enkele klikken.',
+    short: 'Toon en bekijk elk vastgoed in maandbedragen in plaats van de totale prijs.',
+    keywords: ['BuyMonth', 'vastgoed', 'maandbedrag', 'projectontwikkelaar', 'kredietsimulator', 'leencapaciteit', 'België'],
+    og: 'nl_BE',
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+}
+
+export async function generateMetadata() {
+  const lang = await getLang()
+  const m = META[lang]
+  return {
+    metadataBase: new URL('https://buymonth.be'),
+    title: { default: m.title, template: '%s — BuyMonth' },
+    description: m.description,
+    keywords: m.keywords,
+    authors: [{ name: 'BuyMonth' }],
+    icons: { icon: '/favicon.ico' },
+    alternates: { canonical: '/' },
+    openGraph: {
+      type: 'website',
+      locale: m.og,
+      alternateLocale: lang === 'nl' ? ['fr_BE'] : ['nl_BE'],
+      url: 'https://buymonth.be',
+      siteName: 'BuyMonth',
+      title: m.title,
+      description: m.short,
+    },
+    twitter: { card: 'summary_large_image', title: m.title, description: m.short },
+    robots: { index: true, follow: true },
+  }
 }
 
 export const viewport = {
@@ -68,12 +69,15 @@ export const viewport = {
   initialScale: 1,
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const lang = await getLang()
   return (
-    <html lang="fr" className={`${fraunces.variable} ${montserrat.variable}`}>
+    <html lang={lang} className={`${fraunces.variable} ${montserrat.variable}`}>
       <body className={montserrat.className} suppressHydrationWarning>
         <SessionProviderWrapper>
-          {children}
+          <LangProvider lang={lang}>
+            {children}
+          </LangProvider>
         </SessionProviderWrapper>
       </body>
     </html>
