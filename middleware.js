@@ -81,5 +81,5 @@ export async function middleware(req) {
 
 export const config = {
   // Tout sauf les fichiers statiques et l'API
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\.[a-zA-Z0-9]+$).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.[a-zA-Z0-9]+$).*)'],
 }
