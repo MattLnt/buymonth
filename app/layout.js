@@ -47,7 +47,6 @@ export async function generateMetadata() {
     description: m.description,
     keywords: m.keywords,
     authors: [{ name: 'BuyMonth' }],
-    icons: { icon: '/favicon.ico' },
     alternates: { canonical: '/' },
     openGraph: {
       type: 'website',
